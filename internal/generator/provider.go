@@ -4,24 +4,24 @@ import (
 	"path/filepath"
 
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
+	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/generator/attribute"
 	"github.com/iancoleman/strcase"
-	"github.com/hashicorp/terraform/config/configschema"
 )
-func generateProvider(name string, schem *configschema.Block){
+func generateProvider(name string, attributes []attribute.Attribute){
 	f,err := os.Create(filepath.Join(Path,"provider.ts"))
 	if err!=nil{
 		panic(err)
 	}
 	defer f.Close()
-	attributes:=blockToAttributes(*schem);
 	className:=strcase.ToCamel(name)
 	u.TryWrite(f,
-		"import { SMap, generateObject, checkValid, prepareQueue, ResourceError } from '"+GeneralPath+"general'",
+		"import { SMap, ResourceError } from '"+GeneralPath+"general'",
 		"import { Provider } from '"+GeneralPath+"provider'",
+		"import { Module } from '"+GeneralPath+"module'",
 	)
 	u.TryWrite(f,
 		"export class "+className+" extends Provider{",
-		"    private readonly resourceIdentifier='"+className+"';",
+		"    protected readonly resourceIdentifier='"+name+"';",
 		"    //#region Parameters",
 	)
 	for _,v := range attributes{
@@ -29,6 +29,8 @@ func generateProvider(name string, schem *configschema.Block){
 	}
 	u.TryWrite(f,
 		"    //#endregion",
+		"",
+		"    constructor(){super(0)}",
 		"",
 		"    //#region simpleResources",
 	)
@@ -41,7 +43,7 @@ func generateProvider(name string, schem *configschema.Block){
 		"    //#region resource Functions",
 	)
 	u.TryWrite(f,
-		"    [checkValid](){",
+		"    protected checkValid(){",
 		"        const out:SMap<ResourceError>={};",
         "        const errors:string[]=[];",
 	)
@@ -61,10 +63,10 @@ func generateProvider(name string, schem *configschema.Block){
 		"    }",
 	)
 	u.TryWrite(f,
-		"    [prepareQueue](module:any,param:any){}",
+		"    protected prepareQueue(module:Module,param:any){}",
 	)
 	u.TryWrite(f,
-		"    [generateObject](){",
+		"    protected generateObject(){",
 		"        return {",
 	)
 	for _,v := range attributes{

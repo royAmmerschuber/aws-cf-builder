@@ -6,6 +6,8 @@ import (
 	"github.com/iancoleman/strcase"
 )
 type AdvancedAttribute struct{
+	Max int
+	Min int
 	InterfaceName string
 	Name string
 	Required bool
@@ -13,7 +15,10 @@ type AdvancedAttribute struct{
 }
 
 func (a AdvancedAttribute) GenerateParameters() string{
-	return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.InterfaceName+";"
+	if a.Max==1{
+		return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.InterfaceName+";"
+	}
+	return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.InterfaceName+"[]=[];"
 }
 func (a AdvancedAttribute) GenerateSetter() string{
 	setterName:=""
@@ -23,16 +28,28 @@ func (a AdvancedAttribute) GenerateSetter() string{
 	}else{
 		setterName=strcase.ToLowerCamel(a.Name)
 	}
+	parName:=strcase.ToLowerCamel(a.Name)
+	if a.Max==1{
+		return u.Multiline(
+			setterName+"("+pName+":"+a.InterfaceName+"):this{",
+			"    this._"+parName+"="+pName+";",
+			"    return this;",
+			"}",
+		)
+	}
 	return u.Multiline(
-		setterName+"("+pName+":"+a.InterfaceName+"):this{",
-		"    this._"+strcase.ToLowerCamel(a.Name)+"="+pName+";",
+		setterName+"(..."+pName+":"+a.InterfaceName+"[]):this{",
+		"    this._"+parName+".push(..."+pName+");",
 		"    return this;",
 		"}",
 	)
 }
 func (a AdvancedAttribute) GenerateGenerate() string{
 	parName:="this._"+strcase.ToLowerCamel(a.Name)
-	return a.Name+":"+parName+","
+	if a.Max==1{
+		return a.Name+":"+parName+" && ["+parName+"],"
+	}
+	return a.Name+":"+parName+".length ? "+parName+" : undefined,"
 }
 func (a AdvancedAttribute) GenerateInterfaces() string{
 	out:="export interface "+a.InterfaceName+"{\n"
@@ -46,22 +63,8 @@ func (a AdvancedAttribute) GenerateInterfaces() string{
 	return out
 }
 func (a AdvancedAttribute) GenerateCheck() string{
-	//TODO implement DeepChecks
-	if a.Required==false{
-		return ""
-	}
-	setterName:=""
-	if a.Required{
-		setterName=strcase.ToCamel(a.Name)
-	}else{
-		setterName=strcase.ToLowerCamel(a.Name)
-	}
-	return u.Multiline(
-		"if(this._"+strcase.ToLowerCamel(a.Name)+"===undefined){",
-		"    errors.push('you must specify Property "+setterName+"')",
-		"}",
-	)
-	
+	//TODO implement
+	return ""
 }
 
 func (a AdvancedAttribute) GenerateInterfaceProp() string{

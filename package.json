@@ -1,0 +1,13 @@
+{
+    "dependencies": {
+        "callsite": "^1.0.0",
+        "chalk": "^2.4.2",
+        "lodash": "^4.17.11"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.14.123",
+        "@types/node": "^11.13.4",
+        "ts-node": "^8.1.0",
+        "typescript": "^3.4.3"
+    }
+}

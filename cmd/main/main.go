@@ -9,8 +9,8 @@ import (
 
 func main() {
 	path:=flag.String("path","./tmp","path to create module")
-
+	
 	flag.Parse()
 	generator.Path,_=filepath.Abs(*path)
-	generator.Generate("aws", aws.Provider());
+	generator.Generate("aws", (*interface{})(aws.Provider()));
 }
