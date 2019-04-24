@@ -1,0 +1,12 @@
+{
+    "$schema": "./schema.json",
+    "resources": {
+        "function":{
+            "nameParts": ["function_name"]
+        },
+        "permission":{
+            "nameParts": ["function_name","_alias"]
+        }
+    },
+    "datasources": {}
+}

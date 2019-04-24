@@ -1,0 +1,26 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "generatable":{
+            "type":"object",
+            "properties": {
+                "nameParts":{
+                    "type":"array",
+                    "items": {"type":"string"}
+                }
+            }
+        }
+    },
+    "properties": {
+        "provider":{"$ref": "#/definitions/generatable"},
+        "resources":{
+            "type":"object",
+            "additionalProperties":{"$ref": "#/definitions/generatable"} 
+        },
+        "datasources":{
+            "type":"object",
+            "additionalProperties":{"$ref": "#/definitions/generatable"}
+        }
+    },
+    "required": ["resources","datasources"]
+}

@@ -2,33 +2,83 @@ package generator
 
 import (
 	"fmt"
-
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+	progressbar "github.com/schollz/progressbar/v2"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/hashicorp/terraform/config/configschema"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/iancoleman/strcase"
-	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/generator/attribute"
+	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
+	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/config"
 )
 var Path string
 var GeneralPath string ="../../js/general/"
+var Perm os.FileMode=0777
 
-func Generate(name string, provider interface{}) {
-	switch v:=provider.(type){
-		case schema.Provider: {
-			fmt.Println("using Schema")
-			attributes:= schemaToAttributes(v.Schema)
-			generateProvider(name, attributes)
+func Generate(name string, provider schema.Provider) {
+	provPath:=filepath.Join(Path,name)
+
+	fmt.Println("using Schema")
+	os.MkdirAll(provPath,Perm)
+	generateProvider(provPath,config.Generate(name,name,provider.Schema))
+
+	resources,datasources:=generateNameHierarchy(name,provider.ResourcesMap,provider.DataSourcesMap)
+	prog:=progressbar.New(len(resources))
+	resC:=make(chan bool)
+	catch:=func(group string){
+		if r:=recover();r!=nil{
+			fmt.Printf("paniced while creating ResourceGroup %s error was: %v\n",group,r)
+			resC <- false
+		}else{
+			resC <- true
 		}
-		/* case terraform.ResourceProvider:{
-			fmt.Println("Provider: " + name)
-			schem := getSchema(v)
-			fmt.Printf("Resources: %v\n",len(schem.ResourceTypes))
-			fmt.Printf("DataSources: %v\n",len(schem.DataSources))
-			attributes:=blockToAttributes(*schem.Provider)
-			generateProvider(name , attributes)
-		} */
 	}
+	
+	os.Mkdir(filepath.Join(provPath,"Resource"),Perm)
+	for k,v2:=range resources{
+		go func(k string,v2 map[string]string){
+			defer catch(k)
+			folderName:=filepath.Join(provPath,"Resource",strcase.ToCamel(k))
+			os.Mkdir(folderName,Perm)
+			for k,v2 := range v2{
+				generateResource(folderName,config.Generate(k,v2,provider.ResourcesMap[v2].Schema))
+			}
+		}(k,v2)
+	}
+	
+	os.Mkdir((filepath.Join(provPath,"DataSource")),Perm)
+	for k,v2:=range datasources{
+		go func(k string, v2 map[string]string){
+			defer catch(k)
+			folderName:=filepath.Join(provPath,"DataSource",strcase.ToCamel(k))
+			os.Mkdir(folderName,Perm)
+			for k,v2 := range v2{
+				generateDataSource(folderName,config.Generate(k,v2,provider.DataSourcesMap[v2].Schema))
+			}
+		}(k,v2)
+	}
+
+	failed:=0
+	for i:=0;i<len(resources)+len(datasources);i++{
+		if !<-resC{
+			failed++
+			prog.Add(1)
+		}
+	}
+	prog.Finish()
+
+	fmt.Println("\nfailed:",failed)
+	os.Mkdir(filepath.Join(provPath,"dataSource"),Perm)
+	/* for k,v:=range dataSources{
+		go func(){
+			os.Mkdir(filepath.Join(provPath,"Resource",k),Perm)
+
+		}()
+	} */
 	
 }
 
@@ -58,97 +108,163 @@ func getSchema(p terraform.ResourceProvider) *terraform.ProviderSchema{
 	return schem
 }
 
-func blockToAttributes(s configschema.Block) []attribute.Attribute{
-	out :=make([]attribute.Attribute,0)
+func blockToAttributes(s configschema.Block) map[string]attribute.Attribute{
+	out :=make(map[string]attribute.Attribute,0)
 	for k,v :=range s.Attributes{
 		switch{
 			case v.Type.IsPrimitiveType():{
-				out=append(out,attribute.SimpleAttribute{
+				out[k]=attribute.SimpleAttribute{
 					Name:k,
 					Required:v.Required,
 					TypeString:u.CtyToTsType(v.Type),
-				})
+				}
 			}
 			case v.Type.IsSetType() || v.Type.IsListType():{
-				out=append(out,attribute.ArrayAttribute{
+				out[k]=attribute.ArrayAttribute{
 					Name:k,
 					Required:v.Required,
 					TypeString:u.CtyToTsType(v.Type.ElementType()),
-				})
+				}
 			}
 		}
 	}
 	for k,v :=range s.BlockTypes{
 		
-		out=append(out,attribute.AdvancedAttribute{
+		out[k]=attribute.AdvancedAttribute{
 			InterfaceName:strcase.ToCamel(k),
 			Name:k,
 			Required:v.MinItems>0,
 			Attributes:blockToAttributes(v.Block),
-		})
+		}
 	}
 	return out
 }
-func schemaToAttributes(s map[string]*schema.Schema) []attribute.Attribute{
-	out:=make([]attribute.Attribute,0)
-	for k,v :=range s{
-		switch{
-			case v.Type==schema.TypeBool || v.Type==schema.TypeString || v.Type==schema.TypeFloat || v.Type==schema.TypeInt:{
-				//TODO int type
-				out=append(out,attribute.SimpleAttribute{
-					Name:k,
-					Required:v.Required,
-					TypeString:schemaTypeToTs(v.Type),
-				})
-			}
-			case v.Type==schema.TypeList||v.Type==schema.TypeSet:{
-				switch e:=v.Elem.(type){
-					case schema.Schema:{
-						if e.Type==schema.TypeBool || e.Type==schema.TypeString || e.Type==schema.TypeFloat || e.Type==schema.TypeInt{
-							//TODO int type
-							out=append(out,attribute.ArrayAttribute{
-								Name:k,
-								Required:v.Required,
-								TypeString:schemaTypeToTs(e.Type),
-							})
-						}else {
-							panic(fmt.Errorf("array has non simple schema Elem"))
-						}
-					}
-					case schema.Resource:{
-						
-						out=append(out,attribute.AdvancedAttribute{
-							Max:v.MaxItems,
-							Min:v.MinItems,
-							Name:k,
-							Required:v.Required,
-							InterfaceName:strcase.ToCamel(k),
-							Attributes:schemaToAttributes(e.Schema),
-						});
-					}
-					default:{
-						panic(fmt.Errorf("array has non Schema/Resource Elem"))
+
+
+func generateNameHierarchy(providerName string, resources map[string]*schema.Resource,datasources map[string]*schema.Resource) (map[string]map[string]string,map[string]map[string]string){
+	rkeys,dkeys := make([]string, 0, len(resources)),make([]string,0,len(datasources))
+	for k := range resources{
+		rkeys=append(rkeys,k)
+	}
+	sort.Strings(rkeys)
+	for k := range datasources{
+		dkeys=append(dkeys,k)
+	}
+	sort.Strings(dkeys)
+	r := make(map[string][]string,0)
+	for _,k:=range rkeys{
+		s:=strings.Split(k,"_")
+		if r[s[1]]==nil{
+			r[s[1]]=make([]string,0);
+		}
+		r[s[1]]=append(r[s[1]],strings.Join(s[2:],"_"))
+	}
+	d := make(map[string][]string,0)
+	for _,k:=range dkeys{
+		s:=strings.Split(k,"_")
+		if d[s[1]]==nil{
+			d[s[1]]=make([]string,0);
+		}
+		d[s[1]]=append(d[s[1]],strings.Join(s[2:],"_"))
+	}
+	resR := make(map[string]map[string]string)
+	resD := make(map[string]map[string]string)
+	for k,v := range r{
+		comp:=strings.Split(v[0],"_");
+		leng:=len(comp)
+		
+		if len(v)>1{
+			for _,v2:=range v[1:]{
+				for i,v2:=range strings.Split(v2,"_"){
+					if i>=leng || v2!=comp[i]{
+						leng=i
+						break
 					}
 				}
 			}
 		}
+		ds,dOk:=d[k];
+		if dOk{
+			for _,v2:=range ds{
+				for i,v2:=range strings.Split(v2,"_"){
+					if i>=leng || v2!=comp[i]{
+						leng=i
+						break
+					}
+				}
+			}
+		}
+
+		prefix:=strings.Join(comp[:leng],"_");
+		key := k
+		if prefix!=""{
+			key+="_"+prefix
+		}
+		resR[key]=make(map[string]string,0)
+		fmt.Println(key+":")
+		for _,v2:=range v{
+			name:=strings.TrimPrefix(strings.TrimPrefix(v2,prefix),"_")
+			identifier:=providerName+"_"+key
+			if name!=""{
+				identifier+="_"+name
+			}else{
+				name=key
+			}
+			fmt.Println("r   ",name,"    :    ",identifier)
+			resR[key][name]=identifier
+		}
+		if dOk{
+			resD[key]=make(map[string]string,0)
+			for _,v2:=range ds{
+				name:=strings.TrimPrefix(strings.TrimPrefix(v2,prefix),"_")
+				identifier:=providerName+"_"+key
+				if name!=""{
+					identifier+="_"+name
+				}else{
+					name=key
+				}
+				fmt.Println("d   ",name,"    :    ",identifier)
+				resD[key][name]=identifier
+			}
+		}
 	}
-	return out
-}
-func schemaTypeToTs(t schema.ValueType) string{
-	switch t{
-		case schema.TypeBool:{
-			return "boolean"
-		}
-		case schema.TypeString:{
-			return "string"
-		}
-		case schema.TypeFloat:{
-			return "number"
-		}
-		case schema.TypeInt:{
-			return "number"
+	for k,v :=range d{
+		
+		if _,ok:=r[k];!ok{
+			comp:=strings.Split(v[0],"_");
+			leng:=0
+			
+			if len(v)>1{
+				for _,v2:=range v[1:]{
+					for i,v2:=range strings.Split(v2,"_"){
+						if i>=leng || v2!=comp[i]{
+							leng=i
+							break
+						}
+					}
+				}
+			}
+			prefix:=strings.Join(comp[:leng],"_");
+			key := k
+			if prefix!=""{
+				key+="_"+prefix
+			}
+			resD[key]=make(map[string]string,0)
+			fmt.Println(key+":")
+			for _,v2:=range v{
+				name:=strings.TrimPrefix(strings.TrimPrefix(v2,prefix),"_")
+				identifier:=providerName+"_"+key
+				if name!=""{
+					identifier+="_"+name
+				}else{
+					name=key
+				}
+				fmt.Println("d   ",name,"    :    ",identifier)
+				resD[key][name]=identifier
+			}
 		}
 	}
-	panic("non basic Type")
+	fmt.Println(len(resR))
+	fmt.Println(len(resD))
+	return resR,resD
 }

@@ -7,4 +7,5 @@ type Attribute interface{
 	GenerateInterfaces() string
 	GenerateCheck() string
 	GenerateInterfaceProp() string
+	GenerateRef() string
 }

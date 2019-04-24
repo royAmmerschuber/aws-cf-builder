@@ -12,7 +12,7 @@ type SimpleAttribute struct{
 }
 
 func (a SimpleAttribute) GenerateParameters() string{
-	return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.TypeString+";"
+	return "private _"+strcase.ToLowerCamel(a.Name)+":Field<"+a.TypeString+">;"
 }
 func (a SimpleAttribute) GenerateSetter() string{
 	setterName:=""
@@ -28,7 +28,7 @@ func (a SimpleAttribute) GenerateSetter() string{
 		pName=strcase.ToLowerCamel(a.Name)
 	}
 	return u.Multiline(
-		setterName+"("+pName+":"+a.TypeString+"):this{",
+		setterName+"("+pName+":Field<"+a.TypeString+">):this{",
 		"    this._"+strcase.ToLowerCamel(a.Name)+"="+pName+";",
 		"    return this;",
 		"}",
@@ -60,11 +60,14 @@ func (a SimpleAttribute) GenerateCheck() string{
 }
 
 func (a SimpleAttribute) GenerateInterfaceProp() string{
-	setterName:=""
-	if a.Required{
-		setterName=strcase.ToCamel(a.Name)
-	}else{
-		setterName=strcase.ToLowerCamel(a.Name)+"?"
+	setterName:=a.Name
+	if !a.Required{
+		setterName+="?"
 	}
 	return setterName+":"+a.TypeString+";"
 }
+
+func (a SimpleAttribute) GenerateRef() string{
+	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.TypeString+">(this,'"+a.Name+"'),";
+}
+

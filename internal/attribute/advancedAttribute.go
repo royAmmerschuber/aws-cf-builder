@@ -11,7 +11,7 @@ type AdvancedAttribute struct{
 	InterfaceName string
 	Name string
 	Required bool
-	Attributes []Attribute
+	Attributes map[string]Attribute
 }
 
 func (a AdvancedAttribute) GenerateParameters() string{
@@ -68,11 +68,13 @@ func (a AdvancedAttribute) GenerateCheck() string{
 }
 
 func (a AdvancedAttribute) GenerateInterfaceProp() string{
-	setterName:=""
-	if a.Required{
-		setterName=strcase.ToCamel(a.Name)
-	}else{
-		setterName=strcase.ToLowerCamel(a.Name)+"?"
+	setterName:=a.Name
+	if !a.Required{
+		setterName+="?"
 	}
 	return setterName+":"+a.InterfaceName+"[];"
+}
+
+func (a AdvancedAttribute) GenerateRef() string{
+	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.InterfaceName+"[]>(this,'"+a.Name+"'),";
 }

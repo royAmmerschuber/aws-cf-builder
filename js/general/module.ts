@@ -66,14 +66,20 @@ export class Module{
     }
     private generateObject(){
         return {
-            provider:_.mapValues(this[generationQueue].providers,(v,k)=>{
+            provider:_.mapValues(this[generationQueue].providers,v => {
                 if(v.length==1){
                     return v[0][generateObject]()
+                    
                 }
-                return v.map(v=>v[generateObject]())
-            })
+                return v.map(v => v[generateObject]())
+            }),
+            resource:_.mapValues(this[generationQueue].resources,
+                v => _.mapValues(v,v => v[generateObject]())
+            ),
+            datasource:_.mapValues(this[generationQueue].dataSources,
+                v => _.mapValues(v,v => v[generateObject]())
+            )
         }
     }
-    
 }
 

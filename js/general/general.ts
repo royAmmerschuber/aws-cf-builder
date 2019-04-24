@@ -13,6 +13,8 @@ export const generateObject=Symbol("generateObject")
 export const checkValid=Symbol("checkValid")
 export const prepareQueue=Symbol("prepareQueue")
 export const generationQueue=Symbol("generationQueue")
+export const getName=Symbol("getName")
+export const getRef=Symbol("getRef")
 export type SMap<T>={[k:string]:T};
 
 export interface ResourceError{
@@ -21,7 +23,7 @@ export interface ResourceError{
 }
 
 export abstract class Generatable{
-    private checkCache:any
+    protected checkCache:SMap<ResourceError>
 
     protected stacktrace:string;
     protected abstract resourceIdentifier:string;

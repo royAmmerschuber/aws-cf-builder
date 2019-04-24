@@ -12,5 +12,5 @@ func main() {
 	
 	flag.Parse()
 	generator.Path,_=filepath.Abs(*path)
-	generator.Generate("aws", (*interface{})(aws.Provider()));
+	generator.Generate("aws", *aws.Provider());
 }

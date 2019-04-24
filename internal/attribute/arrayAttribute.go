@@ -56,11 +56,13 @@ func (a ArrayAttribute) GenerateCheck() string{
 }
 
 func (a ArrayAttribute) GenerateInterfaceProp() string{
-	setterName:=""
-	if a.Required{
-		setterName=strcase.ToCamel(a.Name)
-	}else{
-		setterName=strcase.ToLowerCamel(a.Name)+"?"
+	setterName:=a.Name
+	if !a.Required{
+		setterName+="?"
 	}
 	return setterName+":"+a.TypeString+"[];"
+}
+
+func (a ArrayAttribute) GenerateRef() string{
+	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.TypeString+"[]>(this,'"+a.Name+"'),";
 }

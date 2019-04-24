@@ -33,11 +33,10 @@ export abstract class Provider extends Generatable{
     }
     [generateObject](){
         const out=this.generateObject();
-        out.alias=this._alias;
-        out.version=this._version;
-        return {
-            [this.resourceIdentifier]:out
-        };
+        return _.assign(out,{
+            alias:this._alias,
+            version:this._version,
+        });
     }
     //#endregion
 }
