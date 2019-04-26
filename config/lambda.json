@@ -1,8 +1,11 @@
 {
-    "$schema": "./schema.json",
+    "$schema": "./_schema.json",
     "resources": {
         "function":{
-            "nameParts": ["function_name"]
+            "nameParts": ["function_name"],
+            "ChildResources": {
+                "lambda":["permission"]
+            }
         },
         "permission":{
             "nameParts": ["function_name","_alias"]

@@ -7,12 +7,18 @@
                 "nameParts":{
                     "type":"array",
                     "items": {"type":"string"}
+                },
+                "ChildResources":{
+                    "type":"object",
+                    "additionalProperties": {
+                        "type":"array",
+                        "items": {"type":"string"}
+                    }
                 }
             }
         }
     },
     "properties": {
-        "provider":{"$ref": "#/definitions/generatable"},
         "resources":{
             "type":"object",
             "additionalProperties":{"$ref": "#/definitions/generatable"} 

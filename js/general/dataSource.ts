@@ -4,10 +4,10 @@ import { AdvField } from "./field";
 import _ from "lodash";
 
 export abstract class DataSource extends Generatable{
-    protected _alias:string;
+    protected __alias:string;
     private isPrepared:boolean
-    Alias(alias:string){
-        this._alias=alias;
+    alias(alias:string){
+        this.__alias=alias;
         return this;
     }
 
@@ -34,7 +34,7 @@ export abstract class DataSource extends Generatable{
         if(this.stacktrace in out){
             errors=out[this.stacktrace].errors
         }
-        if(!this._alias){
+        if(!this.__alias){
             errors.push("alias missing")
         }
         
@@ -54,8 +54,8 @@ export abstract class DataSource extends Generatable{
         return this.checkCache=out
     }
     [getName](par:SMap<any>){
-        if(this._alias){
-            return this._alias;
+        if(this.__alias){
+            return this.__alias;
         }else{
             return this.generateName(par);
         }

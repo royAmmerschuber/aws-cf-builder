@@ -44,4 +44,11 @@ func CtyToTsType(t cty.Type) string{
 	panic(fmt.Errorf("wierd Type found: %v",t.GoString()))
 }
 
-
+func ContainsString(arr []string ,key string) bool{
+	for _,v:=range arr{
+		if v==key{
+			return true
+		}
+	}
+	return false
+}

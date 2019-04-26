@@ -22,7 +22,9 @@ func generateResource(folderPath string,config config.Config){
 		"import { SMap, ResourceError } from '../../"+GeneralPath+"general'",
 		"import { Resource } from '../../"+GeneralPath+"resource'",
 		"import { Module } from '../../"+GeneralPath+"module'",
-		"import { Field, ReferenceField } from '../../"+GeneralPath+"field'",
+		"import { Field, ReferenceField, fieldToId } from '../../"+GeneralPath+"field'",
+		"import _ from 'lodash'",
+		"",
 	)
 	u.TryWrite(f,
 		"export class "+className+" extends Resource{",
@@ -50,7 +52,15 @@ func generateResource(folderPath string,config config.Config){
 	)
 	for _,v := range config.IdentAttr{
 		if a,ok:=config.Attributes[v].(attribute.SimpleAttribute);ok{
-			u.TryWrite(f,"        "+strcase.ToLowerCamel(a.Name)+":Field<"+a.TypeString+">")
+			u.TryWrite(f,"        "+strcase.ToLowerCamel(a.Name)+":Field<"+a.TypeString+">,")
+		}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
+			tName:=""
+			if a.Field{
+				tName="Field<"+a.TypeString+">"
+			}else{
+				tName=a.TypeString;
+			}
+			u.TryWrite(f,"        "+strcase.ToLowerCamel(a.Name)+":"+tName+",")
 		}else{
 			panic(fmt.Errorf("%s: non simple IdentAttr",config.Name))
 		}
@@ -60,8 +70,12 @@ func generateResource(folderPath string,config config.Config){
 		"        super(1)",
 	)
 	for _,v :=range config.IdentAttr{
-		a:=config.Attributes[v].(attribute.SimpleAttribute)
-		n:=strcase.ToLowerCamel(a.Name)
+		n:=""
+		if a,ok:=config.Attributes[v].(attribute.SimpleAttribute);ok{
+			n=strcase.ToLowerCamel(a.Name)
+		}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
+			n=strcase.ToLowerCamel(a.Name)
+		}
 		u.TryWrite(f,"        this._"+n+"="+n+";")
 	}
 	u.TryWrite(f,
@@ -69,8 +83,10 @@ func generateResource(folderPath string,config config.Config){
 		"",
 		"    //#region simpleResources",
 	)
-	for _,v :=range config.Attributes{
-		u.TryWrite(f,u.Indent(1,v.GenerateSetter()))
+	for k,v :=range config.Attributes{
+		if !u.ContainsString(config.IdentAttr,k){
+			u.TryWrite(f,u.Indent(1,v.GenerateSetter()))
+		}
 	}
 	u.TryWrite(f,
 		"    //#endregion",
@@ -111,9 +127,38 @@ func generateResource(folderPath string,config config.Config){
 		"        };",
 		"    }",
 	)
-	u.TryWrite(f,
-		"    protected generateName(){return ''}",
-	)
+	{
+		gen:=func(s string) string{
+			field:=""
+			if a,ok:=config.Attributes[s].(attribute.SimpleAttribute);ok{
+				field+="fieldToId(this._"+strcase.ToLowerCamel(a.Name)+")"
+			}else if a,ok:=config.Attributes[s].(attribute.GhostAttribute);ok{
+				if a.Field{
+					field+="fieldToId(this._"+strcase.ToLowerCamel(a.Name)+")"
+				}else {
+					field+="this._"+strcase.ToLowerCamel(a.Name)
+				}
+			}else{
+				panic("!!!")
+			}
+			return "_.capitalize("+field+")"
+		}
+		genName:=""
+		if l:=len(config.IdentAttr);l>0{
+			if l>1{
+				for _,v:=range config.IdentAttr[:l-1]{
+					genName+=gen(v)+"+"
+				}
+			}
+			genName+=gen(config.IdentAttr[l-1])
+		}
+
+		u.TryWrite(f,
+			"    protected generateName(){",
+			"        return "+genName,
+			"    }",
+		)
+	}
 	u.TryWrite(f,
 		"    //#endregion",
 		"}",

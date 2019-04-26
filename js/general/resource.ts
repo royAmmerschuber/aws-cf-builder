@@ -4,13 +4,13 @@ import _ from "lodash";
 import { AdvField } from "./field";
 
 export abstract class Resource extends Generatable{
-    protected _alias:string;
+    protected __alias:string;
     private isPrepared:boolean
-    Alias(alias:string){
-        this._alias=alias;
+    alias(alias:string){
+        this.__alias=alias;
         return this;
     }
-
+    protected injectDependencies(dep:SMap<any>){}
     protected abstract generateName(par:SMap<any>):string;
     [prepareQueue](mod:Module,par:SMap<any>){
         const name=this[getName](par)
@@ -34,10 +34,6 @@ export abstract class Resource extends Generatable{
         if(this.stacktrace in out){
             errors=out[this.stacktrace].errors
         }
-        /* if(!this._alias){
-            errors.push("alias missing")
-        } */
-        
         if(errors.length && !(this.stacktrace in out)){
             out[this.stacktrace]={
                 errors:errors,
@@ -54,8 +50,8 @@ export abstract class Resource extends Generatable{
         return this.checkCache=out
     }
     [getName](par:SMap<any>){
-        if(this._alias){
-            return this._alias;
+        if(this.__alias){
+            return this.__alias;
         }else{
             return this.generateName(par);
         }

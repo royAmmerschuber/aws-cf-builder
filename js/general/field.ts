@@ -14,9 +14,11 @@ export abstract class AdvField<T>{
         this.prepareQueue(mod,par)
     }
     [checkValid](){return this.checkValid()}
+    [getName](){return this.getName()}
     protected abstract checkValid():SMap<ResourceError>
     protected abstract prepareQueue(mod:Module,par:SMap<any>)
     protected abstract generateObject():string
+    protected abstract getName():string
 }
 
 export class ReferenceField<T> extends AdvField<T>{
@@ -33,5 +35,16 @@ export class ReferenceField<T> extends AdvField<T>{
     }
     protected checkValid(){
         return this.resource[checkValid]();
+    }
+    protected getName(){
+        return this.resource[getName]({})
+    }
+}
+
+export function fieldToId(f:Field<any>):string{
+    if(f instanceof AdvField){
+        return f[getName]()
+    }else{
+        return f
     }
 }

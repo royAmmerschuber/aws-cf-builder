@@ -11,3 +11,8 @@ type Config struct{
 	Comp map[string]attribute.Attribute
 	IdentAttr []string
 }
+
+type FileConfig struct{
+	Resource Config
+	DataSource Config
+}

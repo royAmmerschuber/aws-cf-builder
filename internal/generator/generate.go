@@ -3,10 +3,12 @@ package generator
 import (
 	"fmt"
 	"os"
+	"io/ioutil"
 	"path/filepath"
 	"sort"
 	"strings"
-	progressbar "github.com/schollz/progressbar/v2"
+	"encoding/json"
+	"github.com/schollz/progressbar/v2"
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/hashicorp/terraform/config/configschema"
 	"github.com/hashicorp/terraform/helper/schema"
@@ -16,6 +18,7 @@ import (
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/config"
 )
 var Path string
+var ConfPath string
 var GeneralPath string ="../../js/general/"
 var Perm os.FileMode=0777
 
@@ -24,7 +27,13 @@ func Generate(name string, provider schema.Provider) {
 
 	fmt.Println("using Schema")
 	os.MkdirAll(provPath,Perm)
-	generateProvider(provPath,config.Generate(name,name,provider.Schema))
+	var jsonConf config.JsonConfigGeneratable
+	if j,ok:=ioutil.ReadFile(filepath.Join(ConfPath,"_provider.json"));ok==nil{
+		json.Unmarshal(j,&jsonConf)
+	}else{
+		jsonConf=config.JsonConfigGeneratable{}
+	}
+	generateProvider(provPath,config.GenerateS(name,name,provider.Schema,jsonConf))
 
 	resources,datasources:=generateNameHierarchy(name,provider.ResourcesMap,provider.DataSourcesMap)
 	prog:=progressbar.New(len(resources))
@@ -44,8 +53,23 @@ func Generate(name string, provider schema.Provider) {
 			defer catch(k)
 			folderName:=filepath.Join(provPath,"Resource",strcase.ToCamel(k))
 			os.Mkdir(folderName,Perm)
+			var jsonConf config.JsonConfig
+			if j,ok:=ioutil.ReadFile(filepath.Join(ConfPath,strcase.ToLowerCamel(k)+".json"));ok==nil{
+				json.Unmarshal(j,&jsonConf)
+				m,_:=json.Marshal(jsonConf)
+				fmt.Printf("%s\n",m)
+			}else{
+				jsonConf=config.JsonConfig{
+					Resources:map[string]config.JsonConfigGeneratable{},
+					Datasources:map[string]config.JsonConfigGeneratable{},
+				}
+			}
 			for k,v2 := range v2{
-				generateResource(folderName,config.Generate(k,v2,provider.ResourcesMap[v2].Schema))
+				resConf,ok:=jsonConf.Resources[k]
+				if !ok{
+					resConf=config.JsonConfigGeneratable{}
+				}
+				generateResource(folderName,config.GenerateS(k,v2,provider.ResourcesMap[v2].Schema,resConf))
 			}
 		}(k,v2)
 	}
@@ -56,8 +80,21 @@ func Generate(name string, provider schema.Provider) {
 			defer catch(k)
 			folderName:=filepath.Join(provPath,"DataSource",strcase.ToCamel(k))
 			os.Mkdir(folderName,Perm)
+			var jsonConf config.JsonConfig
+			if j,ok:=ioutil.ReadFile(filepath.Join(ConfPath,strcase.ToLowerCamel(k)+".json"));ok==nil{
+				json.Unmarshal(j,&jsonConf)
+			}else{
+				jsonConf=config.JsonConfig{
+					Resources:map[string]config.JsonConfigGeneratable{},
+					Datasources:map[string]config.JsonConfigGeneratable{},
+				}
+			}
 			for k,v2 := range v2{
-				generateDataSource(folderName,config.Generate(k,v2,provider.DataSourcesMap[v2].Schema))
+				resConf,ok:=jsonConf.Datasources[k]
+				if !ok{
+					resConf=config.JsonConfigGeneratable{}
+				}
+				generateDataSource(folderName,config.GenerateS(k,v2,provider.DataSourcesMap[v2].Schema,resConf))
 			}
 		}(k,v2)
 	}
@@ -72,13 +109,6 @@ func Generate(name string, provider schema.Provider) {
 	prog.Finish()
 
 	fmt.Println("\nfailed:",failed)
-	os.Mkdir(filepath.Join(provPath,"dataSource"),Perm)
-	/* for k,v:=range dataSources{
-		go func(){
-			os.Mkdir(filepath.Join(provPath,"Resource",k),Perm)
-
-		}()
-	} */
 	
 }
 
