@@ -13,6 +13,12 @@ type Config struct{
 }
 
 type FileConfig struct{
-	Resource Config
-	DataSource Config
+	Resource *Config
+	DataSource *Config
+	Interfaces []*attribute.Interface
+}
+
+type ProviderConfig struct{
+	Conf Config
+	Interfaces []*attribute.Interface
 }

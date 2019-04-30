@@ -38,8 +38,8 @@ func (a SimpleAttribute) GenerateSetter() string{
 func (a SimpleAttribute) GenerateGenerate() string{
 	return a.Name+":this._"+strcase.ToLowerCamel(a.Name)+","
 }
-func (a SimpleAttribute) GenerateInterfaces() string{
-	return ""
+func (a SimpleAttribute) GetInterfaces() []*Interface{
+	return []*Interface{}
 }
 func (a SimpleAttribute) GenerateCheck() string{
 	if a.Required==false{
@@ -71,3 +71,13 @@ func (a SimpleAttribute) GenerateRef() string{
 	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.TypeString+">(this,'"+a.Name+"'),";
 }
 
+func (_a SimpleAttribute) Equals(a Attribute) bool{
+	if a2,ok:=a.(SimpleAttribute);ok{
+		if (
+			a2.TypeString==_a.TypeString &&
+			a2.Required==_a.Required){
+			return true
+		}
+	}
+	return false
+}

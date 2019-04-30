@@ -48,8 +48,8 @@ func (a GhostAttribute) GenerateSetter() string {
 func (a GhostAttribute) GenerateGenerate() string {
 	return ""
 }
-func (a GhostAttribute) GenerateInterfaces() string {
-	return ""
+func (a GhostAttribute) GetInterfaces() []*Interface{
+	return []*Interface{}
 }
 func (a GhostAttribute) GenerateCheck() string {
 	if a.Required==false{
@@ -73,4 +73,16 @@ func (a GhostAttribute) GenerateInterfaceProp() string {
 }
 func (a GhostAttribute) GenerateRef() string {
 	return ""
+}
+
+func (_a GhostAttribute) Equals(a Attribute) bool{
+	if a2,ok:=a.(GhostAttribute);ok{
+		if (
+			a2.TypeString==_a.TypeString &&
+			a2.Field==_a.Field &&
+			a2.Required==_a.Required){
+			return true
+		}
+	}
+	return false
 }

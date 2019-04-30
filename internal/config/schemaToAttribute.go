@@ -60,8 +60,10 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 							Min:v.MinItems,
 							Name:k,
 							Required:v.Required,
-							InterfaceName:strcase.ToCamel(k),
-							Attributes:attrs,
+							Interface:&attribute.Interface{
+								Name:strcase.ToCamel(k),
+								Attributes:attrs,
+							},
 						}
 						if v.Required||v.Optional{
 							out[k]=attr

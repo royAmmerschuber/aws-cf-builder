@@ -3,56 +3,86 @@ package generator
 import (
 	"os"
 	"fmt"
-	"path/filepath"
-
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/config"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
 	"github.com/iancoleman/strcase"
 )
 
-func generateResource(folderPath string,config config.Config){
-	f,err := os.Create(filepath.Join(folderPath,strcase.ToLowerCamel(config.Name)+".ts"))
+func generateResourceFile(file string,config *config.FileConfig){
+	f,err := os.Create(file)
 	if err!=nil{
 		panic(err)
 	}
 	defer f.Close()
-	className:=strcase.ToCamel(config.Name)
 	u.TryWrite(f,
-		"import { SMap, ResourceError } from '../../"+GeneralPath+"general'",
-		"import { Resource } from '../../"+GeneralPath+"resource'",
-		"import { Module } from '../../"+GeneralPath+"module'",
-		"import { Field, ReferenceField, fieldToId } from '../../"+GeneralPath+"field'",
+		"import { SMap, ResourceError } from '../"+GeneralPath+"general'",
+		"import { Resource } from '../"+GeneralPath+"resource'",
+		"import { DataSource } from '../"+GeneralPath+"dataSource'",
+		"import { Module } from '../"+GeneralPath+"module'",
+		"import { Field, ReferenceField, fieldToId } from '../"+GeneralPath+"field'",
 		"import _ from 'lodash'",
 		"",
 	)
-	u.TryWrite(f,
-		"export class "+className+" extends Resource{",
-		"    protected readonly resourceIdentifier='"+config.Identifier+"'",
-		"    //#region Parameters",
+	
+	if r:=config.Resource;r!=nil{
+		u.TryWrite(f,
+			"export class "+r.Name+" extends Resource{",
+			u.Indent(1,generateCore(r)),
+			"}",
+		)
+	}
+	if d:=config.DataSource;d!=nil{
+		u.TryWrite(f,
+			"class D"+d.Name+" extends DataSource{",
+			u.Indent(1,generateCore(d)),
+			"}",
+		)
+	}
+	if d:=config.DataSource;d!=nil{
+		u.TryWrite(f,
+			"export namespace "+d.Name+"{",
+			"    export const Data=D"+d.Name,
+			"    export type Data=D"+d.Name,
+			"}",
+		)
+	}
+	for _,v:=range config.Interfaces{
+		t:=v.Generate()
+		/* if config.Resource!=nil && config.Resource.Name=="Distribution"{
+			fmt.Println(t)
+		} */
+		u.TryWrite(f,t)
+	}
+}
+
+func generateCore(config *config.Config) string{
+	out:=u.Multiline(
+		"protected readonly resourceIdentifier='"+config.Identifier+"'",
+		"//#region Parameters",
 	)
 	for _,v :=range config.Attributes{
-		u.TryWrite(f,u.Indent(1,v.GenerateParameters()))
+		out+=""+v.GenerateParameters()+"\n"
 	}
-	u.TryWrite(f,
-		"    //#endregion",
+	out+=u.Multiline(
+		"//#endregion",
 		"",
-		"    readonly d={",
+		"readonly d={",
 	)
 	for _,v := range config.Attributes{
-		u.TryWrite(f,u.Indent(2,v.GenerateRef()))
+		out+="    "+v.GenerateRef()+"\n"
 	}
 	for _,v :=range config.Comp{
-		u.TryWrite(f,u.Indent(2,v.GenerateRef()))
+		out+="    "+v.GenerateRef()+"\n"
 	}
-	u.TryWrite(f,
-		"    };",
+	out+=u.Multiline(
+		"};",
 		"",
-		"    constructor(",
+		"constructor(",
 	)
 	for _,v := range config.IdentAttr{
 		if a,ok:=config.Attributes[v].(attribute.SimpleAttribute);ok{
-			u.TryWrite(f,"        "+strcase.ToLowerCamel(a.Name)+":Field<"+a.TypeString+">,")
+			out+="    "+strcase.ToLowerCamel(a.Name)+":Field<"+a.TypeString+">,"
 		}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
 			tName:=""
 			if a.Field{
@@ -60,14 +90,14 @@ func generateResource(folderPath string,config config.Config){
 			}else{
 				tName=a.TypeString;
 			}
-			u.TryWrite(f,"        "+strcase.ToLowerCamel(a.Name)+":"+tName+",")
+			out+="    "+strcase.ToLowerCamel(a.Name)+":"+tName+","
 		}else{
 			panic(fmt.Errorf("%s: non simple IdentAttr",config.Name))
 		}
 	}
-	u.TryWrite(f,
-		"    ){",
-		"        super(1)",
+	out+=u.Multiline(
+		"){",
+		"    super(1)",
 	)
 	for _,v :=range config.IdentAttr{
 		n:=""
@@ -76,56 +106,54 @@ func generateResource(folderPath string,config config.Config){
 		}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
 			n=strcase.ToLowerCamel(a.Name)
 		}
-		u.TryWrite(f,"        this._"+n+"="+n+";")
+		out+="    this._"+n+"="+n+";"
 	}
-	u.TryWrite(f,
-		"    }",
+	out+=u.Multiline(
+		"}",
 		"",
-		"    //#region simpleResources",
+		"//#region simpleResources",
 	)
 	for k,v :=range config.Attributes{
 		if !u.ContainsString(config.IdentAttr,k){
-			u.TryWrite(f,u.Indent(1,v.GenerateSetter()))
+			out+=v.GenerateSetter()
 		}
 	}
-	u.TryWrite(f,
-		"    //#endregion",
+	out+=u.Multiline(
+		"//#endregion",
 		"",
-		"    //#region resource Functions",
+		"//#region resource Functions",
 	)
-	u.TryWrite(f,
-		"    protected checkValid(){",
-		"        const out:SMap<ResourceError>={};",
-		"        const errors:string[]=[];",
+	out+=u.Multiline(
+		"protected checkValid(){",
+		"    const out:SMap<ResourceError>={};",
+		"    const errors:string[]=[];",
 	)
 	for _,v:= range config.Attributes{
 		if check:=v.GenerateCheck(); check!=""{
-			u.TryWrite(f,u.Indent(2,check))
+			out+=u.Indent(1,check)
 		}
 	}
-	u.TryWrite(f,
-        "        if(errors.length){",
-        "            out[this.stacktrace]={",
-        "                errors:errors,",
-        "                type:this.resourceIdentifier",
-        "            }",
+	out+=u.Multiline(
+        "    if(errors.length){",
+        "        out[this.stacktrace]={",
+        "            errors:errors,",
+        "            type:this.resourceIdentifier",
         "        }",
-        "        return out;",
-		"    }",
+        "    }",
+        "    return out;",
+		"}",
 	)
-	u.TryWrite(f,
-		"    protected prepareQueue(module:Module,param:any){}",
-	)
-	u.TryWrite(f,
-		"    protected generateObject(){",
-		"        return {",
+	out+="protected prepareQueue(module:Module,param:any){}\n"
+	out+=u.Multiline(
+		"protected generateObject(){",
+		"    return {",
 	)
 	for _,v := range config.Attributes{
-		u.TryWrite(f,u.Indent(3,v.GenerateGenerate()))
+		out+="    "+v.GenerateGenerate()+"\n"
 	}
-	u.TryWrite(f,
-		"        };",
-		"    }",
+	out+=u.Multiline(
+		"    };",
+		"}",
 	)
 	{
 		gen:=func(s string) string{
@@ -152,26 +180,16 @@ func generateResource(folderPath string,config config.Config){
 			}
 			genName+=gen(config.IdentAttr[l-1])
 		}
-
-		u.TryWrite(f,
-			"    protected generateName(){",
-			"        return "+genName,
-			"    }",
+		if genName==""{
+			genName="''"
+		}
+		out+=u.Multiline(
+			"protected generateName(){",
+			"    return "+genName,
+			"}",
 		)
+		out+=u.Multiline()
 	}
-	u.TryWrite(f,
-		"    //#endregion",
-		"}",
-	)
-
-	for _,v:= range config.Attributes{
-		if in:=v.GenerateInterfaces();in!=""{
-			u.TryWrite(f,in)
-		}
-	}
-	for _,v:= range config.Comp{
-		if in:=v.GenerateInterfaces();in!=""{
-			u.TryWrite(f,in)
-		}
-	}
+	out+="//#endregion\n"
+	return out
 }

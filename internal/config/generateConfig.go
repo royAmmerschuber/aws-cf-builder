@@ -7,58 +7,173 @@ import (
 	"sync"
 	"encoding/json"
 	"io/ioutil"
-	"os"
 	"path/filepath"
+	"github.com/schollz/progressbar/v2"
+	"github.com/iancoleman/strcase"
 	"github.com/hashicorp/terraform/helper/schema"
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
 )
-func GenerateProvider(name string, provider schema.Provider,confPath string) (Config,map[string]map[string]FileConfig){
+func GenerateProvider(name string, provider schema.Provider,confPath string) (ProviderConfig,map[string]*map[string]*FileConfig){
 	resources,datasources:=generateNameHierarchy(name,provider.ResourcesMap,provider.DataSourcesMap)
-	var jsonConf jsonConfigGeneratable
-	fileConf:=make(map[string]map[string]FileConfig)
+	fileConf:=make(map[string]*map[string]*FileConfig)
 	var mx sync.Mutex
+	completed:=make(chan bool)
 	jsonConfigs:=make(map[string]jsonConfig)
+	var provJConf jsonConfigGeneratable
 	if c,err:=ioutil.ReadDir(confPath);err==nil{
 		for _,v:=range c{
+			
 			if j,err:=ioutil.ReadFile(filepath.Join(confPath,v.Name()));err==nil{
-				json.Unmarshal(j,jsonConfigs[v.Name()])
+				if v.Name()=="_provider.json"{
+					json.Unmarshal(j,&provJConf)
+				}else{
+					var x jsonConfig
+					json.Unmarshal(j,&x)
+					jsonConfigs[v.Name()]=x
+				}
+			}else{
+				fmt.Println("failed opening Jconfig %s",v.Name())
 			}
 		}
 	}
-	provConfig:=GenerateS(name,name,provider.Schema,jsonConf)
-	for k,v:=range resources{
-		var groupJson jsonConfig
-		if j,err:=ioutil.ReadFile(filepath.Join(confPath,k+".json"));err==nil{
-			json.Unmarshal(j,&jsonConf)
-		}else{
-			jsonConf=jsonConfigGeneratable{}
-		}
-		for k2,v2:=range v{
-			go func(){
+	prog:=progressbar.New(len(provider.ResourcesMap)+len(provider.DataSourcesMap))
+	provConfig:=ProviderConfig{
+		Conf:GenerateS(name,name,provider.Schema,provJConf),
+	}
+	provConfig.Interfaces=dedupeAttributeInterfaces(provConfig.Conf.Attributes)
 
-			}()
-		}
+	for k,v:=range resources{
+		go func(k string, v map[string]string){
+			
+			groupJson,ok:=jsonConfigs[k+".json"]
+			if !ok{
+				groupJson=jsonConfig{}
+			}
+			for k2,v2:=range v{
+				go func(k2 string,v2 string){
+					defer func(){
+						if r:=recover();r!=nil{
+							fmt.Printf("\rpaniced while creating ResourceGroup %s and resource %s error was: %v\n",k,k2,r)
+							completed <- false
+						}else{
+							completed <- true
+						}
+					}()
+					json,ok:=groupJson.Resources[k2]
+					if !ok{
+						json=jsonConfigGeneratable{}
+					}
+					c:=GenerateS(k2,v2,provider.ResourcesMap[v2].Schema,json)
+					mx.Lock()
+					defer mx.Unlock()
+					e,ok:=fileConf[k]
+					if !ok{
+						fc:=make(map[string]*FileConfig,0)
+						e=&fc
+						fileConf[k]=e
+					}else{
+					}
+					if e2,ok:=(*e)[k2];ok{
+						e2.Resource=&c
+					}else{
+						(*e)[k2]=&FileConfig{
+							Resource:&c,
+						}
+					}
+				}(k2,v2)
+			}
+		}(k,v)
 	}
 	for k,v:=range datasources{
-		var groupJson jsonConfig
-		if j,err:=ioutil.ReadFile(filepath.Join(confPath,k+".json"));err==nil{
-			json.Unmarshal(j,&jsonConf)
-		}else{
-			jsonConf=jsonConfigGeneratable{}
-		}
-		for k2,v2:=range v{
-			go func(){
-
-			}()
+		go func(k string, v map[string]string){
+			groupJson,ok:=jsonConfigs[k+".json"]
+			if !ok{
+				groupJson=jsonConfig{}
+			}
+			for k2,v2:=range v{
+				go func(k2 string,v2 string){
+					defer func(){
+						if r:=recover();r!=nil{
+							fmt.Printf("paniced while creating ResourceGroup %s and resource %s error was: %v\n",k,k2,r)
+							completed <- false
+						}else{
+							completed <- true
+						}
+					}()
+					json,ok:=groupJson.Datasources[k2]
+					if ok==false{
+						json=jsonConfigGeneratable{}
+					}
+					c:=GenerateS(k2,v2,provider.DataSourcesMap[v2].Schema,json)
+					mx.Lock()
+					defer mx.Unlock()
+					e,ok:=fileConf[k]
+					if !ok{
+						fc:=make(map[string]*FileConfig,0)
+						e=&fc
+						fileConf[k]=e
+					}
+					if e2,ok:=(*e)[k2];ok{
+						e2.DataSource=&c
+					}else{
+						(*e)[k2]=&FileConfig{
+							DataSource:&c,
+						}
+					}
+				}(k2,v2)
+			}
+		}(k,v)
+	}
+	failed:=0
+	for i:=0;i<len(provider.ResourcesMap)+len(provider.DataSourcesMap);i++{
+		if !<-completed {
+			failed++
+		}		
+		prog.Add(1)
+	}
+	prog.Finish()
+	for _,v:=range fileConf{
+		for _,v:=range *v{
+			fileConfFillInterfaces(v)
 		}
 	}
+	fmt.Println("\nfailed:",failed)
 	return provConfig,fileConf
 }
+func fileConfFillInterfaces(c *FileConfig){
 
+	var resAtt []*attribute.Interface
+	if c.Resource!=nil{
+		resAtt=dedupeAttributeInterfaces(c.Resource.Attributes,c.Resource.Comp)
+	}
+	var dataAtt []*attribute.Interface
+	if c.DataSource!=nil{
+		dataAtt=dedupeAttributeInterfaces(c.DataSource.Attributes,c.DataSource.Comp)
+	}
+	
+	resMap:=make(map[string]*attribute.Interface,len(resAtt))
+	out:=make([]*attribute.Interface,0,len(resAtt))
+	for _,v:=range resAtt{
+		resMap[v.Name]=v
+		out=append(out,v)
+	}
+	for _,d:=range dataAtt{
+		if r,ok:=resMap[d.Name];ok{
+			if r.Equals(d){
+				*d=*r
+				continue
+			}else{
+				d.Name="D"+d.Name
+			}
+		}
+		out=append(out,d)
+	}
+	c.Interfaces=out
+	
+}
 
-
-func GenerateS(name string,identifier string,schem map[string]*schema.Schema,jsonConfig JsonConfigGeneratable) Config{
+func GenerateS(name string,identifier string,schem map[string]*schema.Schema,jsonConfig jsonConfigGeneratable) Config{
 	var identAttr []string
 	attr,comp:=schemaToAttributes(schem)
 	if jsonConfig.NameParts!=nil{
@@ -73,12 +188,8 @@ func GenerateS(name string,identifier string,schem map[string]*schema.Schema,jso
 	}else if _,ok:=attr["name"];ok{
 		identAttr=[]string{"name"}
 	}
-	if name=="function"{
-		fmt.Println(jsonConfig)
-		fmt.Println(identAttr)
-	}
 	return Config{
-		Name:name,
+		Name:strcase.ToCamel(name),
 		Identifier:identifier,
 		Attributes:attr,
 		Comp:comp,

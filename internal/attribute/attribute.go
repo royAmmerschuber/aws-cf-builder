@@ -4,8 +4,9 @@ type Attribute interface{
 	GenerateParameters() string
 	GenerateSetter() string
 	GenerateGenerate() string
-	GenerateInterfaces() string
+	GetInterfaces() []*Interface
 	GenerateCheck() string
 	GenerateInterfaceProp() string
 	GenerateRef() string
+	Equals(a Attribute) bool
 }

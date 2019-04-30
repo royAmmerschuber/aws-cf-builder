@@ -1,9 +1,9 @@
 import { Module } from "./general/module";
 import { Aws } from "../dist/aws/provider";
-import { Function } from "../dist/aws/Resource/lambda/function";
-import { Permission } from "../dist/aws/Resource/lambda/permission";
-import { RestApi } from "../dist/aws/Resource/ApiGateway/restApi";
-import { Role } from "../dist/aws/Resource/Iam/role";
+import { Function } from "../dist/aws/Lambda/function";
+import { Permission } from "../dist/aws/Lambda/permission";
+import { RestApi } from "../dist/aws/ApiGateway/restApi";
+import { Role } from "../dist/aws/Iam/role";
 console.log(JSON.stringify(
     new Module()
         .providers(
@@ -30,7 +30,8 @@ console.log(JSON.stringify(
             )
                 .Action("dynamodb.*")
                 .Principal("üaiö"),
-            new RestApi("pedro")
+            new RestApi("pedro"),
+            new RestApi.Data("karl")
         )
         .generate()
 ,undefined,4))

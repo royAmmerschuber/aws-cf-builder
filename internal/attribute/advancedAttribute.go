@@ -8,17 +8,16 @@ import (
 type AdvancedAttribute struct{
 	Max int
 	Min int
-	InterfaceName string
 	Name string
 	Required bool
-	Attributes map[string]Attribute
+	Interface *Interface
 }
 
 func (a AdvancedAttribute) GenerateParameters() string{
 	if a.Max==1{
-		return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.InterfaceName+";"
+		return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.Interface.Name+";"
 	}
-	return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.InterfaceName+"[]=[];"
+	return "private _"+strcase.ToLowerCamel(a.Name)+":"+a.Interface.Name+"[]=[];"
 }
 func (a AdvancedAttribute) GenerateSetter() string{
 	setterName:=""
@@ -31,14 +30,14 @@ func (a AdvancedAttribute) GenerateSetter() string{
 	parName:=strcase.ToLowerCamel(a.Name)
 	if a.Max==1{
 		return u.Multiline(
-			setterName+"("+pName+":"+a.InterfaceName+"):this{",
+			setterName+"("+pName+":"+a.Interface.Name+"):this{",
 			"    this._"+parName+"="+pName+";",
 			"    return this;",
 			"}",
 		)
 	}
 	return u.Multiline(
-		setterName+"(..."+pName+":"+a.InterfaceName+"[]):this{",
+		setterName+"(..."+pName+":"+a.Interface.Name+"[]):this{",
 		"    this._"+parName+".push(..."+pName+");",
 		"    return this;",
 		"}",
@@ -51,16 +50,8 @@ func (a AdvancedAttribute) GenerateGenerate() string{
 	}
 	return a.Name+":"+parName+".length ? "+parName+" : undefined,"
 }
-func (a AdvancedAttribute) GenerateInterfaces() string{
-	out:="export interface "+a.InterfaceName+"{\n"
-	for _,v := range a.Attributes{
-		out+="    "+v.GenerateInterfaceProp()+"\n"
-	}
-	out+="}\n"
-	for _,v :=range a.Attributes{
-		out+=v.GenerateInterfaces()
-	}
-	return out
+func (a AdvancedAttribute) GetInterfaces() []*Interface{
+	return []*Interface{a.Interface}
 }
 func (a AdvancedAttribute) GenerateCheck() string{
 	//TODO implement
@@ -72,9 +63,21 @@ func (a AdvancedAttribute) GenerateInterfaceProp() string{
 	if !a.Required{
 		setterName+="?"
 	}
-	return setterName+":"+a.InterfaceName+"[];"
+	return setterName+":"+a.Interface.Name+"[];"
 }
 
 func (a AdvancedAttribute) GenerateRef() string{
-	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.InterfaceName+"[]>(this,'"+a.Name+"'),";
+	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.Interface.Name+"[]>(this,'"+a.Name+"'),";
+}
+func (_a AdvancedAttribute) Equals(a Attribute) bool{
+	if a2,ok:=a.(AdvancedAttribute);ok{
+		if (
+			a2.Required==_a.Required &&
+			a2.Max==_a.Max && 
+			a2.Min==_a.Min &&
+			(a2.Interface==_a.Interface || a2.Interface.Equals(_a.Interface))){
+			return true
+		}
+	}
+	return false
 }

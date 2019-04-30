@@ -7,7 +7,8 @@ import (
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/config"
 	"github.com/iancoleman/strcase"
 )
-func generateProvider(basePath string,config config.Config){
+func generateProvider(basePath string,conf config.ProviderConfig){
+	config:=conf.Conf
 	f,err := os.Create(filepath.Join(basePath,"provider.ts"))
 	if err!=nil{
 		panic(err)
@@ -81,11 +82,8 @@ func generateProvider(basePath string,config config.Config){
 		"    //#endregion",
 		"}",
 	)
-
-	for _,v:= range config.Attributes{
-		if in:=v.GenerateInterfaces();in!=""{
-			u.TryWrite(f,in)
-		}
+	for _,v:=range conf.Interfaces{
+		u.TryWrite(f,v.Generate())
 	}
 }
 

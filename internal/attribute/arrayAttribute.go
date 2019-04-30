@@ -34,8 +34,8 @@ func (a ArrayAttribute) GenerateGenerate() string{
 	parName:="this._"+strcase.ToLowerCamel(a.Name)
 	return a.Name+":"+parName+".length ? "+parName+" : undefined,"
 }
-func (a ArrayAttribute) GenerateInterfaces() string{
-	return ""
+func (a ArrayAttribute) GetInterfaces() []*Interface{
+	return []*Interface{}
 }
 func (a ArrayAttribute) GenerateCheck() string{
 	if a.Required==false{
@@ -65,4 +65,15 @@ func (a ArrayAttribute) GenerateInterfaceProp() string{
 
 func (a ArrayAttribute) GenerateRef() string{
 	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.TypeString+"[]>(this,'"+a.Name+"'),";
+}
+
+func (_a ArrayAttribute) Equals(a Attribute) bool{
+	if a2,ok:=a.(ArrayAttribute);ok{
+		if (
+			a2.TypeString==_a.TypeString &&
+			a2.Required==_a.Required){
+			return true
+		}
+	}
+	return false
 }

@@ -12,8 +12,7 @@ export class Module{
         modules:<SMap<Module>>{}
     }
     private _providers:Provider[]=[];
-    private _resources:Resource[]=[];
-    private _dataSources:DataSource[]=[];
+    private _resources:(Resource|DataSource)[]=[];
     private _modules: Module[]=[];
     constructor(
         private name="main"
@@ -22,12 +21,8 @@ export class Module{
         this._providers.push(...providers)
         return this;
     }
-    resources(...resources:Resource[]){
+    resources(...resources:(Resource|DataSource)[]){
         this._resources.push(...resources);
-        return this;
-    }
-    dataSources(...dataSources:DataSource[]){
-        this._dataSources.push(...dataSources);
         return this;
     }
     modules(...modules:Module[]){
@@ -43,7 +38,6 @@ export class Module{
     private check(){
         const errors:SMap<ResourceError>={}
         _.assign(errors,
-            ...this._dataSources.map(v => v[checkValid]()),
             ...this._modules.map(v => v[checkValid]()),
             ...this._providers.map(v => v[checkValid]()),
             ...this._resources.map(v => v[checkValid]()),
@@ -59,7 +53,6 @@ export class Module{
         }
     }
     private prepareQueue(){
-        this._dataSources.forEach(v => v[prepareQueue](this,{}));
         this._modules.forEach(v => v[prepareQueue](this,{}));
         this._providers.forEach(v => v[prepareQueue](this,{}));
         this._resources.forEach(v => v[prepareQueue](this,{}));

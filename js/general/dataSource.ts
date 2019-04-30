@@ -34,9 +34,6 @@ export abstract class DataSource extends Generatable{
         if(this.stacktrace in out){
             errors=out[this.stacktrace].errors
         }
-        if(!this.__alias){
-            errors.push("alias missing")
-        }
         
         if(errors.length && !(this.stacktrace in out)){
             out[this.stacktrace]={
