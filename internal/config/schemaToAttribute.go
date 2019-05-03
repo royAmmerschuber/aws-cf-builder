@@ -47,7 +47,7 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 							}else if v.Computed{
 								comp[k]=attr
 							}else{
-								fmt.Println("non required/optional/computed attribute:",k)
+								panic(fmt.Errorf("%s: non required/optional/computed attribute",k))
 							}
 						}else {
 							panic(fmt.Errorf("%s: array has non simple schema Elem",k))
@@ -64,19 +64,82 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 								Name:strcase.ToCamel(k),
 								Attributes:attrs,
 							},
+							IsMap:false,
 						}
 						if v.Required||v.Optional{
 							out[k]=attr
 						}else if v.Computed{
 							comp[k]=attr
 						}else {
-							panic(fmt.Errorf("%s: array has non simple schema Elem",k))
+							panic(fmt.Errorf("%s: non required/optional/computed attribute",k))
 						}
 					}
 					default:{
 						panic(fmt.Errorf("%s: arrays elem type(%T) has non *Schema/*Resource Elem",k,e))
 					}
 				}
+			}
+			case v.Type==schema.TypeMap:{
+				switch e:=v.Elem.(type){
+					case *schema.Schema:{
+						if e.Type==schema.TypeBool || e.Type==schema.TypeString || e.Type==schema.TypeFloat || e.Type==schema.TypeInt{
+							//TODO int type
+							attr:=attribute.MapAttribute{
+								Name:k,
+								Required:v.Required,
+								TypeString:schemaTypeToTs(e.Type),
+							}
+							if v.Optional||v.Required{
+								out[k]=attr
+							}else if v.Computed{
+								comp[k]=attr
+							}else{
+								fmt.Println("non required/optional/computed attribute:",k)
+							}
+						}else {
+							panic(fmt.Errorf("%s: map has non simple schema Elem",k))
+						}
+					}
+					case *schema.Resource:{
+						attrs,_:=schemaToAttributes(e.Schema)
+						attr := attribute.AdvancedAttribute{
+							Max:v.MaxItems,
+							Min:v.MinItems,
+							Name:k,
+							Required:v.Required,
+							Interface:&attribute.Interface{
+								Name:strcase.ToCamel(k),
+								Attributes:attrs,
+							},
+							IsMap:true,
+						}
+						if v.Required||v.Optional{
+							out[k]=attr
+						}else if v.Computed{
+							comp[k]=attr
+						}else {
+							panic(fmt.Errorf("%s: map has non simple schema Elem",k))
+						}
+					}
+					default:{
+						//TODO int type
+						attr:=attribute.MapAttribute{
+							Name:k,
+							Required:v.Required,
+							TypeString:schemaTypeToTs(schema.TypeString),
+						}
+						if v.Optional||v.Required{
+							out[k]=attr
+						}else if v.Computed{
+							comp[k]=attr
+						}else{
+							fmt.Println("non required/optional/computed attribute:",k)
+						}
+					}
+				}
+			}
+			default:{
+				panic(fmt.Errorf("%s: unexpected type found",k))
 			}
 		}
 	}

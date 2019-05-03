@@ -2,7 +2,6 @@ package config
 import (
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
 	"strconv"
-	"fmt"
 )
 func dedupeAttributeInterfaces(attributes ...map[string]attribute.Attribute) []*attribute.Interface{
 	incr:=make(map[string]int)
@@ -11,9 +10,6 @@ func dedupeAttributeInterfaces(attributes ...map[string]attribute.Attribute) []*
 	recF=func(intf []*attribute.Interface){
 		for _,v:=range intf{
 			if comp,ok:=outm[v.Name];ok{
-				if v.Name=="ForwardedValues"{
-					fmt.Printf("\r%+v\n",v)
-				}
 				if comp.Equals(v){
 					*v=*comp
 				}else{	

@@ -5,11 +5,15 @@ import (
 )
 
 type Config struct{
+	Path string
 	Name string
 	Identifier string
 	Attributes map[string]attribute.Attribute
 	Comp map[string]attribute.Attribute
 	IdentAttr []string
+	Children []*Config
+	Provides string
+	Inherits map[string][]string
 }
 
 type FileConfig struct{

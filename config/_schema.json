@@ -8,14 +8,26 @@
                     "type":"array",
                     "items": {"type":"string"}
                 },
-                "ChildResources":{
+                "childResources":{
                     "type":"object",
                     "additionalProperties": {
                         "type":"array",
                         "items": {"type":"string"}
                     }
+                },
+                "provides":{"type":"string"},
+                "inherits":{
+                    "type":"object",
+                    "additionalProperties": {
+                        "type":"array",
+                        "items": {"type":"string"}
+                    },
+                    "maxItems": 2,
+                    "minItems": 2
                 }
-            }
+            },
+            "additionalProperties": false
+
         }
     },
     "properties": {

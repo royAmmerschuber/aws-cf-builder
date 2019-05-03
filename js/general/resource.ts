@@ -1,9 +1,9 @@
-import { Generatable, checkValid, prepareQueue, generationQueue, SMap, getName, generateObject, getRef } from "./general";
+import { Generatable, checkValid, prepareQueue, generationQueue, SMap, getName, getRef, callFieldReferences, generateObject } from "./general";
 import { Module } from "./module";
 import _ from "lodash";
-import { AdvField } from "./field";
 
 export abstract class Resource extends Generatable{
+    protected [generationQueue]:SMap<any>={}
     protected __alias:string;
     private isPrepared:boolean
     alias(alias:string){
@@ -11,18 +11,17 @@ export abstract class Resource extends Generatable{
         return this;
     }
     protected injectDependencies(dep:SMap<any>){}
-    protected abstract generateName(par:SMap<any>):string;
+    protected abstract generateName():string;
     [prepareQueue](mod:Module,par:SMap<any>){
         const name=this[getName](par)
-        if(!this.isPrepared){
+        if(this[generationQueue][name]===undefined){
+            this[generationQueue][name]=par
             _.defaults(mod[generationQueue].resources,{[this.resourceIdentifier]:[]})
                 [this.resourceIdentifier][name]=this;
             this.prepareQueue(mod,par);
             _(this)
-                .entries()
-                .filter(v => v[0].startsWith("_") && v[1] instanceof AdvField)
-                .forEach(v => v[1][prepareQueue](mod,par))
-                
+                .filter((v,k) => k.startsWith("_") || k.startsWith("$"))
+                .forEach(v => callFieldReferences(v,v => v[prepareQueue](mod,par)))
             this.isPrepared=true;
         }
     }
@@ -43,20 +42,28 @@ export abstract class Resource extends Generatable{
         _.assign(out,
             ..._(this)
                 .entries()
-                .filter(v => v[0].startsWith("_") && v[1] instanceof AdvField)
-                .map(v =>(<AdvField<any>>v[1])[checkValid]())
+                .filter(v => v[0].startsWith("_") || v[0].startsWith("$"))
+                .flatMap(v => callFieldReferences(v[1],v => v[checkValid]()))
                 .value()
         )
         return this.checkCache=out
     }
     [getName](par:SMap<any>){
+        this.injectDependencies(par)
         if(this.__alias){
             return this.__alias;
         }else{
-            return this.generateName(par);
+            const x=this.generateName();
+            // console.log(x)
+            return x
         }
+    }
+    [generateObject](name:string){
+        this.injectDependencies(this[generationQueue][name])
+        return this.generateObject()
     }
     [getRef](par:SMap<any>){
         return this.resourceIdentifier+"."+this[getName](par);
     }
+
 }

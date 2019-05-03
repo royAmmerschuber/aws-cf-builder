@@ -16,15 +16,19 @@ func generateResourceFile(file string,config *config.FileConfig){
 	}
 	defer f.Close()
 	u.TryWrite(f,
-		"import { SMap, ResourceError } from '../"+GeneralPath+"general'",
-		"import { Resource } from '../"+GeneralPath+"resource'",
-		"import { DataSource } from '../"+GeneralPath+"dataSource'",
-		"import { Module } from '../"+GeneralPath+"module'",
-		"import { Field, ReferenceField, fieldToId } from '../"+GeneralPath+"field'",
 		"import _ from 'lodash'",
-		"",
+		"import { Module } from '../"+GeneralPath+"module'",
+		"import { SMap, ResourceError } from '../"+GeneralPath+"general'",
+		"import { Field, ReferenceField, fieldToId } from '../"+GeneralPath+"field'",
 	)
-	
+	if r:=config.Resource;r!=nil{
+		u.TryWrite(f,"import { Resource } from '../"+GeneralPath+"resource'")
+	}
+	if config.DataSource!=nil{
+		u.TryWrite(f,"import { DataSource } from '../"+GeneralPath+"dataSource'")
+	}
+	u.TryWrite(f,importChildren(config.Resource,config.DataSource))
+
 	if r:=config.Resource;r!=nil{
 		u.TryWrite(f,
 			"export class "+r.Name+" extends Resource{",
@@ -38,8 +42,6 @@ func generateResourceFile(file string,config *config.FileConfig){
 			u.Indent(1,generateCore(d)),
 			"}",
 		)
-	}
-	if d:=config.DataSource;d!=nil{
 		u.TryWrite(f,
 			"export namespace "+d.Name+"{",
 			"    export const Data=D"+d.Name,
@@ -48,11 +50,7 @@ func generateResourceFile(file string,config *config.FileConfig){
 		)
 	}
 	for _,v:=range config.Interfaces{
-		t:=v.Generate()
-		/* if config.Resource!=nil && config.Resource.Name=="Distribution"{
-			fmt.Println(t)
-		} */
-		u.TryWrite(f,t)
+		u.TryWrite(f,v.Generate())
 	}
 }
 
@@ -64,16 +62,23 @@ func generateCore(config *config.Config) string{
 	for _,v :=range config.Attributes{
 		out+=""+v.GenerateParameters()+"\n"
 	}
+	for _,v :=range config.Children{
+		out+="private $"+strcase.ToLowerCamel(v.Name)+"s:"+v.Name+"[]=[];\n"
+	}
 	out+=u.Multiline(
 		"//#endregion",
 		"",
 		"readonly d={",
 	)
 	for _,v := range config.Attributes{
-		out+="    "+v.GenerateRef()+"\n"
+		if r:=v.GenerateRef();r!=""{
+			out+="    "+r+"\n"
+		}
 	}
 	for _,v :=range config.Comp{
-		out+="    "+v.GenerateRef()+"\n"
+		if r:=v.GenerateRef();r!=""{
+			out+="    "+r+"\n"
+		}
 	}
 	out+=u.Multiline(
 		"};",
@@ -81,18 +86,20 @@ func generateCore(config *config.Config) string{
 		"constructor(",
 	)
 	for _,v := range config.IdentAttr{
-		if a,ok:=config.Attributes[v].(attribute.SimpleAttribute);ok{
-			out+="    "+strcase.ToLowerCamel(a.Name)+":Field<"+a.TypeString+">,"
-		}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
-			tName:=""
-			if a.Field{
-				tName="Field<"+a.TypeString+">"
+		if _,ok:=config.Inherits[v]; !ok{
+			if a,ok:=config.Attributes[v].(attribute.SimpleAttribute);ok{
+				out+="    "+strcase.ToLowerCamel(a.Name)+":Field<"+a.TypeString+">,\n"
+			}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
+				tName:=""
+				if a.Field{
+					tName="Field<"+a.TypeString+">"
+				}else{
+					tName=a.TypeString;
+				}
+				out+="    "+strcase.ToLowerCamel(a.Name)+":"+tName+",\n"
 			}else{
-				tName=a.TypeString;
+				panic(fmt.Errorf("%s: non simple IdentAttr",config.Name))
 			}
-			out+="    "+strcase.ToLowerCamel(a.Name)+":"+tName+","
-		}else{
-			panic(fmt.Errorf("%s: non simple IdentAttr",config.Name))
 		}
 	}
 	out+=u.Multiline(
@@ -100,13 +107,15 @@ func generateCore(config *config.Config) string{
 		"    super(1)",
 	)
 	for _,v :=range config.IdentAttr{
-		n:=""
-		if a,ok:=config.Attributes[v].(attribute.SimpleAttribute);ok{
-			n=strcase.ToLowerCamel(a.Name)
-		}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
-			n=strcase.ToLowerCamel(a.Name)
+		if _,ok:=config.Inherits[v]; !ok{
+			n:=""
+			if a,ok:=config.Attributes[v].(attribute.SimpleAttribute);ok{
+				n=strcase.ToLowerCamel(a.Name)
+			}else if a,ok:=config.Attributes[v].(attribute.GhostAttribute);ok{
+				n=strcase.ToLowerCamel(a.Name)
+			}
+			out+="    this._"+n+"="+n+";\n"
 		}
-		out+="    this._"+n+"="+n+";"
 	}
 	out+=u.Multiline(
 		"}",
@@ -115,8 +124,19 @@ func generateCore(config *config.Config) string{
 	)
 	for k,v :=range config.Attributes{
 		if !u.ContainsString(config.IdentAttr,k){
-			out+=v.GenerateSetter()
+			if _,ok:=config.Inherits[k]; !ok{
+				out+=v.GenerateSetter()
+			}
 		}
+	}
+	for _,v:=range config.Children{
+		lName:=strcase.ToLowerCamel(v.Name)
+		out+=u.Multiline(
+			lName+"(..."+lName+"s:"+v.Name+"[]){",
+			"    this.$"+lName+"s.push(..."+lName+"s)",
+			"    return this",
+			"}",
+		)
 	}
 	out+=u.Multiline(
 		"//#endregion",
@@ -128,9 +148,11 @@ func generateCore(config *config.Config) string{
 		"    const out:SMap<ResourceError>={};",
 		"    const errors:string[]=[];",
 	)
-	for _,v:= range config.Attributes{
-		if check:=v.GenerateCheck(); check!=""{
-			out+=u.Indent(1,check)
+	for k,v:= range config.Attributes{
+		if _,ok:=config.Inherits[k]; !ok{
+			if check:=v.GenerateCheck(); check!=""{
+				out+=u.Indent(1,check)
+			}
 		}
 	}
 	out+=u.Multiline(
@@ -143,13 +165,36 @@ func generateCore(config *config.Config) string{
         "    return out;",
 		"}",
 	)
-	out+="protected prepareQueue(module:Module,param:any){}\n"
+	out+="protected prepareQueue(module:Module,param:any){"
+	if config.Provides!=""{
+		out+="\n    param."+config.Provides+"=this\n"
+	}
+	out+="}\n"
+	if len(config.Inherits)>0{
+		out+="protected injectDependencies(param:any){\n"
+		for k,v:=range config.Inherits{
+			if a,ok:=config.Attributes[k];ok{
+				if a,ok:=a.(attribute.SimpleAttribute);ok{
+					out+="    if(param."+v[0]+"===undefined) throw new Error(this.stacktrace+'\\nresource is missing inherited parameter "+v[0]+"')\n"
+					out+="    this._"+strcase.ToLowerCamel(a.Name)+"=param."+v[0]+".d."+v[1]+"\n"
+				}else{
+					panic(fmt.Errorf("inherited property is non simple"))
+				}
+				
+			}else{
+				panic(fmt.Errorf("inherited Property does not exist"))
+			}
+		}
+		out+="}\n"
+	}
 	out+=u.Multiline(
 		"protected generateObject(){",
 		"    return {",
 	)
 	for _,v := range config.Attributes{
-		out+="    "+v.GenerateGenerate()+"\n"
+		if g:=v.GenerateGenerate(); g!=""{
+			out+="        "+g+"\n"
+		}
 	}
 	out+=u.Multiline(
 		"    };",
@@ -192,4 +237,36 @@ func generateCore(config *config.Config) string{
 	}
 	out+="//#endregion\n"
 	return out
+}
+
+func importChildren(res *config.Config, dat *config.Config) string{
+	out:=""
+	done:=make([]*config.Config,0)
+	if res!=nil{
+		if res.Name=="Function"{
+			fmt.Printf("\r%+v\n",res.Children)
+		}
+		for _,v:=range res.Children{
+			done=append(done,v)
+			out+="import { "+v.Name+" } from '../"+v.Path+"'"
+		}
+	}
+	if dat!=nil{
+		for _,v:=range dat.Children{
+			if !containsConfig(done,v){
+				out+="import { "+v.Name+" } from '../"+v.Path+"'"
+			}
+		}
+	}
+	return out
+}
+
+
+func containsConfig(arr []*config.Config,key *config.Config) bool{
+	for _,v:=range arr{
+		if v==key{
+			return true
+		}
+	}
+	return false
 }

@@ -3,12 +3,16 @@
     "resources": {
         "function":{
             "nameParts": ["function_name"],
-            "ChildResources": {
+            "childResources": {
                 "lambda":["permission"]
-            }
+            },
+            "provides":"lfunc"
         },
         "permission":{
-            "nameParts": ["function_name","_alias"]
+            "nameParts": ["function_name","_alias"],
+            "inherits":{
+                "function_name":["lfunc","functionName"]
+            }
         }
     },
     "datasources": {}

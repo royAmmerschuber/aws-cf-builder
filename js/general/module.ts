@@ -21,8 +21,16 @@ export class Module{
         this._providers.push(...providers)
         return this;
     }
-    resources(...resources:(Resource|DataSource)[]){
-        this._resources.push(...resources);
+    resources(...resources:(SMap<Resource|DataSource>|(Resource|DataSource)[]|Resource|DataSource)[]){
+        resources.forEach(v => {
+            if(v instanceof Resource || v instanceof DataSource){
+                this._resources.push(v)
+            }else if(v instanceof Array){
+                this._resources.push(...v)
+            }else{
+                this._resources.push(..._.values(v))
+            }
+        })
         return this;
     }
     modules(...modules:Module[]){
@@ -67,10 +75,10 @@ export class Module{
                 return v.map(v => v[generateObject]())
             }),
             resource:_.mapValues(this[generationQueue].resources,
-                v => _.mapValues(v,v => v[generateObject]())
+                v => _.mapValues(v,(v,k) => v[generateObject](k))
             ),
             datasource:_.mapValues(this[generationQueue].dataSources,
-                v => _.mapValues(v,v => v[generateObject]())
+                v => _.mapValues(v,(v,k) => v[generateObject](k))
             )
         }
     }

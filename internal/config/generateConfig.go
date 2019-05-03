@@ -7,6 +7,7 @@ import (
 	"sync"
 	"encoding/json"
 	"io/ioutil"
+	"time"
 	"path/filepath"
 	"github.com/schollz/progressbar/v2"
 	"github.com/iancoleman/strcase"
@@ -65,6 +66,32 @@ func GenerateProvider(name string, provider schema.Provider,confPath string) (Pr
 						json=jsonConfigGeneratable{}
 					}
 					c:=GenerateS(k2,v2,provider.ResourcesMap[v2].Schema,json)
+					if k2=="function" && k=="lambda"{
+						fmt.Println("\rwaiting")
+					}
+					for k,v:=range json.ChildResources{
+						for _,v:=range v{
+							for {
+								mx.Lock()
+								if c2,ok:=fileConf[k];ok{
+									if c2,ok:=(*c2)[v];ok{
+										if c.Children==nil{
+											c.Children=make([]*Config,0,1)
+										}
+										c.Children=append(c.Children,c2.Resource)
+										mx.Unlock()
+										break
+									}
+								}
+								mx.Unlock()
+								time.Sleep(time.Second)
+							}
+						}
+					}
+					if k2=="function" && k=="lambda"{
+						fmt.Println("\rcompleted")
+					}
+					c.Path=strcase.ToCamel(k)+"/"+strcase.ToLowerCamel(k2)
 					mx.Lock()
 					defer mx.Unlock()
 					e,ok:=fileConf[k]
@@ -102,10 +129,30 @@ func GenerateProvider(name string, provider schema.Provider,confPath string) (Pr
 						}
 					}()
 					json,ok:=groupJson.Datasources[k2]
-					if ok==false{
+					if !ok{
 						json=jsonConfigGeneratable{}
 					}
 					c:=GenerateS(k2,v2,provider.DataSourcesMap[v2].Schema,json)
+					for k,v:=range json.ChildResources{
+						for _,v:=range v{
+							for {
+								mx.Lock()
+								if c2,ok:=fileConf[k];ok{
+									if c2,ok:=(*c2)[v];ok{
+										fmt.Println("\rfound")
+										if c.Children==nil{
+											c.Children=make([]*Config,0,1)
+										}
+										c.Children=append(c.Children,c2.Resource)
+										break
+									}
+								}
+								mx.Unlock()
+								time.Sleep(time.Millisecond*50)
+							}
+						}
+					}
+					c.Path=strcase.ToCamel(k)+"/"+strcase.ToLowerCamel(k2)
 					mx.Lock()
 					defer mx.Unlock()
 					e,ok:=fileConf[k]
@@ -188,13 +235,20 @@ func GenerateS(name string,identifier string,schem map[string]*schema.Schema,jso
 	}else if _,ok:=attr["name"];ok{
 		identAttr=[]string{"name"}
 	}
-	return Config{
+	if name=="function"{
+		fmt.Printf("\r%+v\n",jsonConfig)
+	}
+	c:=Config{
 		Name:strcase.ToCamel(name),
 		Identifier:identifier,
 		Attributes:attr,
 		Comp:comp,
 		IdentAttr:identAttr,
+		Provides:jsonConfig.Provides,
+		Inherits:jsonConfig.Inherits,
 	}
+	
+	return c
 }
 
 func generateNameHierarchy(providerName string, resources map[string]*schema.Resource,datasources map[string]*schema.Resource) (map[string]map[string]string,map[string]map[string]string){

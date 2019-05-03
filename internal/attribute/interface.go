@@ -24,9 +24,6 @@ func (i Interface) GetInterfaces() []*Interface{
 }
 
 func (_i Interface) Equals(i *Interface) bool{
-	if _i.Name=="ForwardedValues"{
-		recover()
-	}
 	if len(_i.Attributes)==len(i.Attributes){
 		x:=true
 		for k,_v:=range _i.Attributes{

@@ -42,7 +42,7 @@ export abstract class Generatable{
     [prepareQueue](module:Module,param:any){return this.prepareQueue(module,param)}
 
     protected abstract generateObject():any;
-    [generateObject](){return this.generateObject()};
+    [generateObject](name:string){return this.generateObject()};
 }
 function getStack(errorDepth:number){
     return _(stack())
@@ -60,4 +60,13 @@ function getStack(errorDepth:number){
         .filter(v => v!=null)
         .map(v => chalk.red(v.func)+chalk.bold.redBright(" ("+v.file+":"+v.line+":"+v.col+")")+";")
         .reduce((o,c) => c+o,"");
+}
+export function callFieldReferences<T>(field:any,func:(a:any)=>T):T[]{
+    if(typeof field == "object"){
+        if(field instanceof Generatable){
+            return [func(field)]
+        }
+        return _.flatMap(field,v => callFieldReferences(v,func))
+    }
+    return [];
 }
