@@ -101,16 +101,16 @@ func (a AdvancedAttribute) GenerateRef() string{
 	}else{
 		typ=a.Interface.Name+"[]"
 	}
-	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+typ+">(this,'"+a.Name+"'),";
+	return strcase.ToLowerCamel(a.Name)+":ReferenceField.create<"+typ+">(this,'"+a.Name+"'),";
 }
 func (_a AdvancedAttribute) Equals(a Attribute) bool{
 	if a2,ok:=a.(AdvancedAttribute);ok{
 		if (
-			a2.Required==_a.Required &&
-			a2.Max==_a.Max && 
-			a2.Min==_a.Min &&
-			a2.IsMap==_a.IsMap &&
-			(a2.Interface==_a.Interface || a2.Interface.Equals(_a.Interface))){
+			_a.Required==a2.Required &&
+			_a.Max==a2.Max && 
+			_a.Min==a2.Min &&
+			_a.IsMap==a2.IsMap &&
+			(_a.Interface==a2.Interface || _a.Interface.Equals(a2.Interface))){
 			return true
 		}
 	}

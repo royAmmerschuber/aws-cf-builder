@@ -62,7 +62,7 @@ func (a MapAttribute) GenerateInterfaceProp() string{
 	return a.Name+":SMap<Field<"+a.TypeString+">>"
 }
 func (a MapAttribute) GenerateRef() string{
-	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<SMap<"+a.TypeString+">>(this,'"+a.Name+"'),"
+	return strcase.ToLowerCamel(a.Name)+":ReferenceField.create<SMap<"+a.TypeString+">>(this,'"+a.Name+"'),"
 }
 func (_a MapAttribute) Equals(a Attribute) bool{
 	if a2,ok:=a.(MapAttribute);ok{

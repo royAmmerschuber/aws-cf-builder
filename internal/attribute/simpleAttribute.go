@@ -68,7 +68,7 @@ func (a SimpleAttribute) GenerateInterfaceProp() string{
 }
 
 func (a SimpleAttribute) GenerateRef() string{
-	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.TypeString+">(this,'"+a.Name+"'),";
+	return strcase.ToLowerCamel(a.Name)+":ReferenceField.create<"+a.TypeString+">(this,'"+a.Name+"'),";
 }
 
 func (_a SimpleAttribute) Equals(a Attribute) bool{

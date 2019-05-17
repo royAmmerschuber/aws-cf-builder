@@ -4,7 +4,7 @@
         "function":{
             "nameParts": ["function_name"],
             "childResources": {
-                "lambda":["permission"]
+                "lambda":["permission","event_source_mapping","alias"]
             },
             "provides":"lfunc"
         },
@@ -13,7 +13,26 @@
             "inherits":{
                 "function_name":["lfunc","functionName"]
             }
+        },
+        "event_source_mapping":{
+            "nameParts": ["function_name","_alias"],
+            "inherits": {
+                "function_name":["lfunc","functionName"]
+            }
+        },
+        "alias":{
+            "nameParts": ["function_name","name"],
+            "inherits": {
+                "function_name":["lfunc","functionName"]
+            }
         }
     },
-    "datasources": {}
+    "datasources": {
+        "function":{
+            "childResources": {
+                "lambda":["permission","event_source_mapping","alias"]
+            },
+            "provides":"lfunc"
+        }
+    }
 }

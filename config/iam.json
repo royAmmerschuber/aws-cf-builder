@@ -1,0 +1,17 @@
+{
+    "$schema": "./_schema.json",
+    "resources": {
+        "role":{
+            "provides": "role",
+            "childResources": {
+                "iam":["role_policy"]
+            }
+        },
+        "role_policy":{
+            "nameParts": ["role","name"],
+            "inherits": {
+                "role":["role","id"]
+            }
+        }
+    }
+}

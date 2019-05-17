@@ -9,9 +9,12 @@ func dedupeAttributeInterfaces(attributes ...map[string]attribute.Attribute) []*
 	var recF func([]*attribute.Interface)
 	recF=func(intf []*attribute.Interface){
 		for _,v:=range intf{
+			if v.Name=="VpcConfig"{
+				recover()
+			}
 			if comp,ok:=outm[v.Name];ok{
 				if comp.Equals(v){
-					*v=*comp
+					v=comp
 				}else{	
 					v.Name+=strconv.Itoa(incr[v.Name])
 					incr[v.Name]++
@@ -26,6 +29,7 @@ func dedupeAttributeInterfaces(attributes ...map[string]attribute.Attribute) []*
 	}
 	for _,v:=range attributes{
 		for _,v:=range v{
+			
 			recF(v.GetInterfaces())
 		}
 	}

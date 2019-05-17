@@ -15,7 +15,7 @@ import (
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
 )
-func GenerateProvider(name string, provider schema.Provider,confPath string) (ProviderConfig,map[string]*map[string]*FileConfig){
+func GenerateProvider(name string, provider schema.Provider,confPath string, docsPath string) (ProviderConfig,map[string]*map[string]*FileConfig){
 	resources,datasources:=generateNameHierarchy(name,provider.ResourcesMap,provider.DataSourcesMap)
 	fileConf:=make(map[string]*map[string]*FileConfig)
 	var mx sync.Mutex
@@ -72,34 +72,33 @@ func GenerateProvider(name string, provider schema.Provider,confPath string) (Pr
 					for k,v:=range json.ChildResources{
 						for _,v:=range v{
 							for {
+								fmt.Println("test")
 								mx.Lock()
+								fmt.Println("test2")
 								if c2,ok:=fileConf[k];ok{
 									if c2,ok:=(*c2)[v];ok{
 										if c.Children==nil{
 											c.Children=make([]*Config,0,1)
 										}
 										c.Children=append(c.Children,c2.Resource)
+										fmt.Println("found")
 										mx.Unlock()
 										break
 									}
 								}
+								fmt.Println("test3")
 								mx.Unlock()
 								time.Sleep(time.Second)
 							}
 						}
 					}
-					if k2=="function" && k=="lambda"{
-						fmt.Println("\rcompleted")
-					}
 					c.Path=strcase.ToCamel(k)+"/"+strcase.ToLowerCamel(k2)
 					mx.Lock()
-					defer mx.Unlock()
 					e,ok:=fileConf[k]
 					if !ok{
 						fc:=make(map[string]*FileConfig,0)
 						e=&fc
 						fileConf[k]=e
-					}else{
 					}
 					if e2,ok:=(*e)[k2];ok{
 						e2.Resource=&c
@@ -108,6 +107,7 @@ func GenerateProvider(name string, provider schema.Provider,confPath string) (Pr
 							Resource:&c,
 						}
 					}
+					mx.Unlock()
 				}(k2,v2)
 			}
 		}(k,v)
@@ -139,22 +139,21 @@ func GenerateProvider(name string, provider schema.Provider,confPath string) (Pr
 								mx.Lock()
 								if c2,ok:=fileConf[k];ok{
 									if c2,ok:=(*c2)[v];ok{
-										fmt.Println("\rfound")
 										if c.Children==nil{
 											c.Children=make([]*Config,0,1)
 										}
 										c.Children=append(c.Children,c2.Resource)
+										mx.Unlock()
 										break
 									}
 								}
 								mx.Unlock()
-								time.Sleep(time.Millisecond*50)
+								time.Sleep(time.Second)
 							}
 						}
 					}
 					c.Path=strcase.ToCamel(k)+"/"+strcase.ToLowerCamel(k2)
 					mx.Lock()
-					defer mx.Unlock()
 					e,ok:=fileConf[k]
 					if !ok{
 						fc:=make(map[string]*FileConfig,0)
@@ -168,6 +167,7 @@ func GenerateProvider(name string, provider schema.Provider,confPath string) (Pr
 							DataSource:&c,
 						}
 					}
+					mx.Unlock()
 				}(k2,v2)
 			}
 		}(k,v)
@@ -207,7 +207,7 @@ func fileConfFillInterfaces(c *FileConfig){
 	}
 	for _,d:=range dataAtt{
 		if r,ok:=resMap[d.Name];ok{
-			if r.Equals(d){
+			if d.Equals(r){
 				*d=*r
 				continue
 			}else{

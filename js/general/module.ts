@@ -1,19 +1,22 @@
 import { Provider } from "./provider";
 import { Resource } from "./resource";
 import { DataSource } from "./dataSource";
-import { generateObject, generationQueue, ResourceError, checkValid, prepareQueue, SMap } from "./general";
+import { generateObject, generationQueue, ResourceError, checkValid, prepareQueue, SMap, Generatable } from "./general";
 import _ from "lodash"
 import chalk from "chalk"
+import { Variable, Output, Local } from "./variable";
 export class Module{
     public [generationQueue]={
         providers:<SMap<Provider[]>>{},
         resources:<SMap<SMap<Resource>>>{},
         dataSources:<SMap<SMap<DataSource>>>{},
-        modules:<SMap<Module>>{}
+        variables:<SMap<Variable<any>>>{},
+        outputs:<SMap<Output<any>>>{},
+        locals:<SMap<Local<any>>>{}
     }
     private _providers:Provider[]=[];
     private _resources:(Resource|DataSource)[]=[];
-    private _modules: Module[]=[];
+    private _outputs:Output<any>[]=[]
     constructor(
         private name="main"
     ){}
@@ -21,20 +24,20 @@ export class Module{
         this._providers.push(...providers)
         return this;
     }
+    outputs(...outputs:Output<any>[]){
+        this._outputs.push(...outputs)
+        return this;
+    }
     resources(...resources:(SMap<Resource|DataSource>|(Resource|DataSource)[]|Resource|DataSource)[]){
         resources.forEach(v => {
             if(v instanceof Resource || v instanceof DataSource){
                 this._resources.push(v)
             }else if(v instanceof Array){
-                this._resources.push(...v)
+                this.resources(...v)
             }else{
-                this._resources.push(..._.values(v))
+                this.resources(..._.values(v))
             }
         })
-        return this;
-    }
-    modules(...modules:Module[]){
-        this._modules.push(...modules);
         return this;
     }
     generate():any{
@@ -45,11 +48,11 @@ export class Module{
 
     private check(){
         const errors:SMap<ResourceError>={}
-        _.assign(errors,
-            ...this._modules.map(v => v[checkValid]()),
-            ...this._providers.map(v => v[checkValid]()),
-            ...this._resources.map(v => v[checkValid]()),
-        )
+        _.assign(errors, ..._.flatMap(<Generatable[][]>[
+            this._providers,
+            this._resources,
+            this._outputs
+        ], v => v.map(v =>v[checkValid]())))
         if(_.size(errors)){
             let out=""
             _.forOwn(errors,(v,k)=>{
@@ -61,26 +64,31 @@ export class Module{
         }
     }
     private prepareQueue(){
-        this._modules.forEach(v => v[prepareQueue](this,{}));
-        this._providers.forEach(v => v[prepareQueue](this,{}));
-        this._resources.forEach(v => v[prepareQueue](this,{}));
+        [
+            this._providers,
+            this._resources,
+            this._outputs   
+        ].forEach(v => v.forEach(v => v[prepareQueue](this,{})))
     }
     private generateObject(){
+        const gq=this[generationQueue]
         return {
-            provider:_.mapValues(this[generationQueue].providers,v => {
+            variable:_.size(gq.variables) ? _.mapValues(gq.variables, (v,k) =>v[generateObject](k)) : undefined,
+            locals:_.size(gq.locals) ? _.mapValues(gq.locals, (v,k) => v[generateObject](k)) : undefined,
+            provider:_.size(gq.providers) ? _.mapValues(gq.providers,v => {
                 if(v.length==1){
                     return v[0][generateObject]()
                     
                 }
                 return v.map(v => v[generateObject]())
-            }),
-            resource:_.mapValues(this[generationQueue].resources,
+            }) : undefined,
+            datasource:_.size(gq.dataSources) ? _.mapValues(gq.dataSources,
                 v => _.mapValues(v,(v,k) => v[generateObject](k))
-            ),
-            datasource:_.mapValues(this[generationQueue].dataSources,
+            ) : undefined,
+            resource:_.size(gq.resources) ? _.mapValues(gq.resources,
                 v => _.mapValues(v,(v,k) => v[generateObject](k))
-            )
+            ) : undefined,
+            output:_.size(gq.outputs) ? _.mapValues(gq.outputs, (v,k) => v[generateObject](k)) : undefined,
         }
     }
 }
-

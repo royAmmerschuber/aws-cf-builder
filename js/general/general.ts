@@ -61,7 +61,7 @@ function getStack(errorDepth:number){
         .map(v => chalk.red(v.func)+chalk.bold.redBright(" ("+v.file+":"+v.line+":"+v.col+")")+";")
         .reduce((o,c) => c+o,"");
 }
-export function callFieldReferences<T>(field:any,func:(a:any)=>T):T[]{
+export function callFieldReferences<T>(field:any,func:(a:Generatable)=>T):T[]{
     if(typeof field == "object"){
         if(field instanceof Generatable){
             return [func(field)]

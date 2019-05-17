@@ -12,8 +12,8 @@ import (
 var GeneralPath string ="../../js/general/"
 var Perm os.FileMode=0777
 
-func Generate(name string, provider schema.Provider,outPath,ConfPath string) {
-	provConf,resConf:=config.GenerateProvider(name,provider,ConfPath)
+func Generate(name string, provider schema.Provider,outPath,ConfPath string,DocsPath string) {
+	provConf,resConf:=config.GenerateProvider(name,provider,ConfPath,DocsPath)
 	provPath:=filepath.Join(outPath,name)
 	os.RemoveAll(provPath)
 	os.MkdirAll(provPath,Perm)

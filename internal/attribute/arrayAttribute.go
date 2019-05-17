@@ -64,7 +64,7 @@ func (a ArrayAttribute) GenerateInterfaceProp() string{
 }
 
 func (a ArrayAttribute) GenerateRef() string{
-	return strcase.ToLowerCamel(a.Name)+":new ReferenceField<"+a.TypeString+"[]>(this,'"+a.Name+"'),";
+	return strcase.ToLowerCamel(a.Name)+":ReferenceField.create<"+a.TypeString+"[]>(this,'"+a.Name+"'),";
 }
 
 func (_a ArrayAttribute) Equals(a Attribute) bool{

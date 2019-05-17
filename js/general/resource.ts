@@ -5,7 +5,6 @@ import _ from "lodash";
 export abstract class Resource extends Generatable{
     protected [generationQueue]:SMap<any>={}
     protected __alias:string;
-    private isPrepared:boolean
     alias(alias:string){
         this.__alias=alias;
         return this;
@@ -20,13 +19,17 @@ export abstract class Resource extends Generatable{
                 [this.resourceIdentifier][name]=this;
             this.prepareQueue(mod,par);
             _(this)
-                .filter((v,k) => k.startsWith("_") || k.startsWith("$"))
+                .filter((_v,k) => k.startsWith("_") || k.startsWith("$"))
                 .forEach(v => callFieldReferences(v,v => v[prepareQueue](mod,par)))
-            this.isPrepared=true;
+        }else{
+            console.log("yo")
         }
     }
     [checkValid](){
-        if(this.checkCache) return this.checkCache
+        if(this.checkCache){
+            console.log(this.checkCache)
+            return this.checkCache
+        }
 
         const out=this.checkValid();
         let errors:string[]=[];
@@ -41,9 +44,8 @@ export abstract class Resource extends Generatable{
         }
         _.assign(out,
             ..._(this)
-                .entries()
-                .filter(v => v[0].startsWith("_") || v[0].startsWith("$"))
-                .flatMap(v => callFieldReferences(v[1],v => v[checkValid]()))
+                .filter((_v,k) => k.startsWith("_") || k.startsWith("$"))
+                .flatMap(v => callFieldReferences(v,v => v[checkValid]()))
                 .value()
         )
         return this.checkCache=out

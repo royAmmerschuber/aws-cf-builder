@@ -68,20 +68,20 @@ func generateCore(config *config.Config) string{
 	out+=u.Multiline(
 		"//#endregion",
 		"",
-		"readonly d={",
+		"readonly d=ReferenceField.create<{",
 	)
 	for _,v := range config.Attributes{
-		if r:=v.GenerateRef();r!=""{
+		if r:=v.GenerateInterfaceProp();r!=""{
 			out+="    "+r+"\n"
 		}
 	}
 	for _,v :=range config.Comp{
-		if r:=v.GenerateRef();r!=""{
+		if r:=v.GenerateInterfaceProp();r!=""{
 			out+="    "+r+"\n"
 		}
 	}
 	out+=u.Multiline(
-		"};",
+		"}>(this,'');",
 		"",
 		"constructor(",
 	)
@@ -248,13 +248,13 @@ func importChildren(res *config.Config, dat *config.Config) string{
 		}
 		for _,v:=range res.Children{
 			done=append(done,v)
-			out+="import { "+v.Name+" } from '../"+v.Path+"'"
+			out+="import { "+v.Name+" } from '../"+v.Path+"'\n"
 		}
 	}
 	if dat!=nil{
 		for _,v:=range dat.Children{
 			if !containsConfig(done,v){
-				out+="import { "+v.Name+" } from '../"+v.Path+"'"
+				out+="import { "+v.Name+" } from '../"+v.Path+"'\n"
 			}
 		}
 	}
