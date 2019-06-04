@@ -71,9 +71,6 @@ func (a GhostAttribute) GenerateCheck() string {
 func (a GhostAttribute) GenerateInterfaceProp() string {
 	return ""
 }
-func (a GhostAttribute) GenerateRef() string {
-	return ""
-}
 
 func (_a GhostAttribute) Equals(a Attribute) bool{
 	if a2,ok:=a.(GhostAttribute);ok{

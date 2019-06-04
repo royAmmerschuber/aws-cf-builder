@@ -5,6 +5,7 @@ import (
 )
 
 type Config struct{
+	Comment string
 	Path string
 	Name string
 	Identifier string

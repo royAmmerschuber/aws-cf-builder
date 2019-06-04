@@ -1,8 +1,10 @@
 package attribute
 import (
+	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"github.com/iancoleman/strcase"
 )
 type Interface struct{
+	Comment string
 	Name string
 	Attributes map[string]Attribute
 }
@@ -10,7 +12,7 @@ type Interface struct{
 func (i Interface) Generate() string{
 	out:="interface "+strcase.ToCamel(i.Name)+"{\n"
 	for _,a:=range i.Attributes{
-		out+="    "+a.GenerateInterfaceProp()+"\n"
+		out+=u.Indent(1,a.GenerateInterfaceProp())
 	}
 	out+="}\n"
 	return out

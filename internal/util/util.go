@@ -16,8 +16,9 @@ func Multiline(s ...string)string{
 }
 func Indent(depth int,s string) string{
 	indent:=strings.Repeat("    ",depth)
-	return indent+strings.ReplaceAll(s,"\n","\n"+indent)
+	return indent+strings.TrimRight(strings.ReplaceAll(s,"\n","\n"+indent)," ")
 }
+
 func TryWrite(f *os.File,s ...string) int{
 	sum:=0
 	for _,l :=range s{

@@ -4,11 +4,20 @@ import (
 	"fmt"
 
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
+	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/config/docs"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/iancoleman/strcase"
+
 )
 
-func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attribute,map[string]attribute.Attribute){
+func schemaToAttributes(s map[string]*schema.Schema, doc *docs.DocStructure, blockdoc *docs.DocBlock) (map[string]attribute.Attribute,map[string]attribute.Attribute){
+	dArgs:=doc.Arguments
+	dAttr:=doc.Attributes
+	dBlocks:=doc.Blocks
+	if blockdoc!=nil{
+		dAttr=map[string]string{}
+		dArgs=blockdoc.Arguments
+	}
 	out:=make(map[string]attribute.Attribute,0)
 	comp:=make(map[string]attribute.Attribute,0)
 	for k,v :=range s{
@@ -19,17 +28,25 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 			case v.Type==schema.TypeBool || v.Type==schema.TypeString || v.Type==schema.TypeFloat || v.Type==schema.TypeInt:{
 				//TODO int type
 				//TODO deep computed
+				
 				attr:=attribute.SimpleAttribute{
 					Name:k,
 					Required:v.Required,
 					TypeString:schemaTypeToTs(v.Type),
 				}
 				if v.Optional||v.Required{
+					if d,ok:=dArgs[k];ok{
+						attr.Comment=d.Text
+						attr.CommentBonus=d.Bonus
+					}
 					out[k]=attr
 				}else if v.Computed{
+					if d,ok:=dAttr[k];ok{
+						attr.Comment=d
+					}
 					comp[k]=attr
 				}else{
-					fmt.Println("non required/optional/computed attribute:",k)
+					fmt.Println("\rnon required/optional/computed attribute:",k)
 				}
 			}
 			case v.Type==schema.TypeList||v.Type==schema.TypeSet:{
@@ -43,8 +60,15 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 								TypeString:schemaTypeToTs(e.Type),
 							}
 							if v.Optional||v.Required{
+								if d,ok:=dArgs[k];ok{
+									attr.Comment=d.Text
+									attr.CommentBonus=d.Bonus
+								}
 								out[k]=attr
 							}else if v.Computed{
+								if d,ok:=dAttr[k];ok{
+									attr.Comment=d
+								}
 								comp[k]=attr
 							}else{
 								panic(fmt.Errorf("%s: non required/optional/computed attribute",k))
@@ -54,7 +78,11 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 						}
 					}
 					case *schema.Resource:{
-						attrs,_:=schemaToAttributes(e.Schema)
+						var doc *docs.DocBlock
+						if d,ok:=dBlocks[k];ok{
+							doc=&d
+						}
+						attrs,_:=schemaToAttributes(e.Schema,&docs.DocStructure{},doc)
 						attr := attribute.AdvancedAttribute{
 							Max:v.MaxItems,
 							Min:v.MinItems,
@@ -66,6 +94,11 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 							},
 							IsMap:false,
 						}
+
+						if doc!=nil{
+							attr.Comment=doc.Text
+						}
+
 						if v.Required||v.Optional{
 							out[k]=attr
 						}else if v.Computed{
@@ -90,18 +123,29 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 								TypeString:schemaTypeToTs(e.Type),
 							}
 							if v.Optional||v.Required{
+								if d,ok:=dArgs[k];ok{
+									attr.Comment=d.Text
+									attr.CommentBonus=d.Bonus
+								}
 								out[k]=attr
 							}else if v.Computed{
+								if d,ok:=dAttr[k];ok{
+									attr.Comment=d
+								}
 								comp[k]=attr
 							}else{
-								fmt.Println("non required/optional/computed attribute:",k)
+								fmt.Println("\rnon required/optional/computed attribute:",k)
 							}
 						}else {
 							panic(fmt.Errorf("%s: map has non simple schema Elem",k))
 						}
 					}
 					case *schema.Resource:{
-						attrs,_:=schemaToAttributes(e.Schema)
+						var doc *docs.DocBlock
+						if d,ok:=dBlocks[k];ok{
+							doc=&d
+						}
+						attrs,_:=schemaToAttributes(e.Schema,&docs.DocStructure{},doc)
 						attr := attribute.AdvancedAttribute{
 							Max:v.MaxItems,
 							Min:v.MinItems,
@@ -113,6 +157,11 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 							},
 							IsMap:true,
 						}
+						
+						if doc!=nil{
+							attr.Comment=doc.Text
+						}
+
 						if v.Required||v.Optional{
 							out[k]=attr
 						}else if v.Computed{
@@ -133,7 +182,7 @@ func schemaToAttributes(s map[string]*schema.Schema) (map[string]attribute.Attri
 						}else if v.Computed{
 							comp[k]=attr
 						}else{
-							fmt.Println("non required/optional/computed attribute:",k)
+							fmt.Println("\rnon required/optional/computed attribute:",k)
 						}
 					}
 				}

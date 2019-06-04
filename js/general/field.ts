@@ -2,13 +2,12 @@ import { Resource } from "./resource";
 import { getName, prepareQueue, SMap, getRef, ResourceError, checkValid, Generatable } from "./general";
 import { Module } from "./module";
 import { DataSource } from "./dataSource";
-import { Function } from "../../dist/aws/Lambda/function";
 
 export type Field<T>=T|AdvField<T>
 export type Ref<T,ref>=Field<T>|ref
 export abstract class AdvField<T> extends Generatable{
     toJSON(){
-        return this.generateString()
+        return this.generateField()
     }
     [prepareQueue](mod:Module,par:SMap<any>){
         
@@ -18,7 +17,7 @@ export abstract class AdvField<T> extends Generatable{
     [getName](par:SMap<any>){return this.getName(par)}
     protected abstract checkValid():SMap<ResourceError>
     protected abstract prepareQueue(mod:Module,par:SMap<any>)
-    protected abstract generateString():string
+    protected abstract generateField():T|string
     protected abstract getName(par:SMap<any>):string
     protected generateObject():any{
         return {}
@@ -55,7 +54,7 @@ export class ReferenceField<T> extends AdvField<T>{
         })
     }
 
-    protected generateString(){
+    protected generateField(){
         if(this.resource instanceof Resource){
             return "${"+this.resource[getRef]({})+this.attr+"}"
         }else{
@@ -77,7 +76,6 @@ export class ReferenceField<T> extends AdvField<T>{
 export function fieldToId(f:Field<any>):string{
     if(f instanceof AdvField){
         const x=f[getName]({})
-        console.log(x)
         return x
     }else{
         return f

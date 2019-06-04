@@ -3,6 +3,7 @@ package generator
 import (
 	"os"
 	"fmt"
+	"strings"
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/config"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
@@ -31,6 +32,9 @@ func generateResourceFile(file string,config *config.FileConfig){
 
 	if r:=config.Resource;r!=nil{
 		u.TryWrite(f,
+			"/**",
+			" * "+strings.ReplaceAll(r.Comment,"*/","* /"),
+			" */",
 			"export class "+r.Name+" extends Resource{",
 			u.Indent(1,generateCore(r)),
 			"}",
@@ -44,6 +48,9 @@ func generateResourceFile(file string,config *config.FileConfig){
 		)
 		u.TryWrite(f,
 			"export namespace "+d.Name+"{",
+			"    /**",
+			"     * "+strings.ReplaceAll(d.Comment,"*/","* /"),
+			"     */",
 			"    export const Data=D"+d.Name,
 			"    export type Data=D"+d.Name,
 			"}",
@@ -72,12 +79,12 @@ func generateCore(config *config.Config) string{
 	)
 	for _,v := range config.Attributes{
 		if r:=v.GenerateInterfaceProp();r!=""{
-			out+="    "+r+"\n"
+			out+=u.Indent(1,r)
 		}
 	}
 	for _,v :=range config.Comp{
 		if r:=v.GenerateInterfaceProp();r!=""{
-			out+="    "+r+"\n"
+			out+=u.Indent(1,r)
 		}
 	}
 	out+=u.Multiline(
@@ -243,9 +250,6 @@ func importChildren(res *config.Config, dat *config.Config) string{
 	out:=""
 	done:=make([]*config.Config,0)
 	if res!=nil{
-		if res.Name=="Function"{
-			fmt.Printf("\r%+v\n",res.Children)
-		}
 		for _,v:=range res.Children{
 			done=append(done,v)
 			out+="import { "+v.Name+" } from '../"+v.Path+"'\n"

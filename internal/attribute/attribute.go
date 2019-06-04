@@ -7,6 +7,5 @@ type Attribute interface{
 	GetInterfaces() []*Interface
 	GenerateCheck() string
 	GenerateInterfaceProp() string
-	GenerateRef() string
 	Equals(a Attribute) bool
 }

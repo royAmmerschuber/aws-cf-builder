@@ -21,14 +21,13 @@ export abstract class Resource extends Generatable{
             _(this)
                 .filter((_v,k) => k.startsWith("_") || k.startsWith("$"))
                 .forEach(v => callFieldReferences(v,v => v[prepareQueue](mod,par)))
-        }else{
-            console.log("yo")
         }
     }
     [checkValid](){
         if(this.checkCache){
-            console.log(this.checkCache)
             return this.checkCache
+        }else{
+            this.checkCache={}
         }
 
         const out=this.checkValid();
@@ -56,7 +55,6 @@ export abstract class Resource extends Generatable{
             return this.__alias;
         }else{
             const x=this.generateName();
-            // console.log(x)
             return x
         }
     }

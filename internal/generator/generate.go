@@ -19,6 +19,7 @@ func Generate(name string, provider schema.Provider,outPath,ConfPath string,Docs
 	os.MkdirAll(provPath,Perm)
 	generateProvider(provPath,provConf)
 	completed:=make(chan bool)
+	fmt.Println("# generating Files from Config:")
 	prog:=progressbar.New(len(resConf))
 	for k,v:=range resConf{
 		go func(k string,v *map[string]*config.FileConfig){
@@ -45,5 +46,5 @@ func Generate(name string, provider schema.Provider,outPath,ConfPath string,Docs
 		prog.Add(1)
 	}
 	prog.Finish()
-	fmt.Println("\nfailed:",failed)
+	fmt.Println("\nfailed:",failed,"\n")
 }

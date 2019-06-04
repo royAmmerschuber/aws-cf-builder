@@ -44,7 +44,7 @@ export abstract class Generatable{
     protected abstract generateObject():any;
     [generateObject](name:string){return this.generateObject()};
 }
-function getStack(errorDepth:number){
+export function getStack(errorDepth:number){
     return _(stack())
         .filter(v=>config.errorBlacklist.every(c => v.getFileName() && v.getFileName().search(c)==-1))
         .drop(1+errorDepth)

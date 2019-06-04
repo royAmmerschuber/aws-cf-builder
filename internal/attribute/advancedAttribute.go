@@ -1,6 +1,7 @@
 package attribute
 
 import (
+	"strings"
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"github.com/iancoleman/strcase"
 )
@@ -11,6 +12,7 @@ type AdvancedAttribute struct{
 	Required bool
 	IsMap bool
 	Interface *Interface
+	Comment string
 }
 
 func (a AdvancedAttribute) GenerateParameters() string{
@@ -27,7 +29,9 @@ func (a AdvancedAttribute) GenerateParameters() string{
 func (a AdvancedAttribute) GenerateSetter() string{
 	setterName:=""
 	pName:=strcase.ToLowerCamel(a.Name)
+	req:="false"
 	if a.Required{
+		req="true"
 		setterName=strcase.ToCamel(a.Name)
 	}else{
 		setterName=strcase.ToLowerCamel(a.Name)
@@ -35,7 +39,22 @@ func (a AdvancedAttribute) GenerateSetter() string{
 	parName:="this._"+strcase.ToLowerCamel(a.Name)
 	if a.IsMap{
 		return u.Multiline(
+			"/**",
+			" * **required: "+req+"**",
+			" * ",
+			" * **maps:**`"+a.Name+"`",
+			" * ",
+			" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
+			" * @param map",
+			" * items to add to the map",
+			" */",
 			setterName+"(map:SMap<"+a.Interface.Name+">):this",
+			"/**",
+			" * @param key",
+			" * key of the item to add to the map",
+			" * @param value",
+			" * value of the item to add to the map",
+			" */",
 			setterName+"(key:string,value:"+a.Interface.Name+"):this",
 			setterName+"(mk:string|SMap<"+a.Interface.Name+">,value?:"+a.Interface.Name+"){",
 			"    if(typeof mk!='string'){",
@@ -47,8 +66,19 @@ func (a AdvancedAttribute) GenerateSetter() string{
 			"}",
 		)
 	}else{
+		comment:=u.Multiline(
+			"/**",
+			" * @param "+pName,
+			" * **required: "+req+"**",
+			" * ",
+			" * **maps:**`"+a.Name+"`",
+			" * ",
+			" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
+			" */",
+		)
 		if a.Max==1{
 			return u.Multiline(
+				comment,
 				setterName+"("+pName+":"+a.Interface.Name+"):this{",
 				"    "+parName+"="+pName+";",
 				"    return this;",
@@ -56,6 +86,7 @@ func (a AdvancedAttribute) GenerateSetter() string{
 			)
 		}
 		return u.Multiline(
+			comment,
 			setterName+"(..."+pName+":"+a.Interface.Name+"[]):this{",
 			"    "+parName+".push(..."+pName+");",
 			"    return this;",
@@ -91,18 +122,9 @@ func (a AdvancedAttribute) GenerateInterfaceProp() string{
 	}else{
 		typ=a.Interface.Name+"[]"
 	}
-	return setterName+":"+typ
+	return setterName+":"+typ+";\n"
 }
 
-func (a AdvancedAttribute) GenerateRef() string{
-	typ:=""
-	if a.IsMap{
-		typ="SMap<"+a.Interface.Name+">"
-	}else{
-		typ=a.Interface.Name+"[]"
-	}
-	return strcase.ToLowerCamel(a.Name)+":ReferenceField.create<"+typ+">(this,'"+a.Name+"'),";
-}
 func (_a AdvancedAttribute) Equals(a Attribute) bool{
 	if a2,ok:=a.(AdvancedAttribute);ok{
 		if (

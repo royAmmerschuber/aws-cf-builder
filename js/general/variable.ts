@@ -43,7 +43,7 @@ export class Variable<T extends string> extends AdvField<TypeOfName<T>>{
             description:this._description
         }
     }
-    protected generateString(): string {
+    protected generateField(): string {
         return "${var."+this._name+"}";
     }
     protected getName(par: SMap<any>): string {
@@ -98,7 +98,7 @@ export class Output<T> extends Generatable{
     }
 }
 export class Local<T> extends AdvField<T>{
-    protected generateString(): string {
+    protected generateField(): string {
         return "${local."+this._name+"}"
     }
     protected getName(par: SMap<any>): string {

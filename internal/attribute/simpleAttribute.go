@@ -1,11 +1,14 @@
 package attribute
 
 import (
+	"strings"
 	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"github.com/iancoleman/strcase"
 )
 
 type SimpleAttribute struct{
+	Comment string
+	CommentBonus string
 	TypeString string
 	Required bool
 	Name string
@@ -17,8 +20,11 @@ func (a SimpleAttribute) GenerateParameters() string{
 func (a SimpleAttribute) GenerateSetter() string{
 	setterName:=""
 	pName:=""
+	bonusText:=""
+	req:="false"
 	if a.Required{
 		setterName=strcase.ToCamel(a.Name)
+		req="true"
 	}else{
 		setterName=strcase.ToLowerCamel(a.Name)
 	}
@@ -27,7 +33,21 @@ func (a SimpleAttribute) GenerateSetter() string{
 	}else{
 		pName=strcase.ToLowerCamel(a.Name)
 	}
+
+	if a.CommentBonus!=""{
+		bonusText="\n * **"+a.CommentBonus+"**\n * "
+	}
+	
+
 	return u.Multiline(
+		"/**",
+		" * @param "+pName,
+		" * **required: "+req+"**",
+		" * ",
+		" * **maps:**`"+a.Name+"`",
+		" * "+bonusText,
+		" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
+		" */",
 		setterName+"("+pName+":Field<"+a.TypeString+">):this{",
 		"    this._"+strcase.ToLowerCamel(a.Name)+"="+pName+";",
 		"    return this;",
@@ -61,14 +81,25 @@ func (a SimpleAttribute) GenerateCheck() string{
 
 func (a SimpleAttribute) GenerateInterfaceProp() string{
 	setterName:=a.Name
+	reqText:="true"
+	bonusText:=""
 	if !a.Required{
 		setterName+="?"
+		reqText="false"
 	}
-	return setterName+":"+a.TypeString+";"
-}
 
-func (a SimpleAttribute) GenerateRef() string{
-	return strcase.ToLowerCamel(a.Name)+":ReferenceField.create<"+a.TypeString+">(this,'"+a.Name+"'),";
+	if a.CommentBonus!=""{
+		bonusText="\n * **"+a.CommentBonus+"**\n * "
+	}
+
+	return u.Multiline(
+		"/**",
+		" * **required: "+reqText+"**",
+		" * "+bonusText,
+		" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
+		" */",
+		setterName+":"+a.TypeString+";",
+	)
 }
 
 func (_a SimpleAttribute) Equals(a Attribute) bool{
