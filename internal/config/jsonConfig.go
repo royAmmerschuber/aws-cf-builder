@@ -1,5 +1,6 @@
 package config
 type jsonConfigGeneratable struct{
+	Alias string
 	NameParts []string
 	ChildResources map[string][]string
 	Provides string

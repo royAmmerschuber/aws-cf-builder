@@ -5,9 +5,9 @@ import (
 )
 
 type Config struct{
+	Name string
 	Comment string
 	Path string
-	Name string
 	Identifier string
 	Attributes map[string]attribute.Attribute
 	Comp map[string]attribute.Attribute

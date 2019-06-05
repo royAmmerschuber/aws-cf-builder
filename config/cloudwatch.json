@@ -11,5 +11,6 @@
             "nameParts": ["rule","_alias"],
             "inherits": {"rule":["eRule","name"]}
         }
-    }
+    },
+    "datasources": {}
 }

@@ -35,16 +35,16 @@ func (a SimpleAttribute) GenerateSetter() string{
 	}
 
 	if a.CommentBonus!=""{
-		bonusText="\n * **"+a.CommentBonus+"**\n * "
+		bonusText="\n * __"+a.CommentBonus+"__\n * "
 	}
 	
 
 	return u.Multiline(
 		"/**",
 		" * @param "+pName,
-		" * **required: "+req+"**",
+		" * __required: "+req+"__",
 		" * ",
-		" * **maps:**`"+a.Name+"`",
+		" * __maps:__`"+a.Name+"`",
 		" * "+bonusText,
 		" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
 		" */",
@@ -89,12 +89,12 @@ func (a SimpleAttribute) GenerateInterfaceProp() string{
 	}
 
 	if a.CommentBonus!=""{
-		bonusText="\n * **"+a.CommentBonus+"**\n * "
+		bonusText="\n * __"+a.CommentBonus+"__\n * "
 	}
 
 	return u.Multiline(
 		"/**",
-		" * **required: "+reqText+"**",
+		" * __required: "+reqText+"__",
 		" * "+bonusText,
 		" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
 		" */",

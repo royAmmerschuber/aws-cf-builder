@@ -24,7 +24,7 @@ func (a AdvancedAttribute) GenerateParameters() string{
 	}else{
 		typ=a.Interface.Name+"[]=[]"
 	}
-	return "private _"+strcase.ToLowerCamel(a.Name)+":"+typ
+	return "private _"+strcase.ToLowerCamel(a.Name)+":"+typ+";"
 }
 func (a AdvancedAttribute) GenerateSetter() string{
 	setterName:=""
@@ -40,9 +40,9 @@ func (a AdvancedAttribute) GenerateSetter() string{
 	if a.IsMap{
 		return u.Multiline(
 			"/**",
-			" * **required: "+req+"**",
+			" * __required: "+req+"__",
 			" * ",
-			" * **maps:**`"+a.Name+"`",
+			" * __maps:__`"+a.Name+"`",
 			" * ",
 			" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
 			" * @param map",
@@ -69,9 +69,9 @@ func (a AdvancedAttribute) GenerateSetter() string{
 		comment:=u.Multiline(
 			"/**",
 			" * @param "+pName,
-			" * **required: "+req+"**",
+			" * __required: "+req+"__",
 			" * ",
-			" * **maps:**`"+a.Name+"`",
+			" * __maps:__`"+a.Name+"`",
 			" * ",
 			" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
 			" */",
@@ -97,7 +97,7 @@ func (a AdvancedAttribute) GenerateSetter() string{
 func (a AdvancedAttribute) GenerateGenerate() string{
 	parName:="this._"+strcase.ToLowerCamel(a.Name)
 	if a.IsMap{
-		return a.Name+":_.size("+parName+") ? "+parName+" : undefined"
+		return a.Name+":_.size("+parName+") ? "+parName+" : undefined,"
 	}else if a.Max==1{
 		return a.Name+":"+parName+" && ["+parName+"],"
 	}

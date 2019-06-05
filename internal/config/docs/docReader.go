@@ -19,7 +19,7 @@ var mArg=regexp.MustCompile(
 		`([^\x60]*)`+
 	`\x60 (?:- )?\(`+
 		`(Optional|Required)?`+
-	`,?`+
+	`[,/]?`+
 		`([^)]*)`+
 	`\)`+
 		`(.*(?:\n\n|(?:\n[^\n*]*))*)`,

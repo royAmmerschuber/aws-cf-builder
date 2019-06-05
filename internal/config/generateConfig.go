@@ -370,7 +370,9 @@ func GenerateS(name string,identifier string,schem map[string]*schema.Schema,jso
 		Provides:jsonConfig.Provides,
 		Inherits:jsonConfig.Inherits,
 	}
-	
+	if jsonConfig.Alias!=""{
+		c.Name=jsonConfig.Alias
+	}
 	return c
 }
 

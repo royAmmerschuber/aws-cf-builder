@@ -30,15 +30,15 @@ func (a MapAttribute) GenerateSetter() string{
 	}
 
 	if a.CommentBonus!=""{
-		bonusText="\n * **"+a.CommentBonus+"**\n * "
+		bonusText="\n * __"+a.CommentBonus+"__\n * "
 	}
 
 	pName:="this._"+strcase.ToLowerCamel(a.Name)
 	return u.Multiline(
 		"/**",
-		" * **required: "+req+"**",
+		" * __required: "+req+"__",
 		" * ",
-		" * **maps:**`"+a.Name+"`",
+		" * __maps:__`"+a.Name+"`",
 		" * "+bonusText,
 		" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
 		" * @param map",
@@ -94,7 +94,7 @@ func (a MapAttribute) GenerateInterfaceProp() string{
 	}
 	return u.Multiline(
 		"/**",
-		" * **required: "+req+"**",
+		" * __required: "+req+"__",
 		" * "+bonusText,
 		" * "+strings.ReplaceAll(a.Comment,"*/","* /"),
 		" */",

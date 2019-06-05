@@ -1,0 +1,13 @@
+{
+    "$schema": "./_schema.json",
+    "resources": {
+        "resource":{
+            "alias": "ApiResource"
+        }
+    },
+    "datasources": {
+        "resource":{
+            "alias": "ApiRresource"
+        }
+    }
+}
