@@ -172,7 +172,9 @@ func GenerateProvider(name string, provider schema.Provider,confPath string, doc
 						json=jsonConfigGeneratable{}
 					}
 					c:=GenerateS(k2,v2,provider.ResourcesMap[v2].Schema,json,doc)
-
+					if c.Name=="Resource"{
+						panic(fmt.Errorf("Resource cannot be named Resource"))
+					}
 					for k,v:=range json.ChildResources{
 						for _,v:=range v{
 							for i:=0;;i++{
@@ -233,7 +235,6 @@ func GenerateProvider(name string, provider schema.Provider,confPath string, doc
 							}else{
 								fmt.Printf("\rpaniced while creating datasource %s.%s error was:\n    %v\n",k,k2,r)
 							}
-
 							completed <- false
 						}else{
 							completed <- true
@@ -246,12 +247,14 @@ func GenerateProvider(name string, provider schema.Provider,confPath string, doc
 					}
 					
 					doc:=docs.DocStructure{}
-					if v,ok:=docsR[v2];ok{
+					if v,ok:=docsD[v2];ok{
 						doc=v
 					}
 					
 					c:=GenerateS(k2,v2,provider.DataSourcesMap[v2].Schema,json,doc)
-					
+					if c.Name=="Resource"{
+						panic(fmt.Errorf("DataSource cannot be named DataSource"))
+					}
 					for k,v:=range json.ChildResources{
 						for _,v:=range v{
 							for i:=0;;i++ {
@@ -347,7 +350,7 @@ func fileConfFillInterfaces(c *FileConfig){
 func GenerateS(name string,identifier string,schem map[string]*schema.Schema,jsonConfig jsonConfigGeneratable, doc docs.DocStructure) Config{
 	
 	var identAttr []string
-	attr,comp:=schemaToAttributes(schem, &doc, nil)
+	attr,comp:=schemaToAttributes(schem, &doc, nil,reservedKeys)
 	if jsonConfig.NameParts!=nil{
 		identAttr=jsonConfig.NameParts
 		if u.ContainsString(identAttr,"_alias"){

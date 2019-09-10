@@ -68,7 +68,9 @@ export class Module{
             this._providers,
             this._resources,
             this._outputs   
-        ].forEach(v => v.forEach(v => v[prepareQueue](this,{})))
+        ].forEach(v => v.forEach(v => {
+            v[prepareQueue](this,{})
+        }))
     }
     private generateObject(){
         const gq=this[generationQueue]

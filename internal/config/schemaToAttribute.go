@@ -3,14 +3,21 @@ package config
 import (
 	"fmt"
 
+	u "bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/util"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/attribute"
 	"bitbucket.org/RoyAmmerschuber/terraformbuilder/internal/config/docs"
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/iancoleman/strcase"
 
 )
+var reservedKeys=[]string{"alias","checkValid","prepareQueue","generateObject","generateName"}
+func schemaToAttributes(
+	s            map[string]*schema.Schema, 
+	doc          *docs.DocStructure, 
+	blockdoc     *docs.DocBlock,
+	reservedKeys []string,
+) (map[string]attribute.Attribute,map[string]attribute.Attribute){
 
-func schemaToAttributes(s map[string]*schema.Schema, doc *docs.DocStructure, blockdoc *docs.DocBlock) (map[string]attribute.Attribute,map[string]attribute.Attribute){
 	dArgs:=doc.Arguments
 	dAttr:=doc.Attributes
 	dBlocks:=doc.Blocks
@@ -23,6 +30,9 @@ func schemaToAttributes(s map[string]*schema.Schema, doc *docs.DocStructure, blo
 	for k,v :=range s{
 		if v.Removed!=""{
 			continue
+		}
+		if u.ContainsString(reservedKeys,k){
+			panic(fmt.Errorf("%s: key is reserved for internal use",k))
 		}
 		switch{
 			case v.Type==schema.TypeBool || v.Type==schema.TypeString || v.Type==schema.TypeFloat || v.Type==schema.TypeInt:{
@@ -46,7 +56,7 @@ func schemaToAttributes(s map[string]*schema.Schema, doc *docs.DocStructure, blo
 					}
 					comp[k]=attr
 				}else{
-					fmt.Println("\rnon required/optional/computed attribute:",k)
+					panic(fmt.Errorf("%s:non required/optional/computed attribute:",k))
 				}
 			}
 			case v.Type==schema.TypeList||v.Type==schema.TypeSet:{
@@ -82,7 +92,7 @@ func schemaToAttributes(s map[string]*schema.Schema, doc *docs.DocStructure, blo
 						if d,ok:=dBlocks[k];ok{
 							doc=&d
 						}
-						attrs,_:=schemaToAttributes(e.Schema,&docs.DocStructure{},doc)
+						attrs,_:=schemaToAttributes(e.Schema,&docs.DocStructure{},doc,nil)
 						attr := attribute.AdvancedAttribute{
 							Max:v.MaxItems,
 							Min:v.MinItems,
@@ -134,7 +144,7 @@ func schemaToAttributes(s map[string]*schema.Schema, doc *docs.DocStructure, blo
 								}
 								comp[k]=attr
 							}else{
-								fmt.Println("\rnon required/optional/computed attribute:",k)
+								panic(fmt.Errorf("%s:non required/optional/computed attribute:",k))
 							}
 						}else {
 							panic(fmt.Errorf("%s: map has non simple schema Elem",k))
@@ -145,7 +155,7 @@ func schemaToAttributes(s map[string]*schema.Schema, doc *docs.DocStructure, blo
 						if d,ok:=dBlocks[k];ok{
 							doc=&d
 						}
-						attrs,_:=schemaToAttributes(e.Schema,&docs.DocStructure{},doc)
+						attrs,_:=schemaToAttributes(e.Schema,&docs.DocStructure{},doc,nil)
 						attr := attribute.AdvancedAttribute{
 							Max:v.MaxItems,
 							Min:v.MinItems,

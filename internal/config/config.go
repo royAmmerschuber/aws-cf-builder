@@ -13,8 +13,12 @@ type Config struct{
 	Comp map[string]attribute.Attribute
 	IdentAttr []string
 	Children []*Config
-	Provides string
-	Inherits map[string][]string
+	Provides bool
+	Inherits map[string]InheritedProperty
+}
+type InheritedProperty struct{
+	Resource string
+	Attribute string
 }
 
 type FileConfig struct{

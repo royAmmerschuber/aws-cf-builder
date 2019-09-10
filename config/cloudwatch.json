@@ -2,14 +2,16 @@
     "$schema": "./_schema.json",
     "resources": {
         "event_rule":{
-            "provides": "eRule",
+            "provides": true,
             "childResources": {
                 "cloudwatch":["event_target"]
             }
         },
         "event_target":{
             "nameParts": ["rule","_alias"],
-            "inherits": {"rule":["eRule","name"]}
+            "inherits": {
+                "rule":{"resource":"aws_cloudwatch_event_rule", "attribute":"name"}
+            }
         }
     },
     "datasources": {}

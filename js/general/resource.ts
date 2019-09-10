@@ -15,7 +15,7 @@ export abstract class Resource extends Generatable{
         const name=this[getName](par)
         if(this[generationQueue][name]===undefined){
             this[generationQueue][name]=par
-            _.defaults(mod[generationQueue].resources,{[this.resourceIdentifier]:[]})
+            _.defaults(mod[generationQueue].resources,{[this.resourceIdentifier]:{}})
                 [this.resourceIdentifier][name]=this;
             this.prepareQueue(mod,par);
             _(this)

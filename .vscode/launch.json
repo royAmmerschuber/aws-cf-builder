@@ -10,13 +10,14 @@
             "args": ["-conf", "../../config", "-path", "../../dist"]
         },
         {
-            "name":"tsTest",
-            "type":"node",
+            "type": "node",
             "request": "launch",
-            "program":"${workspaceFolder}/js/test.ts",
-            "preLaunchTask":"tsc: build - tsconfig.json",
-            "outFiles":[
-                "${workspaceFolder}/out/**/*.js"
+            "name": "test ts",
+            "protocol": "inspector",
+            "args": ["./js/testCrossRef.ts"],
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "outFiles": [
+                "${workspaceFolder}/build/**/*.js"
             ]
         }
     ]

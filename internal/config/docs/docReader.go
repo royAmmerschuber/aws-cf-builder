@@ -59,6 +59,9 @@ func GenerateDocumentStructure(b []byte) (string,DocStructure){
 		panic(fmt.Errorf("doc:title not found"))
 	}
 	title=string(b[fTitle[0][2]:fTitle[0][3]])
+	title=strings.TrimPrefix(title,"Resource:")
+	title=strings.TrimPrefix(title,"Data Source:")
+	title=strings.TrimSpace(title)
 	content:=b[fTitle[0][1]:]
 	
 	fH2:=mH2.FindAllSubmatchIndex(content,-1)
@@ -135,20 +138,4 @@ func getBlock(b []byte, subInd[]int) (string,DocBlock){
 		name=string(b[subInd[6]:subInd[7]])
 	}
 	return name,block
-}
-
-type DocStructure struct{
-	Text string
-	Arguments map[string]DocArg
-	Attributes map[string]string
-	Blocks map[string]DocBlock
-}
-type DocArg struct{
-	Req bool
-	Bonus string
-	Text string
-}
-type DocBlock struct{
-	Text string
-	Arguments map[string]DocArg
 }

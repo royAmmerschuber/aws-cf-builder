@@ -9,27 +9,28 @@
                 "user_pool_client",
                 "user_pool_domain"
             ]},
-            "provides": "uPool"
+            "provides": true
         },
         "user_group":{
             "nameParts": ["user_pool_id","name"],
-            "inherits": {"user_pool_id":["uPool","id"]}
+            "inherits": {
+                "user_pool_id":{"resource":"aws_cognito_user_pool","attribute":"id"}}
         },
         "resource_server":{
             "nameParts": ["user_pool_id","name"],
-            "inherits": {"user_pool_id":["uPool","id"]}
+            "inherits": {"user_pool_id":{"resource":"aws_cognito_user_pool","attribute":"id"}}
         },
         "identity_provider":{
             "nameParts": ["user_pool_id","provider_name"],
-            "inherits": {"user_pool_id":["uPool","id"]}
+            "inherits": {"user_pool_id":{"resource":"aws_cognito_user_pool","attribute":"id"}}
         },
         "user_pool_client":{
             "nameParts": ["user_pool_id","name"],
-            "inherits": {"user_pool_id":["uPool","id"]}
+            "inherits": {"user_pool_id":{"resource":"aws_cognito_user_pool","attribute":"id"}}
         },
         "user_pool_domain":{
             "nameParts": ["user_pool_id","domain"],
-            "inherits": {"user_pool_id":["uPool","id"]}
+            "inherits": {"user_pool_id":{"resource":"aws_cognito_user_pool","attribute":"id"}}
         }
     }
 }

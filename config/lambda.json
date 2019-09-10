@@ -2,37 +2,40 @@
     "$schema": "./_schema.json",
     "resources": {
         "function":{
+            "alias": "LambdaFunction",
             "nameParts": ["function_name"],
             "childResources": {
                 "lambda":["permission","event_source_mapping","alias"]
             },
-            "provides":"lfunc"
+            "provides":true
         },
         "permission":{
             "nameParts": ["function_name","_alias"],
             "inherits":{
-                "function_name":["lfunc","functionName"]
+                "function_name":{"resource":"aws_lambda_function","attribute":"functionName"}
             }
         },
         "event_source_mapping":{
             "nameParts": ["function_name","_alias"],
             "inherits": {
-                "function_name":["lfunc","functionName"]
+                "function_name":{"resource":"aws_lambda_function","attribute":"functionName"}
             }
         },
         "alias":{
+            "alias": "LambdaAlias",
             "nameParts": ["function_name","name"],
             "inherits": {
-                "function_name":["lfunc","functionName"]
+                "function_name":{"resource":"aws_lambda_function","attribute":"functionName"}
             }
         }
     },
     "datasources": {
         "function":{
+            "alias": "LambdaFunction",
             "childResources": {
                 "lambda":["permission","event_source_mapping","alias"]
             },
-            "provides":"lfunc"
+            "provides":true
         }
     }
 }

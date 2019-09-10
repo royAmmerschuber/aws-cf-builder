@@ -2,7 +2,7 @@
     "$schema": "./_schema.json",
     "resources": {
         "role":{
-            "provides": "role",
+            "provides": true,
             "childResources": {
                 "iam":["role_policy"]
             }
@@ -10,7 +10,7 @@
         "role_policy":{
             "nameParts": ["role","name"],
             "inherits": {
-                "role":["role","id"]
+                "role":{"resource":"aws_iam_role","attribute":"id"}
             }
         }
     }

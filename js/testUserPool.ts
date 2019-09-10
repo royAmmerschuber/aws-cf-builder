@@ -1,7 +1,7 @@
 //#region imports
 import { Module } from "./general/module";
 import { Aws } from "../dist/aws/provider";
-import { Function } from "../dist/aws/Lambda/function";
+import { LambdaFunction } from "../dist/aws/Lambda/function";
 import { Variable } from "./general/variable";
 import { Role } from "../dist/aws/Iam/role";
 import { RolePolicy } from "../dist/aws/Iam/rolePolicy";
@@ -59,7 +59,7 @@ try{
                     .statement(...baseStatements)))
 
         return {
-            sync:new Function("adiCognitoGroupSync")
+            sync:new LambdaFunction("adiCognitoGroupSync")
                 .Handler("index.handler")
                 .environment({variables:{
                     userPool:vars.userPool,
@@ -77,7 +77,7 @@ try{
                     .Action("lambda:InvokeFunction")
                     .Principal("cognito-idp.amazonaws.com")
                     .sourceArn(vars.userPoolArn)),
-            getUsers:new Function("adiGetUsers")
+            getUsers:new LambdaFunction("adiGetUsers")
                 .Handler("index.handler")
                 .environment({variables:{
                     samlClient:vars.samlClient,

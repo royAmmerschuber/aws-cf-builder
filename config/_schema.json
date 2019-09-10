@@ -23,17 +23,25 @@
                     "description": "the resources wich are subresources of this resource.\nfor example with the subresource aws_lambda_event_source_mapping write:\n\n{\n    \"lambda\":[\"event_source_mapping\"]\n}\n\nlambda being the resource group and the list containing the resource from the group.\nyou can specify however many you want"
                 },
                 "provides":{
-                    "type":"string",
-                    "description":"the unique name this resource will be passed to its children as"
+                    "type":"boolean",
+                    "description":"if this resource should pass itself down to its children"
                 },
                 "inherits":{
                     "type":"object",
                     "additionalProperties": {
-                        "type":"array",
+                        "type":"object",
                         "items": {"type":"string"},
-                        "maxItems": 2,
-                        "minItems": 2,
-                        "description": "the value is an array with length 2 containing first the provides value of the parent resource and second the attribute of the parent that will be used as the value of the argument"
+                        "properties": {
+                            "resource":{
+                                "type":"string",
+                                "description": "the full resource identifier of the inherited Resource"
+                            },
+                            "attribute":{
+                                "type":"string",
+                                "description": "the Attribute that will be inherited from the parent resource"
+                            }
+                        },
+                        "required": ["resource","attribute"]
                     },
                     "description": "maps parent resources to the attributes in this resource\n\nthe key is the argument to wich it will be mapped.\nthe setter-method for the arguments here will be removed."
                 }

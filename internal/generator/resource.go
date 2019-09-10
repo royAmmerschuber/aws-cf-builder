@@ -173,8 +173,8 @@ func generateCore(config *config.Config) string{
 		"}",
 	)
 	out+="protected prepareQueue(module:Module,param:any){"
-	if config.Provides!=""{
-		out+="\n    param."+config.Provides+"=this\n"
+	if config.Provides{
+		out+="\n    param."+config.Identifier+"=this\n"
 	}
 	out+="}\n"
 	if len(config.Inherits)>0{
@@ -182,8 +182,8 @@ func generateCore(config *config.Config) string{
 		for k,v:=range config.Inherits{
 			if a,ok:=config.Attributes[k];ok{
 				if a,ok:=a.(attribute.SimpleAttribute);ok{
-					out+="    if(param."+v[0]+"===undefined) throw new Error(this.stacktrace+'\\nresource is missing inherited parameter "+v[0]+"')\n"
-					out+="    this._"+strcase.ToLowerCamel(a.Name)+"=param."+v[0]+".d."+v[1]+"\n"
+					out+="    if(param."+v.Resource+"===undefined) throw new Error(this.stacktrace+'\\nresource is missing inherited parameter "+v.Resource+"')\n"
+					out+="    this._"+strcase.ToLowerCamel(a.Name)+"=param."+v.Resource+".d."+v.Attribute+"\n"
 				}else{
 					panic(fmt.Errorf("inherited property is non simple"))
 				}
