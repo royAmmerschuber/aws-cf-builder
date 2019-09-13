@@ -1,6 +1,7 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Debug",
             "type": "go",
@@ -14,7 +15,7 @@
             "request": "launch",
             "name": "test ts",
             "protocol": "inspector",
-            "args": ["./js/testCrossRef.ts"],
+            "args": ["./js/generator/index.ts"],
             "runtimeArgs": ["-r", "ts-node/register"],
             "outFiles": [
                 "${workspaceFolder}/build/**/*.js"

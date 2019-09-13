@@ -12,7 +12,6 @@ import { Parameter } from "../dist/aws/Ssm/parameter";
 import { PolicyDocument, PolicyStatement } from "./awsExtras/policyDocument";
 //#endregion
 try{
-
     const vars={
         userPool:new Variable("userPool","string"),
         userPoolArn:new Variable("userPoolArn","string"),

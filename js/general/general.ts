@@ -15,6 +15,7 @@ export const prepareQueue=Symbol("prepareQueue")
 export const generationQueue=Symbol("generationQueue")
 export const getName=Symbol("getName")
 export const getRef=Symbol("getRef")
+export const resourceIdentifier=Symbol("resourceIdentifier")
 export type SMap<T>={[k:string]:T};
 
 export interface ResourceError{
@@ -26,23 +27,15 @@ export abstract class Generatable{
     protected checkCache:SMap<ResourceError>
 
     protected stacktrace:string;
-    protected abstract resourceIdentifier:string;
+    protected abstract [resourceIdentifier]:string;
 
     constructor(errorDepth){
         this.stacktrace=getStack(2+errorDepth);
     }
 
-
-    protected abstract checkValid():SMap<ResourceError>; 
-    [checkValid](){
-        return this.checkCache || (this.checkCache=this.checkValid())
-    };
-
-    protected abstract prepareQueue(module:Module,param:any);
-    [prepareQueue](module:Module,param:any){return this.prepareQueue(module,param)}
-
-    protected abstract generateObject():any;
-    [generateObject](name:string){return this.generateObject()};
+    abstract [checkValid]():SMap<ResourceError>
+    abstract [prepareQueue](module:Module,param:any):void
+    abstract [generateObject]():any;
 }
 export function getStack(errorDepth:number){
     return _(stack())

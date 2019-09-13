@@ -23,7 +23,7 @@ export abstract class Provider extends Generatable{
     //#endregion
 
     //#region resource functions
-    [prepareQueue](mod:Module,param:any){
+    /* [prepareQueue](mod:Module,param:any){
         if(!this.prepared){
             this.prepared=true;
             _.defaults(mod[generationQueue].providers,{[this.resourceIdentifier]:[]})
@@ -37,6 +37,6 @@ export abstract class Provider extends Generatable{
             alias:this._alias,
             version:this._version,
         });
-    }
+    } */
     //#endregion
 }
