@@ -16,6 +16,8 @@ export const generationQueue=Symbol("generationQueue")
 export const getName=Symbol("getName")
 export const getRef=Symbol("getRef")
 export const resourceIdentifier=Symbol("resourceIdentifier")
+export const checkCache=Symbol("checkChache")
+export const stacktrace=Symbol("stacktrace")
 export type SMap<T>={[k:string]:T};
 
 export interface ResourceError{
@@ -24,20 +26,20 @@ export interface ResourceError{
 }
 
 export abstract class Generatable{
-    protected checkCache:SMap<ResourceError>
+    protected [checkCache]:SMap<ResourceError>
 
-    protected stacktrace:string;
+    protected [stacktrace]:string;
     protected abstract [resourceIdentifier]:string;
 
     constructor(errorDepth){
-        this.stacktrace=getStack(2+errorDepth);
+        this[stacktrace]=getShortStack(2+errorDepth);
     }
 
     abstract [checkValid]():SMap<ResourceError>
     abstract [prepareQueue](module:Module,param:any):void
     abstract [generateObject]():any;
 }
-export function getStack(errorDepth:number){
+export function getShortStack(errorDepth:number){
     return _(stack())
         .filter(v=>config.errorBlacklist.every(c => v.getFileName() && v.getFileName().search(c)==-1))
         .drop(1+errorDepth)

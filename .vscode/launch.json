@@ -15,7 +15,7 @@
             "request": "launch",
             "name": "test ts",
             "protocol": "inspector",
-            "args": ["./js/generator/index.ts"],
+            "args": ["./js/custom/provider.ts"],
             "runtimeArgs": ["-r", "ts-node/register"],
             "outFiles": [
                 "${workspaceFolder}/build/**/*.js"

@@ -1,5 +1,5 @@
 import { Field, AdvField } from "../general/field";
-import { SMap, generateObject, ResourceError, checkValid, prepareQueue, getStack, callFieldReferences } from "../general/general";
+import { SMap, generateObject, ResourceError, checkValid, prepareQueue, getShortStack, callFieldReferences } from "../general/general";
 import _ from "lodash";
 import { Module } from "../general/module";
 //TODO allow Fields
@@ -90,7 +90,7 @@ export class PolicyStatement {
     constructor(
         sid?: Field<string>
     ) {
-        this.stack=getStack(1);
+        this.stack=getShortStack(1);
         this._sid=sid
      }
 
