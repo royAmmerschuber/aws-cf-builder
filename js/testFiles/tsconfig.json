@@ -1,6 +1,6 @@
 {
     "extends": "../../tsconfig.json",
     "compilerOptions": {
-        "types": ["../executor/global.d.ts"]
+        "types": ["../executor/types/global.d.ts"]
     }
 }

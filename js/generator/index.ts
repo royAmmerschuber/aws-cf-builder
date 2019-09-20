@@ -2,14 +2,15 @@ import fs from "fs"
 import _ from "lodash"
 import { generateProvider } from "./generateProvider"
 import { importJson, resrej } from "./util"
+import util from "util" 
 
 const basepath="./baseData"
 const outpath="./distJs"
 const configPath="./config"
-
+const promReadDir=util.promisify(fs.readdir)
 Promise.all([ 
-    new Promise<string[]>((res,rej)=>fs.readdir(basepath+"/resources",resrej(res,rej))),
-    new Promise<string[]>((res,rej)=>fs.readdir(basepath+"/datasources",resrej(res,rej)))
+    promReadDir(basepath+"/resources"),
+    promReadDir(basepath+"/datasources")
 ]).then(async (v)=>{
     const resourceNames=v[0].map(v=>v.slice(0,-5))
     const datasourceNames=v[1].map(v=>v.slice(0,-5))

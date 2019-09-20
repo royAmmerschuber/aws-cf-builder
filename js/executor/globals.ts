@@ -1,3 +1,3 @@
-import { Module } from "../general/module";
-
-global.Module=Module
+import { Custom } from "../custom"
+//@ts-ignore
+global.Custom=Custom

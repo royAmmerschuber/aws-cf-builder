@@ -3,7 +3,7 @@ import { resourceIdentifier, checkValid, prepareQueue, generateObject, SMap, Res
 import { Module } from "../general/module";
 import { CustomResource, CustomParameters } from "./resource";
 import _ from "lodash";
-class customProvider extends Provider{
+export class customProvider extends Provider{
     protected readonly [resourceIdentifier];
     private propertyHolder:SMap<any>={}
     private proxy:CustomProvider;
@@ -58,17 +58,10 @@ class customProvider extends Provider{
         return this.propertyHolder
     }
 }
-export function Custom(name:string):CustomProvider{
-    return new customProvider(name) as any
-}
+
 
 export type CustomPropFunction<This>=<val>(val:val)=>This
 interface CustomProviderProperties extends CustomParameters{
     resources:SMap<()=>CustomResource> & CustomPropFunction<this>
 }
 export type CustomProvider=customProvider & CustomProviderProperties
-
-const aws=Custom("aws")
-    .peter("paul")
-    .resources({meier:"great",paul:32})
-console.log(aws[generateObject]())
