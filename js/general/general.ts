@@ -1,6 +1,7 @@
-import { Module } from "./module";
+import { Module, modulePreparable } from "./module";
 import _ from "lodash";
 import chalk from "chalk";
+import { checkCache, stacktrace, resourceIdentifier, checkValid, prepareQueue, generateObject } from "./symbols";
 // @ts-ignore
 const stack= require("callsite") as ()=>NodeJS.CallSite[]
 
@@ -8,16 +9,6 @@ export const config={
     errorBlacklist:[/^internal/,/node_modules[\/\\]ts-node/,/gulp-cloudformationbuilder/],
     errorPathLength:3
 }
-
-export const generateObject=Symbol("generateObject")
-export const checkValid=Symbol("checkValid")
-export const prepareQueue=Symbol("prepareQueue")
-export const generationQueue=Symbol("generationQueue")
-export const getName=Symbol("getName")
-export const getRef=Symbol("getRef")
-export const resourceIdentifier=Symbol("resourceIdentifier")
-export const checkCache=Symbol("checkChache")
-export const stacktrace=Symbol("stacktrace")
 export type SMap<T>={[k:string]:T};
 
 export interface ResourceError{
@@ -26,17 +17,17 @@ export interface ResourceError{
 }
 
 export abstract class Generatable{
+    protected [stacktrace]:string;
     protected [checkCache]:SMap<ResourceError>
 
-    protected [stacktrace]:string;
-    protected abstract [resourceIdentifier]:string;
+    abstract [resourceIdentifier]:string;
 
     constructor(errorDepth){
         this[stacktrace]=getShortStack(2+errorDepth);
     }
 
     abstract [checkValid]():SMap<ResourceError>
-    abstract [prepareQueue](module:Module,param:any):void
+    abstract [prepareQueue](module:modulePreparable,param:any):void
     abstract [generateObject]():any;
 }
 export function getShortStack(errorDepth:number){

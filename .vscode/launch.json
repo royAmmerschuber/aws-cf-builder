@@ -15,8 +15,8 @@
             "request": "launch",
             "name": "test ts",
             "protocol": "inspector",
-            "args": ["./js/custom/provider.ts"],
-            "runtimeArgs": ["-r", "ts-node/register"],
+            "args": ["./js/executor/tempStart.ts"],
+            "runtimeArgs": ["-r", "./js/executor/preload.js"],
             "outFiles": [
                 "${workspaceFolder}/build/**/*.js"
             ]

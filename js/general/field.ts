@@ -1,27 +1,16 @@
 import { Resource } from "./resource";
-import { getName, prepareQueue, SMap, getRef, ResourceError, checkValid, Generatable } from "./general";
-import { Module } from "./module";
+import {  SMap, Generatable } from "./general";
+import { Module, modulePreparable } from "./module";
 import { DataSource } from "./dataSource";
+import { resourceIdentifier, prepareQueue, checkValid, getName, getRef, generateObject } from "./symbols";
+import { Output } from "./output";
 
 export type Field<T>=T|AdvField<T>
 export type Ref<T,ref>=Field<T>|ref
 export abstract class AdvField<T> extends Generatable{
-    toJSON(){
-        return this.generateField()
-    }
-    [prepareQueue](mod:Module,par:SMap<any>){
-        
-        this.prepareQueue(mod,par)
-    }
-    [checkValid](){return this.checkValid()}
-    [getName](par:SMap<any>){return this.getName(par)}
-    protected abstract checkValid():SMap<ResourceError>
-    protected abstract prepareQueue(mod:Module,par:SMap<any>)
-    protected abstract generateField():T|string
-    protected abstract getName(par:SMap<any>):string
-    protected generateObject():any{
-        return {}
-    }
+    abstract toJSON():T|string
+    abstract [getName](par:SMap<any>):string
+    [generateObject](){return {}}
 }
 type referenceMerger<T>=ReferenceField<T> & (
     T extends object ?
@@ -29,7 +18,7 @@ type referenceMerger<T>=ReferenceField<T> & (
     {}
 )
 export class ReferenceField<T> extends AdvField<T>{
-    protected readonly resourceIdentifier="Ref"
+    protected readonly [resourceIdentifier]="Ref"
     public static create<T>(resource:Resource|DataSource,attr:string):referenceMerger<T>{
         if(attr==""){
             return new ReferenceField(resource,attr) as any
@@ -39,13 +28,17 @@ export class ReferenceField<T> extends AdvField<T>{
             return new ReferenceField(resource,"."+attr) as any
         }
     }
-    private constructor(private resource:Resource|DataSource,private attr:string){
+    protected constructor(private resource:Resource|DataSource,private attr:string){
         super(1)
         return new Proxy(this,{
             get(t,p){
-                if((p in t) || typeof p=="symbol"){
-                    return t[p]
-                }else if(isNaN(Number(p))){
+                if(typeof p=="symbol"){
+                    const v=t[p as any]
+                    if(v instanceof Function){
+                        return (...args)=>(t[p as any] as Function).call(t,...args);
+                    }
+                    return t[p as any]
+            }else if(isNaN(Number(p))){
                     return new ReferenceField(resource,attr+"."+p)
                 }else{
                     return new ReferenceField(resource,attr+"["+p+"]")
@@ -54,25 +47,29 @@ export class ReferenceField<T> extends AdvField<T>{
         })
     }
 
-    protected generateField(){
+    toJSON(){
         if(this.resource instanceof Resource){
             return "${"+this.resource[getRef]({})+this.attr+"}"
         }else{
             return "${data."+this.resource[getRef]({})+this.attr+"}"
         }
     }
-    protected prepareQueue(mod: Module,par: SMap<any>){
+    [prepareQueue](mod: modulePreparable,par: SMap<any>){
         this.resource[prepareQueue](mod,par);
     }
-    protected checkValid(){
+    [checkValid](){
         return this.resource[checkValid]();
     }
-    protected getName(par){
+    [getName](par){
         return this.resource[getName](par)
     }
-
 }
 
+export class ModuleReferenceField<T> extends AdvField<T>{
+    public static create<T>(mod:Module<any>,output:Output<T>):ModuleReferenceField<T>{
+        throw "not implemented"
+    }
+}
 export function fieldToId(f:Field<any>):string{
     if(f instanceof AdvField){
         const x=f[getName]({})

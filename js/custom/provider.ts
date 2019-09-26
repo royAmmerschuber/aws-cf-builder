@@ -1,5 +1,6 @@
 import { Provider } from "../general/provider";
-import { resourceIdentifier, checkValid, prepareQueue, generateObject, SMap, ResourceError } from "../general/general";
+import { SMap, ResourceError } from "../general/general";
+import { resourceIdentifier, checkValid, prepareQueue, generateObject } from "../general/symbols"
 import { Module } from "../general/module";
 import { CustomResource, CustomParameters } from "./resource";
 import _ from "lodash";
@@ -20,7 +21,7 @@ export class customProvider extends Provider{
         },
         get:(tar,p,rec):(()=>CustomResource)=>{
             if(typeof p=="string"){
-                return ()=>CustomResource(this[resourceIdentifier],p)
+                return ()=>CustomResource(this,p)
             }
             return tar[p as any];
         }
