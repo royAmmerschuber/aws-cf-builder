@@ -2,7 +2,7 @@
 import { Module } from "./general/module";
 import { Aws } from "../dist/aws/provider";
 import { LambdaFunction } from "../dist/aws/Lambda/function";
-import { Variable } from "./general/variable";
+import { variable } from "./general/variable";
 import { Role } from "../dist/aws/Iam/role";
 import { RolePolicy } from "../dist/aws/Iam/rolePolicy";
 import { Permission } from "../dist/aws/Lambda/permission";
@@ -13,13 +13,13 @@ import { PolicyDocument, PolicyStatement } from "./awsExtras/policyDocument";
 //#endregion
 try{
     const vars={
-        userPool:new Variable("userPool","string"),
-        userPoolArn:new Variable("userPoolArn","string"),
-        samlClient:new Variable("samlClient","string"),
-        adTenant:new Variable("adTenant","string"),
-        adClientSecret:new Variable("adClientSecret","string"),
-        adClientId:new Variable("adClientId","string"),
-        userTable:new Variable("userTable","string"),
+        userPool:new variable("userPool","string"),
+        userPoolArn:new variable("userPoolArn","string"),
+        samlClient:new variable("samlClient","string"),
+        adTenant:new variable("adTenant","string"),
+        adClientSecret:new variable("adClientSecret","string"),
+        adClientId:new variable("adClientId","string"),
+        userTable:new variable("userTable","string"),
     }
     const adClientSecretSSMParam=new Parameter("adClientSecret")
         .Type("SecureString")

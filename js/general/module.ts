@@ -1,13 +1,10 @@
-import _ from "lodash";
-import { SMap, ResourceError, Generatable } from "./general";
+import _ from "lodash/fp";
+import { SMap, ResourceError, pathItem, TopLevelGeneratable } from "./general";
 import { RefFilterByOutput, FilterInputToSetter } from "./moduleTypes";
 import { generateObject, prepareQueue, checkValid, resourceIdentifier, checkCache, resourceName } from "./symbols";
-import { Resource } from "./resource";
-import { Variable } from "./variable";
-import { Output } from "./output";
-import { Provider } from "./provider";
-import { ModuleBackend } from "./moduleBackend";
-class $module<T> extends Generatable{
+import { ModuleBackend, modulePreparable } from "./moduleBackend";
+import { prepareQueueBase } from "./util";
+export class $module<T> extends TopLevelGeneratable{
     readonly [resourceIdentifier]:string
     [resourceName]:string
     
@@ -29,23 +26,14 @@ class $module<T> extends Generatable{
         //TODO: check own imports
         return this[checkCache]=out
     }
-    [prepareQueue](mod:modulePreparable,par:any){
-        this[ModuleBackend.sym].prepareQueue(mod.moduleBackends)
-        if(!mod.modules.has(this)){
-            mod.modules.add(this)
+    [prepareQueue](mod:modulePreparable,path:pathItem,ref:boolean){
+        if(prepareQueueBase(mod,path,ref,this)){
+            this[ModuleBackend.sym].prepareQueue(mod.moduleBackends)
         }
     }
     [generateObject](){
         throw "not implemented"
     }
-}
-export interface modulePreparable{
-    moduleBackends:Set<ModuleBackend>
-    modules:Set<$module<any>>
-    resources:Set<Resource>
-    variables:Set<Variable<any>>
-    output:Set<Output<any>>
-    providers:Set<Provider>
 }
 
 export type Module<T>=$module<T> & FilterInputToSetter<T,T>

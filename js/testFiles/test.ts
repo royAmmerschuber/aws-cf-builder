@@ -1,5 +1,3 @@
-import { Output } from "../general/output"
-import { Variable } from "../general/variable"
 
 const aws=Custom("aws")
     .region("us-east-1")
@@ -15,12 +13,12 @@ export const lambda=aws.LambdaFunction()
         .Action("sts:invokeLambda")
         .FunctionName("test"))
 export const peter="paul"
-export const importantInfo=new Variable()
+export const importantInfo=Variable()
 export const outs={
-    one:new Output(),
+    one:Output<string>(),
     peter:{
-        geiles:new Output(),
-        randomInput:new Variable(),
+        geiles:Output<number>(),
+        randomInput:Variable<any[]>(),
         pentagon:aws.ApiGatewayRestApi()
             .name("petra")
     }

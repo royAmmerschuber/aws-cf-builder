@@ -1,9 +1,10 @@
 import { Resource } from "./resource";
-import {  SMap, Generatable } from "./general";
-import { Module, modulePreparable } from "./module";
+import { SMap, Generatable, pathItem } from "./general";
+import { Module } from "./module";
 import { DataSource } from "./dataSource";
 import { resourceIdentifier, prepareQueue, checkValid, getName, getRef, generateObject } from "./symbols";
-import { Output } from "./output";
+import { output } from "./output";
+import { modulePreparable } from "./moduleBackend";
 
 export type Field<T>=T|AdvField<T>
 export type Ref<T,ref>=Field<T>|ref
@@ -18,14 +19,14 @@ type referenceMerger<T>=ReferenceField<T> & (
     {}
 )
 export class ReferenceField<T> extends AdvField<T>{
-    protected readonly [resourceIdentifier]="Ref"
+    readonly [resourceIdentifier]="ref"
     public static create<T>(resource:Resource|DataSource,attr:string):referenceMerger<T>{
         if(attr==""){
             return new ReferenceField(resource,attr) as any
         }else if(!isNaN(Number(attr))){
-            return new ReferenceField(resource,"["+attr+"]") as any
+            return new ReferenceField(resource,`[${attr}]`) as any
         }else{
-            return new ReferenceField(resource,"."+attr) as any
+            return new ReferenceField(resource,`.${attr}`) as any
         }
     }
     protected constructor(private resource:Resource|DataSource,private attr:string){
@@ -38,24 +39,20 @@ export class ReferenceField<T> extends AdvField<T>{
                         return (...args)=>(t[p as any] as Function).call(t,...args);
                     }
                     return t[p as any]
-            }else if(isNaN(Number(p))){
-                    return new ReferenceField(resource,attr+"."+p)
+                }else if(isNaN(Number(p))){
+                    return new ReferenceField(resource,`${attr}.${p}`)
                 }else{
-                    return new ReferenceField(resource,attr+"["+p+"]")
+                    return new ReferenceField(resource,`${attr}[${p}]`)
                 }
             }
         })
     }
 
     toJSON(){
-        if(this.resource instanceof Resource){
-            return "${"+this.resource[getRef]({})+this.attr+"}"
-        }else{
-            return "${data."+this.resource[getRef]({})+this.attr+"}"
-        }
+        return `\${${this.resource[getRef]()+this.attr}}`
     }
-    [prepareQueue](mod: modulePreparable,par: SMap<any>){
-        this.resource[prepareQueue](mod,par);
+    [prepareQueue](mod: modulePreparable,par: pathItem,ref:boolean){
+        this.resource[prepareQueue](mod,par,true);
     }
     [checkValid](){
         return this.resource[checkValid]();
@@ -66,7 +63,7 @@ export class ReferenceField<T> extends AdvField<T>{
 }
 
 export class ModuleReferenceField<T> extends AdvField<T>{
-    public static create<T>(mod:Module<any>,output:Output<T>):ModuleReferenceField<T>{
+    public static create<T>(mod:Module<any>,output:output<T>):ModuleReferenceField<T>{
         throw "not implemented"
     }
 }

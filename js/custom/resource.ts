@@ -1,20 +1,17 @@
 import { Resource } from "../general/resource";
 import { CustomPropFunction } from "./provider";
-import { SMap, ResourceError, Generatable } from "../general/general";
-import { modulePreparable } from "../general/module";
-import _f from "lodash/fp";
-import _ from "lodash"
-import { Field, ReferenceField } from "../general/field";
+import { SMap, Generatable, pathItem, TopLevelGeneratable } from "../general/general";
+import { modulePreparable } from "../general/moduleBackend";
+import _ from "lodash/fp";
+import { ReferenceField } from "../general/field";
 import { Provider } from "../general/provider";
 import { provider, resourceIdentifier, checkValid, generateObject, prepareQueue } from "../general/symbols";
+import { prepareQueueBase } from "../general/util";
 class customResource extends Resource{
     readonly [resourceIdentifier]:string
     private propertyHolder:SMap<any>={};
     
     private handler:ProxyHandler<CustomResource>={
-        getPrototypeOf:(target)=>{
-            return this.constructor.prototype
-        },
         get:(target,p,c)=>{
             if(typeof p=="symbol"){
                 const v=this[p as any]
@@ -36,7 +33,7 @@ class customResource extends Resource{
     constructor(prov:Provider,name:string){
         super(0)
         this[provider]=prov
-        this[resourceIdentifier]=prov[resourceIdentifier]+"_"+_f.snakeCase(name)
+        this[resourceIdentifier]=prov[resourceIdentifier]+"_"+_.snakeCase(name)
         return this.proxy=new Proxy(this as any,this.handler)
     }
 
@@ -50,21 +47,24 @@ class customResource extends Resource{
         return {}
     }
     [generateObject](){
-        return _f.flow(
-            _f.pickBy<any>((v)=>!(v instanceof Resource)),
-            _f.mapKeys((v:string)=>_f.snakeCase(v))
+        return _.flow(
+            _.pickBy<any>((v)=>!(v instanceof Resource)),
+            _.mapKeys((v:string)=>_.snakeCase(v))
         )(this.propertyHolder)
     }
-    [prepareQueue](mod:modulePreparable,param:any){
-        if(!mod.resources.has(this)){
-            mod.resources.add(this)
-            const subParam=_.clone(param)
-            subParam[this[resourceIdentifier]]=this
-            _.forEach(this.propertyHolder,(v) => {
+    [prepareQueue](mod:modulePreparable,path:pathItem,ref:boolean){
+        if(prepareQueueBase(mod,path,ref,this)){
+            const subPath=this
+            _.forEach(v => {
                 if(v instanceof Generatable){
-                    v[prepareQueue](mod,param)
+                    if (v instanceof TopLevelGeneratable){
+                        v[prepareQueue](mod,subPath,false)
+                        return
+                    }
+                    v[prepareQueue](mod,subPath,false)
                 }
-            })
+            },this.propertyHolder)
+            this[provider][prepareQueue](mod,subPath,true)
         }
     }
 }

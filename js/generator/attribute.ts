@@ -1,5 +1,5 @@
 import { Type, SchemaBaseData } from "./baseDataDef"
-import _ from "lodash"
+import _ from "lodash/fp"
 import { SMap } from "../general/general"
 
 export abstract class Attribute{
@@ -32,15 +32,20 @@ export class BasicAttribute extends Attribute{
 }
 export function generateAttributes(baseData:SMap<SchemaBaseData<Type>>):Attribute[]{
     const out:Attribute[]=[]
-    _.forEach(baseData,(v,k)=>{
-        switch(v.Type){
-            case Type.TypeBool,Type.TypeFloat,Type.TypeInt,Type.TypeString:
-                out.push(new BasicAttribute(k,v.Type))
-                break;
-            case Type.TypeList,Type.TypeList:
+    _.flow(
+        _.toPairs,
+        _.forEach(vk => {
+            const v=vk[0],k=vk[1];
+            switch(v.Type){
+                case Type.TypeBool,Type.TypeFloat,Type.TypeInt,Type.TypeString:
+                    out.push(new BasicAttribute(k,v.Type))
+                    break;
+                case Type.TypeList,Type.TypeList:
 
-            default:
-        }
-    })
+                default:
+            }
+        })
+    )(baseData)
     return out
+    
 }
