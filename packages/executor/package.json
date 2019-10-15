@@ -1,0 +1,13 @@
+{
+    "dependencies": {
+        "lodash": "^4.17.15",
+        "commander": "^3.0.2"
+    },
+    "devDependencies": {
+        "@types/lodash": "^4.14.123",
+        "@types/commander": "2.12.2"
+    },
+    "optionalDependencies": {
+        "ts-node": "8.3.0"
+    }
+}

@@ -1,11 +1,11 @@
-import { Provider, provSym } from "../general/generatables/provider";
-import { SMap, ResourceError, Preparable, Generatable } from "../general/general";
-import { resourceIdentifier, checkValid, prepareQueue, generateObject, s_path, checkCache } from "../general/symbols"
+import { Provider, provSym } from "../generatables/provider";
+import { SMap, ResourceError, Preparable, Generatable } from "../general";
+import { resourceIdentifier, checkValid, prepareQueue, generateObject, s_path, checkCache } from "../symbols"
 import { CustomParameters, CustomResource, customResource } from "./resource";
 import _ from "lodash/fp";
-import { modulePreparable } from "../general/moduleBackend";
-import { isAdvField } from "../general/field";
-import { prepareQueueBase, generateUniqueIdentifier } from "../general/util";
+import { modulePreparable } from "../moduleBackend";
+import { isAdvField } from "../field";
+import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { CustomBlock, customBlock } from "./block"
 import { Parent } from "./parent";
 export class customProvider extends Provider {
