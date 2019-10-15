@@ -1,17 +1,18 @@
 import { checkCache, checkValid, prepareQueue, resourceIdentifier, stacktrace, s_path, generateObject, getName } from "./symbols"
-import { SMap, ResourceError, pathItem, TopLevelGeneratable } from "./general"
+import { SMap, ResourceError, pathItem, Generatable } from "./general"
 import _ from "lodash/fp"
-import { Provider, provSym } from "./provider"
-import { Resource } from "./resource"
-import { output } from "./output"
-import { variable } from "./variable"
+import { Provider, provSym } from "./generatables/provider"
+import { Resource } from "./generatables/resource"
+import { Output } from "./generatables/output"
+import { Variable } from "./generatables/variable"
 import { refPlaceholder } from "./refPlaceholder"
+import chalk from "chalk"
 
 export class ModuleBackend{
     private static readonly moduleCache:Map<any,ModuleBackend>=new Map()
     private [checkCache]:SMap<ResourceError>
     static readonly sym=Symbol("moduleBackend")
-    private resources:{path:string[],resource:TopLevelGeneratable}[]
+    private resources:{path:string[],resource:Generatable}[]
     private preparable:modulePreparable
     constructor(file:any){
         const cacheResult=ModuleBackend.moduleCache.get(file)
@@ -28,10 +29,9 @@ export class ModuleBackend{
         }
         const out:SMap<ResourceError>={}
         
-        this.resources
+        return this[checkCache]=this.resources
             .map(res => res.resource[checkValid]())
-            .forEach(res => _.assign(out,res))
-        return this[checkCache]=out
+            .reduce((o,c)=>_.assign(o,c),out)
     }
     prepareQueue(moduleSet:Set<ModuleBackend>){
         if(!moduleSet.has(this)){
@@ -44,7 +44,7 @@ export class ModuleBackend{
                 res.resource[prepareQueue](preparable,res.path,false)
             })
             //cleaning out Refs & storing refs in temporary map
-            const missingRefs=new Map<TopLevelGeneratable,pathItem[]>()
+            const missingRefs=new Map<Generatable,pathItem[]>()
             preparable.resources.forEach(resource => {
                 if(resource instanceof refPlaceholder){
                     if(resource.ref[s_path]===undefined){
@@ -70,8 +70,8 @@ export class ModuleBackend{
         //*sort
         const providers:Map<string,Provider[]>=new Map()
         const resources:Map<string,Resource[]>=new Map()
-        const outputs:output<any>[]=[]
-        const variables:variable<any>[]=[]
+        const outputs:Output<any>[]=[]
+        const variables:Variable<any>[]=[]
         this.preparable.resources.forEach(res => {
             if(res instanceof Provider){
                 const arr=providers.get(res[resourceIdentifier])
@@ -87,9 +87,9 @@ export class ModuleBackend{
                 }else{
                     resources.set(res[resourceIdentifier],[res])
                 }
-            }else if(res instanceof output){
+            }else if(res instanceof Output){
                 outputs.push(res)
-            }else if(res instanceof variable){
+            }else if(res instanceof Variable){
                 variables.push(res)
             }
         })
@@ -126,30 +126,30 @@ export class ModuleBackend{
                 )(v[1])]),
                 _.fromPairs
             )([...resources]),
-           /*  output:_.flow(
-                _.map((out:output<any>) => [out[getName](),out[generateObject]()]),
+           output:_.flow(
+                _.map((out:Output<any>) => [out[getName](),out[generateObject]()]),
                 _.fromPairs
             )(outputs),
             variable:_.flow(
-                _.map((va:variable<any>) => [va[getName](),va[generateObject]()]),
+                _.map((va:Variable<any>) => [va[getName](),va[generateObject]()]),
                 _.fromPairs
-            )(variables) */
+            )(variables) 
         }
     }
 }
 
 export interface modulePreparable{
     moduleBackends:Set<ModuleBackend>
-    resources:Set<TopLevelGeneratable|refPlaceholder<TopLevelGeneratable>>
+    resources:Set<Generatable|refPlaceholder<Generatable>>
 }
 
-function getResources(file:any):{path:string[],resource:TopLevelGeneratable}[]{
+function getResources(file:any):{path:string[],resource:Generatable}[]{
     const rec=(path:string[],obj:any) => {
         const out=[]
         for(const k in obj){
             const v=obj[k]
             if(typeof v=="object"){
-                if(v instanceof TopLevelGeneratable){
+                if(v instanceof Generatable){
                     out.push({
                         path:[...path,k],
                         resource:v
@@ -165,13 +165,13 @@ function getResources(file:any):{path:string[],resource:TopLevelGeneratable}[]{
     out.push(...rec([],file))
     return out
 }
-function dissolvePaths(paths:pathItem[],resource:TopLevelGeneratable):pathItem{
+function dissolvePaths(paths:pathItem[],resource:Generatable):pathItem{
     if(paths.length>1){
         //TODO do something smart for path resolving
         if(resource instanceof Provider){
             return paths[0]
         }
-        throw resource[stacktrace]+"\nmultiple references to resource"
+        throw resource[stacktrace]+"\n"+chalk.yellow(resource[resourceIdentifier])+"\nmultiple references to resource"
     }else{
         return paths[0]
     }

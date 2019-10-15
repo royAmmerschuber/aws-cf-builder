@@ -1,25 +1,55 @@
-
-const aws=Custom("aws")
+const aws=new Custom("aws")
     .region("us-east-1")
     .resources
-export const lambda=aws.LambdaFunction()
-    .test("oazk")
-    .code("s3:whatever.com")
-    .role(aws.IamRole()
-        .policy(JSON.stringify({
-            statement:{Action:"log:*"}
-        })).d.arn)
-    .permission(aws.LambdaPermission()
-        .Action("sts:invokeLambda")
-        .FunctionName("test"))
-export const peter="paul"
-export const importantInfo=Variable()
-export const outs={
-    one:Output<string>(),
-    peter:{
-        geiles:Output<number>(),
-        randomInput:Variable<any[]>(),
-        pentagon:aws.ApiGatewayRestApi()
-            .name("petra")
-    }
+export const inp=new Variable<string>()
+    .type("string")
+    .default("great stuff happening")
+export const lambdaRole=new aws.IamRole()
+    .policy("test")
+
+export const lambda=new aws.LambdaFunction()
+    .codeUri(inp)
+    .role(lambdaRole.d.arn)
+    .permission(new aws.LambdaPermission()
+        .functionName(Custom.P.aws_lambda_function.function_name)
+        .Allow("apigateway"))
+    .environment({variables:new Custom.B()
+        .test("greatStuff")
+        .bucketName("something.s3")})
+export const lambdaRunShit=new aws.LambdaFunction()
+    .codeUri("/test")
+    .role(lambdaRole.d.arn)
+export const out=new Output()
+   .value(lambda.d.environment.variable.test)
+   .sensitive()
+/*
+const aws=new Custom("aws"){
+    region:"us-east-1"
+}.resources
+export const inp=new Variable<string>(){
+    type:"string"
+    default:"great stuff happening"
 }
+export const lambdaRole=new aws.IamRole(){
+    policy:"test"
+}
+
+export const lambda=new aws.LambdaFunction(){
+    codeUri:inp
+    role:lambdaRole.d.arn
+    permission:new aws.LambdaPermission(){
+        Allow:"apigateway"
+    }
+    environment:{variables:new Custom.B(){
+        test:"greatStuff"
+    }}
+}
+export const lambdaRunShit=new aws.LambdaFunction(){
+    codeUri:"/test"
+    role:lambdaRole.d.arn
+}
+export const out=(()=>new Output()
+   .value(lambda.d.environment.variable.test)
+   .sensitive())()
+
+*/

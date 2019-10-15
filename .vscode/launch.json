@@ -10,6 +10,9 @@
             "runtimeArgs": ["-r", "./js/executor/preload.js"],
             "outFiles": [
                 "${workspaceFolder}/build/**/*.js"
+            ],
+            "skipFiles": [
+                "${workspaceFolder}/node_modules/lodash/**/*.js"
             ]
         }
     

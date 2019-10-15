@@ -1,7 +1,7 @@
 import { Field, AdvField } from "../general/field";
 import { SMap, ResourceError, getShortStack, callFieldReferences } from "../general/general";
 import _ from "lodash";
-import { Module } from "../general/module";
+import { Module } from "../general/generatables/module";
 import { checkCache, checkValid, prepareQueue, generateObject } from "../general/symbols";
 //TODO allow Fields
 /**

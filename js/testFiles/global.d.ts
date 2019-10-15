@@ -1,10 +1,15 @@
-import * as module from "../general/module"
-import * as custom from "../custom"
-import * as variable from "../general/variable"
-import * as output from "../general/output"
+import * as module from "../general/generatables/module"
+import * as customP from "../custom/provider"
+import * as customB from "../custom/block"
+import * as customParent from "../custom/parent"
+import * as variable from "../general/generatables/variable"
+import * as output from "../general/generatables/output"
 declare global{
-    function Module<T>(p:T):module.Module<T>
-    function Custom(name:string):custom.CustomProvider
-    function Variable<T>():variable.Variable<T>
-    function Output<T>():output.Output<T>
+    export const Module:typeof module.Module
+    export const Custom:(new (name:string)=>customP.CustomProvider) & {
+        B:new ()=>customB.CustomBlock,
+        P:typeof customParent.Parent
+    }
+    export const Variable:typeof variable.Variable
+    export const Output:typeof output.Output
 }

@@ -1,6 +1,6 @@
-import { Generatable } from "./general";
-import { resourceName,getRef,resourceIdentifier} from "./symbols"
-
+import { Generatable } from "../general";
+import { resourceName,getRef,resourceIdentifier} from "../symbols"
+//TODO
 export abstract class DataSource extends Generatable{
     [resourceName]:string
     [getRef]():string{

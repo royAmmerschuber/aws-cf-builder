@@ -1,10 +1,11 @@
 import _ from "lodash/fp";
-import { SMap, ResourceError, pathItem, TopLevelGeneratable } from "./general";
-import { RefFilterByOutput, FilterInputToSetter } from "./moduleTypes";
-import { generateObject, prepareQueue, checkValid, resourceIdentifier, checkCache, resourceName } from "./symbols";
-import { ModuleBackend, modulePreparable } from "./moduleBackend";
-import { prepareQueueBase } from "./util";
-export class $module<T> extends TopLevelGeneratable{
+import { SMap, ResourceError, pathItem, Generatable } from "../general";
+import { RefFilterByOutput } from "../moduleTypes";
+import { generateObject, prepareQueue, checkValid, resourceIdentifier, checkCache, resourceName } from "../symbols";
+import { ModuleBackend, modulePreparable } from "../moduleBackend";
+import { prepareQueueBase } from "../util";
+//TODO
+export class Module<T> extends Generatable{
     readonly [resourceIdentifier]:string
     [resourceName]:string
     
@@ -12,9 +13,10 @@ export class $module<T> extends TopLevelGeneratable{
 
     d:RefFilterByOutput<T>
 
-    constructor(backend:ModuleBackend){
+    constructor(file:T){
         super(0)
-        this[ModuleBackend.sym]=backend
+
+        this[ModuleBackend.sym]=new ModuleBackend(file)
     }
 
     [checkValid]():SMap<ResourceError>{
@@ -34,11 +36,4 @@ export class $module<T> extends TopLevelGeneratable{
     [generateObject](){
         throw "not implemented"
     }
-}
-
-export type Module<T>=$module<T> & FilterInputToSetter<T,T>
-export function Module<T extends SMap<any>>(file:T):Module<T>{
-    const backend=new ModuleBackend(file)
-    const mod=new $module(backend)
-    return mod as any
 }

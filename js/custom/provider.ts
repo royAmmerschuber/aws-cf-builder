@@ -1,29 +1,28 @@
-import { Provider, provSym, generateUniqueIdentifier } from "../general/provider";
-import { SMap, ResourceError, Generatable } from "../general/general";
-import { resourceIdentifier, checkValid, prepareQueue, generateObject, s_path } from "../general/symbols"
-import { CustomResource, CustomParameters } from "./resource";
+import { Provider, provSym } from "../general/generatables/provider";
+import { SMap, ResourceError, Preparable, Generatable } from "../general/general";
+import { resourceIdentifier, checkValid, prepareQueue, generateObject, s_path, checkCache } from "../general/symbols"
+import { CustomParameters, CustomResource, customResource } from "./resource";
 import _ from "lodash/fp";
 import { modulePreparable } from "../general/moduleBackend";
-import { AdvField } from "../general/field";
-import { prepareQueueBase } from "../general/util";
+import { isAdvField } from "../general/field";
+import { prepareQueueBase, generateUniqueIdentifier } from "../general/util";
+import { CustomBlock, customBlock } from "./block"
+import { Parent } from "./parent";
 export class customProvider extends Provider {
     readonly [resourceIdentifier];
-    private propertyHolder: SMap<any> = {}
+    private _: SMap<any> = {}
     private proxy: CustomProvider;
-    paramFunction(name: string) {
-        return <val>(val: val): CustomProvider => {
-            this.propertyHolder[name] = val
-            return this.proxy
-        }
-    }
-    public resources = new Proxy(((_:any) => { }) as CustomPropFunction<CustomProvider> & SMap<() => CustomResource>, {
+    public resources = new Proxy(((_: any) => { }) as CustomPropFunction<CustomProvider> & SMap<new () => CustomResource>, {
         apply: (target, This, argArray): CustomProvider => {
             //@ts-ignore
-            return this.paramFunction("resources")(...argArray)
+            return CustomPropFunction.create("resources",this._,this.proxy)(...argArray)
         },
-        get: (tar, p, rec): (() => CustomResource) => {
+        get: (tar, p, rec) => {
             if (typeof p == "string") {
-                return () => CustomResource(this, p)
+                const prov = this
+                return function () {
+                    return new customResource(prov, p) as any
+                } as any
             }
             return tar[p as any];
         }
@@ -43,7 +42,7 @@ export class customProvider extends Provider {
                 if (p == "resources") {
                     return this.resources
                 }
-                return this.paramFunction(p)
+                return CustomPropFunction.create(p,this._,this.proxy)
             }
         }
     }
@@ -53,44 +52,64 @@ export class customProvider extends Provider {
         return this.proxy = new Proxy<CustomProvider>(this as any, this.handler)
     }
     [checkValid](): SMap<ResourceError> {
-        return {}
+        if (this[checkCache]) return this[checkCache]
+        return this[checkCache] = _.flow(
+            _.filter(v => v instanceof Preparable),
+            _.map((o) => o[checkValid]()),
+            _.reduce(_.assign, {})
+        )(this._)
     }
     [prepareQueue](mod: modulePreparable, path: any, ref: boolean): void {
         this[provSym.numberOfRefs]++
-        if(prepareQueueBase(mod,path,ref,this)){
-            const rec=v => {
-                if(v instanceof Generatable){
-                    v[prepareQueue](mod,subPath,false)
-                }else if(typeof v=="object"){
-                    _.forEach(rec,v)
+        if (prepareQueueBase(mod, path, ref, this)) {
+            const rec = v => {
+                if (v instanceof Preparable) {
+                    v[prepareQueue](mod, subPath, false)
+                } else if (typeof v == "object") {
+                    _.forEach(rec, v)
                 }
             }
-            const subPath=this
-            _.forEach(rec,this.propertyHolder)
+            const subPath = this
+            _.forEach(rec, this._)
         }
     }
-    [generateObject](){
+    [generateObject]() {
         return _.flow(
             _.toPairs,
-            _.filter(v => !(v[1] instanceof Generatable) || v[1] instanceof AdvField),
+            _.filter(v => !(v[1] instanceof Generatable) || isAdvField(v[1])),
             _.map(v => {
-                const k=v[0];v=v[1]
-                return [_.snakeCase(k),v]
+                const k = v[0]; v = v[1]
+                return [_.snakeCase(k), v]
             }),
             _.fromPairs,
             v => {
-                if(!this[provSym.isDefault]){
-                    v.alias=generateUniqueIdentifier(this[s_path])
+                if (!this[provSym.isDefault]) {
+                    v.alias = generateUniqueIdentifier(this[s_path])
                 }
                 return v
             }
-        )(this.propertyHolder)
+        )(this._)
     }
 }
 
-
-export type CustomPropFunction<This> = <val>(val: val) => This
-interface CustomProviderProperties extends CustomParameters {
-    resources: SMap<() => CustomResource> & CustomPropFunction<this>
+export namespace customProvider {
+    export const B: new () => CustomBlock = customBlock as any
+    export const P=Parent
 }
-export type CustomProvider = customProvider & CustomProviderProperties
+
+export interface CustomPropFunction<This>{
+    /**
+     * @param val the value of the function
+     */
+    <val>(val: val):This
+    <val extends Generatable>(id:string,SubResource:val):This
+}
+export namespace CustomPropFunction{
+    export function create<This>(name:string,container:object,This:This):CustomPropFunction<This>{
+        return <val>(val:val)=>{
+            container[name]=val
+            return This
+        }
+    }
+}
+export type CustomProvider = customProvider & CustomParameters
