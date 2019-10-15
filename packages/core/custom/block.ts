@@ -1,7 +1,7 @@
-import { InlineAdvField, isAdvField } from "../general/field";
-import { resourceIdentifier, checkValid, generateExpression, prepareQueue, checkCache } from "../general/symbols";
-import { SMap, ResourceError, pathItem, Preparable } from "../general/general";
-import { modulePreparable } from "../general/moduleBackend";
+import { InlineAdvField, isAdvField } from "../field";
+import { resourceIdentifier, checkValid, generateExpression, prepareQueue, checkCache } from "../symbols";
+import { SMap, ResourceError, pathItem, Preparable } from "../general";
+import { modulePreparable } from "../moduleBackend";
 import { CustomParameters } from "./resource";
 import _ from "lodash/fp"
 import { CustomPropFunction } from "./provider";

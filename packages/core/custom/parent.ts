@@ -1,8 +1,8 @@
-import { SMap, pathItem, Generatable } from "../general/general";
-import { Reference, InlineAdvField } from "../general/field";
-import { resourceIdentifier, generateExpression, checkValid, prepareQueue, s_path, getRef } from "../general/symbols";
-import { modulePreparable } from "../general/moduleBackend";
-import { Resource } from "../general/generatables/resource";
+import { SMap, pathItem, Generatable } from "../general";
+import { Reference, InlineAdvField } from "../field";
+import { resourceIdentifier, generateExpression, checkValid, prepareQueue, s_path, getRef } from "../symbols";
+import { modulePreparable } from "../moduleBackend";
+import { Resource } from "../generatables/resource";
 
 export const Parent = new Proxy({} as SMap<Reference<any>>, {
     get(target, p, rec) {

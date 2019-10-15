@@ -1,12 +1,12 @@
-import { Resource } from "../general/generatables/resource";
+import { Resource } from "../generatables/resource";
 import { CustomPropFunction } from "./provider";
-import { SMap, pathItem, Preparable, ResourceError } from "../general/general";
-import { modulePreparable } from "../general/moduleBackend";
+import { SMap, pathItem, Preparable, ResourceError } from "../general";
+import { modulePreparable } from "../moduleBackend";
 import _ from "lodash/fp";
-import { ReferenceField, isAdvField } from "../general/field";
-import { Provider } from "../general/generatables/provider";
-import { provider, resourceIdentifier, checkValid, generateObject, prepareQueue, checkCache } from "../general/symbols";
-import { prepareQueueBase } from "../general/util";
+import { ReferenceField, isAdvField } from "../field";
+import { Provider } from "../generatables/provider";
+import { provider, resourceIdentifier, checkValid, generateObject, prepareQueue, checkCache } from "../symbols";
+import { prepareQueueBase } from "../util";
 export class customResource extends Resource{
     readonly [resourceIdentifier]:string
     private _:SMap<any>={};
