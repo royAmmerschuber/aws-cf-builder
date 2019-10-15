@@ -1,7 +1,8 @@
 import { Field, AdvField } from "../general/field";
-import { SMap, generateObject, ResourceError, checkValid, prepareQueue, getStack, callFieldReferences } from "../general/general";
+import { SMap, ResourceError, getShortStack, callFieldReferences } from "../general/general";
 import _ from "lodash";
-import { Module } from "../general/module";
+import { Module } from "../general/generatables/module";
+import { checkCache, checkValid, prepareQueue, generateObject } from "../general/symbols";
 //TODO allow Fields
 /**
  * the document wich stores the PolicyStatements for a Policy
@@ -49,11 +50,11 @@ export class PolicyDocument extends AdvField<string> {
     
     //#region resource functions
     protected checkValid(): SMap<ResourceError> {
-        if(this.checkCache!==undefined){
-            return this.checkCache
+        if(this[checkCache]!==undefined){
+            return this[checkCache]
         }
-        this.checkCache={}
-        return this.checkCache=_.assign({},...this.$statements.map(v =>v[checkValid]()));
+        this[checkCache]={}
+        return this[checkCache]=_.assign({},...this.$statements.map(v =>v[checkValid]()));
     }
     protected prepareQueue(mod: Module, par: SMap<any>) {
         this.$statements.forEach(v => v[prepareQueue](mod,par));
@@ -90,7 +91,7 @@ export class PolicyStatement {
     constructor(
         sid?: Field<string>
     ) {
-        this.stack=getStack(1);
+        this.stack=getShortStack(1);
         this._sid=sid
      }
 

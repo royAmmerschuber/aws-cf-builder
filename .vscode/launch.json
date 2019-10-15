@@ -2,23 +2,18 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug",
-            "type": "go",
-            "request": "launch",
-            "mode": "debug",
-            "program":"${workspaceFolder}/cmd/main",
-            "args": ["-conf", "../../config", "-path", "../../dist"]
-        },
-        {
             "type": "node",
             "request": "launch",
             "name": "test ts",
             "protocol": "inspector",
-            "args": ["./js/testCrossRef.ts"],
-            "runtimeArgs": ["-r", "ts-node/register"],
+            "args": ["./js/executor/tempStart.ts"],
+            "runtimeArgs": ["-r", "./js/executor/preload.js"],
             "outFiles": [
                 "${workspaceFolder}/build/**/*.js"
+            ],
+            "skipFiles": [
+                "${workspaceFolder}/node_modules/lodash/**/*.js"
             ]
         }
-    ]
+    
 }
