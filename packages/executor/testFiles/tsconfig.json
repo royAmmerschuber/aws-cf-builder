@@ -1,0 +1,10 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "typeRoots": [
+            "../types"
+        ]
+    },
+    "include": ["**/*"],
+    "exclude": []
+}

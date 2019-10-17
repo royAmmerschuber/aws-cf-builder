@@ -13,8 +13,11 @@ export interface ResourceError{
     type:string,
     errors:string[]
 }
-export type pathItem=string[]|Generatable
-export abstract class Preparable{
+export type pathItem=string[]|pathable
+export interface pathable{
+    [s_path]:pathItem
+}
+export abstract class Preparable implements pathable{
     [stacktrace]:string;
     [s_path]:pathItem
     protected [checkCache]:SMap<ResourceError>
