@@ -8,6 +8,8 @@ import { isAdvField } from "../field";
 import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { CustomBlock, customBlock } from "./block"
 import { Parent } from "./parent";
+import { Resource } from "../generatables/resource";
+import { NamedSubresource } from "./namedSubresource";
 export class customProvider extends Provider {
     readonly [resourceIdentifier];
     private _: SMap<any> = {}
@@ -106,8 +108,15 @@ export interface CustomPropFunction<This>{
 }
 export namespace CustomPropFunction{
     export function create<This>(name:string,container:object,This:This):CustomPropFunction<This>{
-        return <val>(val:val)=>{
-            container[name]=val
+        return <T,U extends Resource>(vi:T|string,resource?:U)=>{
+            if(resource){
+                if(typeof vi!="string"){
+                    throw new Error("must be string")
+                }
+                container[name]=new NamedSubresource(vi,resource)
+            }else{
+                container[name]=vi
+            }
             return This
         }
     }

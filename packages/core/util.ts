@@ -1,6 +1,6 @@
 import { pathItem, Generatable } from "./general"
 import _ from "lodash/fp"
-import { s_path, stacktrace } from "./symbols"
+import { s_path, stacktrace, pathName } from "./symbols"
 import { modulePreparable } from "./moduleBackend"
 import { refPlaceholder } from "./refPlaceholder"
 
@@ -24,23 +24,18 @@ export function cleanTextForIdentifier(s:string){
     return s//TODO convert to valid Terraform identifier
 }
 export const generateUniqueIdentifier=_.memoize(function generateUniqueIdentifier(path:pathItem):string{
-    if(path instanceof Array){
-        return path.map(_.flow(
-            cleanTextForIdentifier,
-            _.capitalize
-        )).join("")
-    }else{
-        //TODO make smarter
-        const rec=(rPath:pathItem)=>{
-            if(rPath instanceof Array){
-                return rPath.map(_.flow(
-                    cleanTextForIdentifier,
-                    _.capitalize
-                )).join("")
-            }else{
-                return rec(rPath[s_path])
-            }
+    //TODO make smarter
+    const rec=(rPath:pathItem):string=>{
+        if(rPath instanceof Array){
+            return rPath.map(_.flow(
+                cleanTextForIdentifier,
+                _.capitalize
+            )).join("")
+        }else if(pathName in rPath){
+            return rec(rPath[s_path])+rPath[pathName]()
+        }else{
+            return rec(rPath[s_path])
         }
-        return rec(path)
     }
+    return rec(path)
 })

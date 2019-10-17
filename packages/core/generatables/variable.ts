@@ -22,7 +22,7 @@ export class Variable<T> extends GeneratableAdvField<T>{
         this._.name=name
         return this
     }
-    type<U>(type:TypeDefinition<U>):U extends T ? T extends U ? this : Variable<U> : Variable<U>{
+    type<U>(type:TypeDefinition<U>):Variable<U>{
         this._.type=type as any
         return this as any
     }

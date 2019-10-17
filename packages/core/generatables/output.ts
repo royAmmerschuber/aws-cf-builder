@@ -25,7 +25,7 @@ export class Output<T> extends Generatable{
         this._.sensitive=bool
         return this
     }
-    value<U>(val:Field<U>):U extends T ? T extends U ? this : Output<U> : Output<U>{
+    value<U>(val:Field<U>): Output<U>{
         this._.value=val as any
         return this as any
     }

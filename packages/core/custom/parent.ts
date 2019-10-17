@@ -1,4 +1,4 @@
-import { SMap, pathItem, Generatable } from "../general";
+import { SMap, pathItem, Generatable, Preparable } from "../general";
 import { Reference, InlineAdvField } from "../field";
 import { resourceIdentifier, generateExpression, checkValid, prepareQueue, s_path, getRef } from "../symbols";
 import { modulePreparable } from "../moduleBackend";
@@ -42,7 +42,7 @@ class ParentReference extends InlineAdvField<any>{
 
     [generateExpression](): string {
         const rec=(path:pathItem)=>{
-            if(path instanceof Generatable){
+            if(path instanceof Preparable){
                 if(path instanceof Resource){
                     if(path[resourceIdentifier]==this.resourceName){
                         return path
