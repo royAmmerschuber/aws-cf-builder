@@ -1,10 +1,9 @@
 import { InlineAdvField, isAdvField } from "../field";
 import { resourceIdentifier, checkValid, generateExpression, prepareQueue, checkCache } from "../symbols";
 import { SMap, ResourceError, pathItem, Preparable } from "../general";
-import { modulePreparable } from "../moduleBackend";
-import { CustomParameters } from "./resource";
+import { modulePreparable } from "../stackBackend";
+import { CustomParameters, CustomPropFunction } from "./resource";
 import _ from "lodash/fp"
-import { CustomPropFunction } from "./provider";
 
 export class customBlock extends InlineAdvField<object>{
     [resourceIdentifier]: string;

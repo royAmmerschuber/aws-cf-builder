@@ -1,7 +1,6 @@
 import { checkCache, checkValid, prepareQueue, resourceIdentifier, stacktrace, s_path, generateObject, getName } from "./symbols"
 import { SMap, ResourceError, pathItem, Generatable } from "./general"
 import _ from "lodash/fp"
-import { Provider, provSym } from "./generatables/provider"
 import { Resource } from "./generatables/resource"
 import { Output } from "./generatables/output"
 import { Variable } from "./generatables/variable"

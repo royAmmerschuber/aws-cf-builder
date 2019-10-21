@@ -1,5 +1,5 @@
 {
-    "name": "tf-builder-core",
+    "name": "cf-builder-core",
     "version":"0.0.1",
     "dependencies": {
         "callsite": "^1.0.0",

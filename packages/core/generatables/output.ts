@@ -1,6 +1,6 @@
 import { SMap, ResourceError, Generatable, Preparable } from "../general";
 import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace, checkCache } from "../symbols";
-import { modulePreparable } from "../moduleBackend";
+import { modulePreparable } from "../stackBackend";
 import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { Field } from "../field";
 import _ from "lodash/fp";
@@ -10,8 +10,8 @@ export class Output<T> extends Generatable{
     private _:{
         name:string,
         description:string,
-        sensitive:boolean,
-        value:Field<T>
+        value:Field<T>,
+        exportName:Field<string>
     }={} as any
     constructor(name?:string){
         super(1)
@@ -21,13 +21,13 @@ export class Output<T> extends Generatable{
         this._.description=text
         return this
     }
-    sensitive(bool:boolean=true){
-        this._.sensitive=bool
-        return this
-    }
     value<U>(val:Field<U>): Output<U>{
         this._.value=val as any
         return this as any
+    }
+    export(name:Field<string>){
+        this._.exportName=name
+        return this
     }
     name(name:string){
         this._.name=name
@@ -49,25 +49,32 @@ export class Output<T> extends Generatable{
                 errors:errors
             }
         }
-        if(this._.value instanceof Preparable){
-            out=_.assign(out,
-                this._.value[checkValid]()
-            )
-        }
+        out=[
+            this._.value,
+            this._.name
+        ].reduce((o,c)=>{
+            if(c instanceof Preparable){
+               return _.assign(o,c[checkValid]()) 
+            }
+            return o
+        },out)
         return this[checkCache] = out
     }
     [prepareQueue](mod: modulePreparable, path: any, ref:boolean): void {
         if(prepareQueueBase(mod,path,ref,this)){
             if(this._.value instanceof Preparable){
-                this._.value
+                this._.value[prepareQueue](mod,this,true)
+                this._.exportName[prepareQueue](mod,this,true)
             }
         }
     }
     [generateObject]() {
         return {
-            description:this._.description,
-            sensitive:this._.sensitive,
-            value:this._.value
+            Description:this._.description,
+            Value:this._.value,
+            Export:this._.exportName && {
+                Name:this._.exportName
+            }
         }
     }
     [getName](){

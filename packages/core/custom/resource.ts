@@ -1,12 +1,49 @@
 import { Resource } from "../generatables/resource";
-import { CustomPropFunction } from "./provider";
-import { SMap, pathItem, Preparable, ResourceError } from "../general";
-import { modulePreparable } from "../moduleBackend";
+import { SMap, pathItem, Preparable, ResourceError, Generatable } from "../general";
+import { modulePreparable } from "../stackBackend";
 import _ from "lodash/fp";
-import { ReferenceField, isAdvField } from "../field";
-import { Provider } from "../generatables/provider";
+import { isAdvField } from "../field";
 import { provider, resourceIdentifier, checkValid, generateObject, prepareQueue, checkCache } from "../symbols";
 import { prepareQueueBase } from "../util";
+import { NamedSubresource } from "./namedSubresource";
+import { CustomBlock, customBlock } from "./block";
+import { Parent } from "./parent";
+import { ReferenceField } from "../fields/referenceField";
+import { AttributeField } from "../fields/attributeField"
+export const Custom:SMap<SMap<new ()=>customResource>> & {B:new ()=>CustomBlock,P:typeof Parent}=new Proxy({
+    cache:new Map<string,any>(),
+    subHandler:{
+        get(target,p,reciever){
+            if(typeof p!="string"){
+                throw new Error("not supported")
+            }
+            return function(){
+                return new customResource(target.area,p)
+            }
+        }
+    } as ProxyHandler<{area:string}>
+},{
+    get(target,p,reciever){
+        if(typeof p!="string"){
+            throw new Error("not supported")
+        }
+        if(p=="B"){
+            return customBlock
+        }else if(p=="P"){
+            return Parent
+        }
+        const cResult=target.cache.get(p)
+        if(cResult){
+            return cResult
+        }else{
+            const subProx=new Proxy({
+                area:p
+            },target.subHandler)
+            target.cache.set(p,subProx)
+            return subProx
+        }
+    }
+}) as any
 export class customResource extends Resource{
     readonly [resourceIdentifier]:string
     private _:SMap<any>={};
@@ -20,8 +57,10 @@ export class customResource extends Resource{
                 }
                 return this[p as any]
             }else if(typeof p=="string"){
-                if(p=="d"){
-                    return this.d
+                if(p=="r"){
+                    return this.r
+                }else if(p=="a"){
+                    return this.a
                 }
                 return CustomPropFunction.create(p,this._,this.proxy)
             }
@@ -29,11 +68,11 @@ export class customResource extends Resource{
     }
     private proxy:customResource
 
-    d=ReferenceField.create<any>(this,"")
-    constructor(prov:Provider,name:string){
+    r=new ReferenceField(this)
+    a=AttributeField.createMap(this)
+    constructor(area:string,name:string){
         super(3)
-        this[provider]=prov
-        this[resourceIdentifier]=prov[resourceIdentifier]+"_"+_.snakeCase(name)
+        this[resourceIdentifier]=`AWS::${area}::${name}`
         return this.proxy=new Proxy(this as any,this.handler)
     }
 
@@ -75,3 +114,26 @@ export interface CustomParameters{
     [k:string]:CustomPropFunction<this>
 }
 export type CustomResource=customResource & CustomParameters;
+
+export interface CustomPropFunction<This>{
+    /**
+     * @param val the value of the function
+     */
+    <val>(val: val):This
+    <val extends Generatable>(id:string,SubResource:val):This
+}
+export namespace CustomPropFunction{
+    export function create<This>(name:string,container:object,This:This):CustomPropFunction<This>{
+        return <T,U extends Resource>(vi:T|string,resource?:U)=>{
+            if(resource){
+                if(typeof vi!="string"){
+                    throw new Error("must be string")
+                }
+                container[name]=new NamedSubresource(vi,resource)
+            }else{
+                container[name]=vi
+            }
+            return This
+        }
+    }
+}

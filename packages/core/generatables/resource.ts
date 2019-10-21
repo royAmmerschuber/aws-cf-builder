@@ -1,12 +1,17 @@
 import { Generatable } from "../general";
 import { getRef, resourceIdentifier, getName } from "../symbols";
 import { generateUniqueIdentifier } from "../util";
+import { ReferenceField } from "../fields/referenceField";
 
 export abstract class Resource extends Generatable{
-    [getRef]():string{
-        return `${this[resourceIdentifier]}.${this[getName]()}`
+    r:ReferenceField
+
+    [getRef](){
+        return {
+            Ref:this[getName]()
+        }
     }
     [getName]():string{
-        return generateUniqueIdentifier(this)
+        return generateUniqueIdentifier(this)+this[resourceIdentifier].split("::")[2]
     }
 }
