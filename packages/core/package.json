@@ -1,5 +1,5 @@
 {
-    "name": "cf-builder-core",
+    "name": "aws-cf-builder-core",
     "version":"0.0.1",
     "dependencies": {
         "callsite": "^1.0.0",

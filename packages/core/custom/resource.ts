@@ -1,16 +1,20 @@
 import { Resource } from "../generatables/resource";
 import { SMap, pathItem, Preparable, ResourceError, Generatable } from "../general";
-import { modulePreparable } from "../stackBackend";
+import { stackPreparable } from "../stackBackend";
 import _ from "lodash/fp";
 import { isAdvField } from "../field";
-import { provider, resourceIdentifier, checkValid, generateObject, prepareQueue, checkCache } from "../symbols";
+import { resourceIdentifier, checkValid, generateObject, prepareQueue, checkCache } from "../symbols";
 import { prepareQueueBase } from "../util";
 import { NamedSubresource } from "./namedSubresource";
 import { CustomBlock, customBlock } from "./block";
 import { Parent } from "./parent";
 import { ReferenceField } from "../fields/referenceField";
 import { AttributeField } from "../fields/attributeField"
-export const Custom:SMap<SMap<new ()=>customResource>> & {B:new ()=>CustomBlock,P:typeof Parent}=new Proxy({
+const pascalCase=_.flow(
+    _.camelCase,
+    _.upperFirst
+)
+export const Custom:SMap<SMap<new ()=>CustomResource>> & {B:new ()=>CustomBlock,P:typeof Parent}=new Proxy({
     cache:new Map<string,any>(),
     subHandler:{
         get(target,p,reciever){
@@ -84,29 +88,31 @@ export class customResource extends Resource{
             _.reduce(_.assign, {})
         )(this._)
     }
-    [prepareQueue](mod:modulePreparable,path:pathItem,ref:boolean){
-        if(prepareQueueBase(mod,path,ref,this)){
+    [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
+        if(prepareQueueBase(stack,path,ref,this)){
             const subPath=this
             const rec = v => {
                 if (v instanceof Preparable) {
                     if(isAdvField(v)){
-                        v[prepareQueue](mod,subPath,true)
+                        v[prepareQueue](stack,subPath,true)
                     }else{
-                        v[prepareQueue](mod,subPath,false)
+                        v[prepareQueue](stack,subPath,false)
                     }
                 } else if (typeof v == "object") {
                     _.forEach(rec, v)
                 }
             }
             _.forEach(rec, this._)
-            this[provider][prepareQueue](mod,subPath,true)
         }
     }
     [generateObject](){
-        return _.flow(
-            _.pickBy<any>((v)=>!(v instanceof Resource)),
-            _.mapKeys((v:string)=>_.snakeCase(v))
-        )(this._)
+        return {
+            Type:this[resourceIdentifier],
+            Properties:_.flow(
+                _.pickBy<any>((v)=>!(v instanceof Resource)),
+                _.mapKeys(pascalCase)
+            )(this._)
+        }
     }
 }
 

@@ -1,7 +1,7 @@
 import { InlineAdvField, isAdvField } from "../field";
 import { resourceIdentifier, checkValid, generateExpression, prepareQueue, checkCache } from "../symbols";
 import { SMap, ResourceError, pathItem, Preparable } from "../general";
-import { modulePreparable } from "../stackBackend";
+import { stackPreparable } from "../stackBackend";
 import { CustomParameters, CustomPropFunction } from "./resource";
 import _ from "lodash/fp"
 
@@ -38,14 +38,14 @@ export class customBlock extends InlineAdvField<object>{
             _.reduce(_.assign, {})
         )(this._)
     }
-    [prepareQueue](mod:modulePreparable,path:pathItem,ref:boolean){
+    [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
         const subPath=path
         const rec = v => {
             if (v instanceof Preparable) {
                 if(isAdvField(v)){
-                    v[prepareQueue](mod,subPath,true)
+                    v[prepareQueue](stack,subPath,true)
                 }else{
-                    v[prepareQueue](mod,subPath,false)
+                    v[prepareQueue](stack,subPath,false)
                 }
             } else if (typeof v == "object") {
                 _.forEach(rec, v)

@@ -1,6 +1,6 @@
 import { SMap, ResourceError, pathItem } from "../general";
 import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, generateExpression, stacktrace } from "../symbols";
-import { modulePreparable } from "../stackBackend";
+import { stackPreparable } from "../stackBackend";
 import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { GeneratableAdvField } from "../field";
 type ParamType=(
@@ -45,7 +45,7 @@ type ParamType=(
  */
 type ParmOutTypeToTsType<T>=(
     T extends (
-        "string"|
+        "String"|
 
         "AWS::EC2::AvailabilityZone::Name"|
         "AWS::EC2::Image::Id"|
@@ -92,7 +92,7 @@ type ParmOutTypeToTsType<T>=(
  */
 type ParmInTypeToTsType<T>=(
     T extends (
-        "string"|
+        "String"|
 
         "AWS::EC2::AvailabilityZone::Name"|
         "AWS::EC2::Image::Id"|
@@ -216,8 +216,8 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
         }
         return {}
     }
-    [prepareQueue](mod: modulePreparable, path: pathItem,ref:boolean): void {
-        prepareQueueBase(mod,path,ref,this)
+    [prepareQueue](stack: stackPreparable, path: pathItem,ref:boolean): void {
+        prepareQueueBase(stack,path,ref,this)
     }
     toJSON(){
         return {

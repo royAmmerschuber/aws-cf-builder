@@ -1,20 +1,20 @@
 import { pathItem, Generatable } from "./general"
 import _ from "lodash/fp"
 import { s_path, stacktrace, pathName } from "./symbols"
-import { modulePreparable } from "./moduleBackend"
+import { stackPreparable } from "./stackBackend"
 import { refPlaceholder } from "./refPlaceholder"
 
-export function prepareQueueBase(mod:modulePreparable,path:pathItem,ref:boolean,res:Generatable){
+export function prepareQueueBase(stack:stackPreparable,path:pathItem,ref:boolean,res:Generatable){
     if(ref){
-        mod.resources.add(new refPlaceholder(res,path))
+        stack.resources.add(new refPlaceholder(res,path))
     }else{
         if(res[s_path]!==undefined){
             throw res[stacktrace]+"\nmultiple attempted creations"
         }
         res[s_path]=path
     }
-    if(!mod.resources.has(res)){
-        mod.resources.add(res)
+    if(!stack.resources.has(res)){
+        stack.resources.add(res)
         return true
     }else{
         return false

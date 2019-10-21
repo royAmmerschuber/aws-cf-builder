@@ -5,6 +5,6 @@
             "../types"
         ]
     },
-    "include": ["**/*"],
+    "include": ["**/*.cf.ts"],
     "exclude": []
 }

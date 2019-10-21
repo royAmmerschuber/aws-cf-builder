@@ -3,13 +3,13 @@ import * as fs from "fs"
 
 import * as commander from "commander"
 
-import { ModuleBackend } from "tf-builder-core/moduleBackend"
-import { SMap } from "tf-builder-core/general"
-import { ResourceError } from "tf-builder-core/general"
+import { SMap } from "aws-cf-builder-core/general"
+import { StackBackend } from "aws-cf-builder-core/stackBackend"
+import { ResourceError } from "aws-cf-builder-core/general"
 import chalk from "chalk"
 import * as _ from "lodash/fp"
 import * as ts from "ts-node"
-
+let yaml:typeof import("js-yaml")
 function printErrors(errs:SMap<ResourceError>){
     _.flow(
         _.toPairs,
@@ -21,14 +21,13 @@ function printErrors(errs:SMap<ResourceError>){
         })
     )(errs)
 }
-function __importStar(){
-    console.log("hey")
-}
+
 const program:commander.Command & {
     typescript:boolean,
     output:string,
     check:boolean,
-    indent:boolean
+    indent:boolean,
+    yaml:boolean
 }=new commander.Command()
     .version("0.0.1")
     .arguments('<file>')
@@ -37,6 +36,7 @@ const program:commander.Command & {
 
     .option('-t, --typescript',"transpile Typescript files")
     .option('-c, --check',"check the typescript for type errors")
+    .option('-y, --yaml','use yaml as output language') //TODO make yaml implementation less retarded
     .option('--no-indent',"doesnt indent json output")
     .parse(process.argv) as any
 
@@ -59,6 +59,9 @@ if(program.typescript){
 }else if(program.check){
     console.log(chalk`{red if you specify {redBright --check} then you also need to specify {redBright --typescript}}`)
 }
+if(program.yaml){
+    yaml=require("js-yaml")
+}
 if(!program.args[0]){
     console.log(chalk.red("please specify the file to compile"))
     program.outputHelp()
@@ -70,31 +73,41 @@ if(err){
 require("../globals")
 
 const inPath=path.resolve(program.args[0]);
-const mainModule=new ModuleBackend(require(inPath))
+const mainModule=new StackBackend(require(inPath))
 const errors=mainModule.checkValid()
 if(_.size(errors)>0){
     printErrors(errors)
     process.exit(1)
 }
-const modules=new Set<ModuleBackend>()
+const modules=new Set<StackBackend>()
 try{
     mainModule.prepareQueue(modules)
     const moduleName=path.parse(inPath).name
-    const output=JSON.stringify(mainModule.generateObject(),null,program.indent ? 4 : 0)
+    let output:string,ending:string
+    output=JSON.stringify(mainModule.generateObject(),null,program.indent ? 4 : 0)
+    if(program.yaml){
+        output=yaml.safeDump(JSON.parse(output))
+        ending=".yaml"
+    }else{
+        ending=".json"
+    }
+    if(!moduleName.endsWith(".cf")){
+        ending=".cf"+ending
+    }
     if(program.output){
         const outPath=path.resolve(program.output)
-        fs.mkdir(outPath,{recursive:true},err=>{
+        fs.mkdir(outPath,{recursive:true},err => {
             if(err){
                 console.log("couldnt create folder")
                 process.exit(1)
             }
-            fs.writeFile(path.join(outPath,moduleName+".tf.json"),output,err=>{
+            fs.writeFile(path.join(outPath,moduleName+ending),output,err=>{
                 if(err){
                     console.log("couldnt create file")
                     process.exit(1)
                 }
                 console.log(chalk.yellowBright("Created:"))
-                console.log(path.join(program.output,chalk.green(moduleName+".tf.json")))
+                console.log(path.join(program.output,chalk.green(moduleName+ending)))
                 process.exit(0)
             })
         })

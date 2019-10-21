@@ -1,9 +1,12 @@
-import { Variable } from "tf-builder-core/generatables/variable"
-import { Output } from "tf-builder-core/generatables/output"
-import { customProvider } from "tf-builder-core/custom/provider"
+import { Output } from "aws-cf-builder-core/generatables/output"
+import { Custom } from "aws-cf-builder-core/custom/resource"
+import { Parameter } from "aws-cf-builder-core/generatables/parameter"
+import { Sub } from "aws-cf-builder-core/fields/substitution"
 //@ts-ignore
-global.Custom=customProvider
+global.Custom=Custom
 //@ts-ignore
-global.Variable=Variable
+global.Parameter=Parameter
 //@ts-ignore
 global.Output=Output 
+//@ts-ignore
+global.Sub=Sub

@@ -6,7 +6,7 @@
             "request": "launch",
             "name": "test ts",
             "protocol": "inspector",
-            "args": ["./packages/executor/bin/tf-builder.ts","./packages/executor/testFiles/test"],
+            "args": ["./packages/executor/bin/cf-builder.ts","./packages/executor/testFiles/test"],
             "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
             "outFiles": [
                 "${workspaceFolder}/build/**/*.js"

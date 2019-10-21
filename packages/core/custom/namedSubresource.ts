@@ -1,7 +1,7 @@
 import { InlineAdvField } from "../field";
 import { generateExpression, resourceIdentifier, checkValid, prepareQueue, s_path, pathName } from "../symbols";
 import { SMap, ResourceError, pathItem } from "../general";
-import { modulePreparable } from "../stackBackend";
+import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
 
 export class NamedSubresource extends InlineAdvField<void>{
@@ -22,9 +22,9 @@ export class NamedSubresource extends InlineAdvField<void>{
     [checkValid](): SMap<ResourceError> {
         return this.resource[checkValid]()
     }
-    [prepareQueue](mod: modulePreparable, path: pathItem, ref: boolean): void {
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         this[s_path]=path
-        this.resource[prepareQueue](mod,this,false)
+        this.resource[prepareQueue](stack,this,false)
     }
     [pathName](){
         return this.name

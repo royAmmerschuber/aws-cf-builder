@@ -3,7 +3,7 @@ import { Preparable, Generatable } from "./general";
 export type Field<T> = T | AdvField<T> | { Ref: string }
 export type Ref<T, ref> = Field<T> | ref
 export interface AdvField<T> extends Preparable {
-    toJSON(): T
+    toJSON(): any
 }
 export function isAdvField(prep: any): prep is AdvField<any> {
     return (
@@ -12,8 +12,8 @@ export function isAdvField(prep: any): prep is AdvField<any> {
     )
 }
 export abstract class GeneratableAdvField<T> extends Generatable implements AdvField<T>{
-    abstract toJSON(): T
+    abstract toJSON(): any
 }
 export abstract class InlineAdvField<T> extends Preparable implements AdvField<T>{
-    abstract toJSON(): T
+    abstract toJSON(): any
 }

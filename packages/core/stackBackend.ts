@@ -3,22 +3,22 @@ import { SMap, ResourceError, pathItem, Generatable } from "./general"
 import _ from "lodash/fp"
 import { Resource } from "./generatables/resource"
 import { Output } from "./generatables/output"
-import { Variable } from "./generatables/variable"
+import { Parameter } from "./generatables/parameter"
 import { refPlaceholder } from "./refPlaceholder"
 import chalk from "chalk"
 
-export class ModuleBackend{
-    private static readonly moduleCache:Map<any,ModuleBackend>=new Map()
+export class StackBackend{
+    private static readonly moduleCache:Map<any,StackBackend>=new Map()
     private [checkCache]:SMap<ResourceError>
     static readonly sym=Symbol("moduleBackend")
     private resources:{path:string[],resource:Generatable}[]
-    private preparable:modulePreparable
+    private preparable:stackPreparable
     constructor(file:any){
-        const cacheResult=ModuleBackend.moduleCache.get(file)
+        const cacheResult=StackBackend.moduleCache.get(file)
         if(cacheResult!==undefined){
             return cacheResult
         }
-        ModuleBackend.moduleCache.set(file,this)
+        StackBackend.moduleCache.set(file,this)
         
         this.resources=getResources(file)
     }
@@ -32,10 +32,10 @@ export class ModuleBackend{
             .map(res => res.resource[checkValid]())
             .reduce((o,c)=>_.assign(o,c),out)
     }
-    prepareQueue(moduleSet:Set<ModuleBackend>){
+    prepareQueue(moduleSet:Set<StackBackend>){
         if(!moduleSet.has(this)){
             moduleSet.add(this)
-            const preparable:modulePreparable={
+            const preparable:stackPreparable={
                 moduleBackends:moduleSet,
                 resources:new Set(),
             }
@@ -67,78 +67,41 @@ export class ModuleBackend{
     }
     generateObject():generationOutput{
         //*sort
-        const providers:Map<string,Provider[]>=new Map()
-        const resources:Map<string,Resource[]>=new Map()
+        const resources:Resource[]=[]
         const outputs:Output<any>[]=[]
-        const variables:Variable<any>[]=[]
+        const parameters:Parameter<any>[]=[]
         this.preparable.resources.forEach(res => {
-            if(res instanceof Provider){
-                const arr=providers.get(res[resourceIdentifier])
-                if(arr){
-                    arr.push(res)
-                }else{
-                    providers.set(res[resourceIdentifier],[res])
-                }
-            }else if(res instanceof Resource){
-                const arr=resources.get(res[resourceIdentifier])
-                if(arr){
-                    arr.push(res)
-                }else{
-                    resources.set(res[resourceIdentifier],[res])
-                }
+            if(res instanceof Resource){
+                resources.push(res)
             }else if(res instanceof Output){
                 outputs.push(res)
-            }else if(res instanceof Variable){
-                variables.push(res)
+            }else if(res instanceof Parameter){
+                parameters.push(res)
             }
         })
         //*clean
-        providers.forEach(provs => {
-            const def=provs.reduce((prov,mostRefs) => {
-                if(mostRefs===undefined || prov[provSym.numberOfRefs]==mostRefs[provSym.numberOfRefs]){
-                    return undefined
-                }else if(prov[provSym.numberOfRefs]>mostRefs[provSym.numberOfRefs]){
-                    return prov
-                }else {
-                    return mostRefs
-                }
-            })
-            def[provSym.isDefault]=true
-        })
+        //noop
         //*generate
         return {
-            provider:_.flow(
-                _.map((_v:[string,Provider[]]) => {
-                    const k=_v[0],v=_v[1]
-                    if(v.length>1){
-                        return [k,v.map(prov => prov[generateObject]())]
-                    }else{
-                        return [k,v[0][generateObject]()]
-                    }
-                }),
+            AWSTemplateFormatVersion:"2010-09-09",
+            Resources:_.flow(
+                _.map((v:Resource) => [v[getName](),v[generateObject]()] ),
                 _.fromPairs
-            )([...providers]),
-            resource:_.flow(
-                _.map((v:[string,Resource[]]) => [v[0],_.flow(
-                    _.map((res:Resource) => [res[getName](),res[generateObject]()] ),
-                    _.fromPairs
-                )(v[1])]),
+            )(resources),
+            Parameters:_.flow(
+                _.map((v:Parameter<any>) => [v[getName](),v[generateObject]()]),
                 _.fromPairs
-            )([...resources]),
-           output:_.flow(
-                _.map((out:Output<any>) => [out[getName](),out[generateObject]()]),
+            )(parameters),
+            Outputs:_.flow(
+                _.map((v:Output<any>) => [v[getName](),v[generateObject]()]),
                 _.fromPairs
-            )(outputs),
-            variable:_.flow(
-                _.map((va:Variable<any>) => [va[getName](),va[generateObject]()]),
-                _.fromPairs
-            )(variables) 
+            )(outputs)
         }
     }
 }
 
-export interface modulePreparable{
-    moduleBackends:Set<ModuleBackend>
+export interface stackPreparable{
+    moduleBackends:Set<StackBackend>
     resources:Set<Generatable|refPlaceholder<Generatable>>
 }
 
@@ -167,17 +130,15 @@ function getResources(file:any):{path:string[],resource:Generatable}[]{
 function dissolvePaths(paths:pathItem[],resource:Generatable):pathItem{
     if(paths.length>1){
         //TODO do something smart for path resolving
-        if(resource instanceof Provider){
-            return paths[0]
-        }
         throw resource[stacktrace]+"\n"+chalk.yellow(resource[resourceIdentifier])+"\nmultiple references to resource"
     }else{
         return paths[0]
     }
 }
 interface generationOutput{
-    provider?:SMap<any[]|any>
-    resource?:SMap<SMap<any>>
-    variable?:SMap<any>
-    output?:SMap<any>
+    AWSTemplateFormatVersion:string,
+    Description?:string,
+    Parameters?:SMap<any>,
+    Resources:SMap<any>,
+    Outputs?:SMap<any>
 }

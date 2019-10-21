@@ -1,5 +1,4 @@
 
-export const provider=Symbol("provider")
 export const generateObject=Symbol("generateObject")
 export const checkValid=Symbol("checkValid")
 export const prepareQueue=Symbol("prepareQueue")

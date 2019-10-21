@@ -1,7 +1,7 @@
 import { SMap, pathItem, Preparable } from "../general";
 import { InlineAdvField } from "../field";
 import { resourceIdentifier, checkValid, prepareQueue, s_path, getRef } from "../symbols";
-import { modulePreparable } from "../stackBackend";
+import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
 import { ReferenceField } from "../fields/referenceField";
 import { AttributeField } from "../fields/attributeField";
@@ -56,7 +56,7 @@ class ParentReferenceField extends InlineAdvField<any>{
     [checkValid]() {
         return {}
     }
-    [prepareQueue](module: modulePreparable, path: pathItem, ref: boolean): void {
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         this[s_path] = path
     }
 }
@@ -104,7 +104,7 @@ class ParentAttributeField extends InlineAdvField<any>{
     [checkValid]() {
         return {}
     }
-    [prepareQueue](module: modulePreparable, path: pathItem, ref: boolean): void {
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         this[s_path] = path
     }
 }

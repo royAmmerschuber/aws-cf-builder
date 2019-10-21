@@ -1,5 +1,5 @@
 import { getShortStack } from "./utilLow";
-import { modulePreparable } from "./moduleBackend";
+import { stackPreparable } from "./stackBackend";
 import _ from "lodash/fp"
 import { checkCache, stacktrace, resourceIdentifier, checkValid, prepareQueue, generateObject, s_path } from "./symbols";
 // @ts-ignore
@@ -29,7 +29,7 @@ export abstract class Preparable implements pathable{
     }
 
     abstract [checkValid]():SMap<ResourceError>
-    abstract [prepareQueue](module:modulePreparable,path:pathItem,ref:boolean):void
+    abstract [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean):void
 }
 export abstract class Generatable extends Preparable{
     abstract [generateObject]():any;

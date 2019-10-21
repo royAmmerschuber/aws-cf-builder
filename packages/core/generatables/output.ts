@@ -1,6 +1,6 @@
 import { SMap, ResourceError, Generatable, Preparable } from "../general";
 import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace, checkCache } from "../symbols";
-import { modulePreparable } from "../stackBackend";
+import { stackPreparable } from "../stackBackend";
 import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { Field } from "../field";
 import _ from "lodash/fp";
@@ -21,7 +21,7 @@ export class Output<T> extends Generatable{
         this._.description=text
         return this
     }
-    value<U>(val:Field<U>): Output<U>{
+    Value<U>(val:Field<U>): Output<U>{
         this._.value=val as any
         return this as any
     }
@@ -60,12 +60,16 @@ export class Output<T> extends Generatable{
         },out)
         return this[checkCache] = out
     }
-    [prepareQueue](mod: modulePreparable, path: any, ref:boolean): void {
-        if(prepareQueueBase(mod,path,ref,this)){
-            if(this._.value instanceof Preparable){
-                this._.value[prepareQueue](mod,this,true)
-                this._.exportName[prepareQueue](mod,this,true)
-            }
+    [prepareQueue](stack: stackPreparable, path: any, ref:boolean): void {
+        if(prepareQueueBase(stack,path,ref,this)){
+            [
+                this._.value,
+                this._.exportName
+            ].forEach(v =>{
+                if(v instanceof Preparable){
+                    v[prepareQueue](stack,this,true)
+                }
+            })
         }
     }
     [generateObject]() {
