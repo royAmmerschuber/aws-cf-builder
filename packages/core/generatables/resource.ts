@@ -4,14 +4,9 @@ import { generateUniqueIdentifier } from "../util";
 import { ReferenceField } from "../fields/referenceField";
 
 export abstract class Resource extends Generatable{
-    r:ReferenceField
+    r=new ReferenceField(this)
 
-    [getRef](){
-        return {
-            Ref:this[getName]()
-        }
-    }
-    [getName]():string{
+    public [getName]():string{
         return generateUniqueIdentifier(this)+this[resourceIdentifier].split("::")[2]
     }
 }

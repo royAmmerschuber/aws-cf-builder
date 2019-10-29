@@ -1,5 +1,5 @@
 import { Resource } from "../generatables/resource";
-import { SMap, pathItem, Preparable, ResourceError, Generatable } from "../general";
+import { SMap, Preparable, ResourceError, Generatable } from "../general";
 import { stackPreparable } from "../stackBackend";
 import _ from "lodash/fp";
 import { isAdvField } from "../field";
@@ -10,6 +10,7 @@ import { CustomBlock, customBlock } from "./block";
 import { Parent } from "./parent";
 import { ReferenceField } from "../fields/referenceField";
 import { AttributeField } from "../fields/attributeField"
+import { pathItem } from "../path";
 const pascalCase=_.flow(
     _.camelCase,
     _.upperFirst
@@ -111,7 +112,7 @@ export class customResource extends Resource{
             Properties:_.flow(
                 _.pickBy<any>((v)=>!(v instanceof Resource)),
                 _.mapKeys(pascalCase)
-            )(this._)
+            )(this._) as any
         }
     }
 }

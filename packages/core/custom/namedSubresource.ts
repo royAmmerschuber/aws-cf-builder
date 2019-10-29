@@ -1,8 +1,9 @@
 import { InlineAdvField } from "../field";
-import { generateExpression, resourceIdentifier, checkValid, prepareQueue, s_path, pathName } from "../symbols";
-import { SMap, ResourceError, pathItem } from "../general";
+import { resourceIdentifier, checkValid, prepareQueue, s_path, pathName } from "../symbols";
+import { SMap, ResourceError } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
+import { pathItem } from "../path";
 
 export class NamedSubresource extends InlineAdvField<void>{
     [resourceIdentifier]="NamedSubresource";
@@ -15,10 +16,6 @@ export class NamedSubresource extends InlineAdvField<void>{
     toJSON(){
         return undefined
     }
-    [generateExpression](): string {
-        //this is supposed to happen, maybe a better error needed
-        throw new Error("Method not implemented.");
-    }    
     [checkValid](): SMap<ResourceError> {
         return this.resource[checkValid]()
     }

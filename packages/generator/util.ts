@@ -1,5 +1,5 @@
 import fs from "fs"
-import _ from "lodash"
+import _ from "lodash/fp"
 import util from "util"
 export function redent(newDepth:number,s:string){
     s=s.slice(1)

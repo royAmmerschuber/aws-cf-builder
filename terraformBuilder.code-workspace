@@ -1,0 +1,14 @@
+{
+	"folders": [
+        {
+            "path": "packages\\cf-definedResources"
+        },
+        {
+            "path": "packages\\core"
+        },
+        {
+            "path": "packages\\executor"
+        }
+    ],
+    "settings": {}
+}

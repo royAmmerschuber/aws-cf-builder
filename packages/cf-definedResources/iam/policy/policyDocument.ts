@@ -1,16 +1,19 @@
-import { Field, AdvField } from "../general/field";
-import { SMap, ResourceError, getShortStack, callFieldReferences } from "../general/general";
-import _ from "lodash";
-import { Module } from "../general/generatables/module";
-import { checkCache, checkValid, prepareQueue, generateObject } from "../general/symbols";
-//TODO allow Fields
+import _ from "lodash/fp";
+import { InlineAdvField, Field } from "aws-cf-builder-core/field"
+import { resourceIdentifier, checkValid, stacktrace, generateObject, checkCache, prepareQueue } from "aws-cf-builder-core/symbols";
+import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
+import { callOn, Attr } from "aws-cf-builder-core/util";
+import { stackPreparable } from "aws-cf-builder-core/stackBackend";
+import { pathItem } from "aws-cf-builder-core/path";
+import { Resource } from "aws-cf-builder-core/generatables/resource";
+
 /**
  * the document wich stores the PolicyStatements for a Policy
  */
-export class PolicyDocument extends AdvField<string> {
-    protected readonly resourceIdentifier="PolicyDocument"
+export class PolicyDocument extends InlineAdvField<PolicyOut>{
+    readonly [resourceIdentifier] = "PolicyDocument"
     //#region parameters
-    private $statements: PolicyStatement[] = [];
+    private statements: Field<StatementOut>[] = [];
     //#endregion
 
     /**
@@ -30,9 +33,9 @@ export class PolicyDocument extends AdvField<string> {
      * > policies, refer to the documentation for the service you're 
      * > working with.
      */
-    constructor(private id?: string) {
-        super(1);
-     }
+    constructor(private id?: Field<string>) {
+        super(1)
+    }
 
     //#region virtual subresources
     /**
@@ -42,58 +45,67 @@ export class PolicyDocument extends AdvField<string> {
      * @param statements The Statement element contains an 
      * array of individual statements
      */
-    statement(...statements: PolicyStatement[]) {
-        this.$statements.push(...statements);
+    statement(...statements: Field<StatementOut>[]) {
+        this.statements.push(...statements);
         return this;
     }
     //#endregion
-    
+
     //#region resource functions
-    protected checkValid(): SMap<ResourceError> {
-        if(this[checkCache]!==undefined){
-            return this[checkCache]
+    [checkValid]() {
+        if (this[checkCache]) return this[checkCache]
+
+        const out: SMap<ResourceError> = {}
+        const errors: string[] = []
+        if (!this.statements.length) {
+            errors.push("you must at least specify one PolicyStatement");
         }
-        this[checkCache]={}
-        return this[checkCache]=_.assign({},...this.$statements.map(v =>v[checkValid]()));
+
+        if (errors.length) {
+            out[this[stacktrace]] = {
+                type: this[resourceIdentifier],
+                errors: errors
+            };
+        }
+
+        return this[checkCache] = callOn([this.id, this.statements], Preparable as any, (o: Preparable) => o[checkValid]())
+            .reduce<SMap<ResourceError>>(_.assign, out)
     }
-    protected prepareQueue(mod: Module, par: SMap<any>) {
-        this.$statements.forEach(v => v[prepareQueue](mod,par));
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
+        callOn([this.id, this.statements], Preparable as any, (o: Preparable) => o[prepareQueue](stack, path, true))
     }
-    protected getName(par: SMap<any>): string {
-        return this.id || "policy";
-    }
-    protected generateField() {
-        return /* JSON.stringify */<any>({
+    toJSON(): PolicyOut {
+        return {
             Version: "2012-10-17",
             Id: this.id,
-            Statement: this.$statements.map(s => s[generateObject]())
-        })
+            Statement: this.statements.map(s => s[generateObject]())
+        }
     }
     //#endregion
 }
 /**
  * a policy statement tells the Policy where it can access.
  */
-export class PolicyStatement {
-    protected readonly resourceIdentifier="PolicyStatement"
-    private stack: string;
-    //#region parameters
-    private iPrincipal: boolean;
-    private _principals: PrincipalOut;
-    private iAction: boolean;
-    private _actions: "*" | Field<string>[];
-    private iResource: boolean;
-    private _resources: "*" | Field<string>[] = "*"; //TODO use ARNs
-    private isRestriction: boolean;
-    private _sid: Field<string>;
-    //#endregion
+export class PolicyStatement extends InlineAdvField<StatementOut>{
+    readonly [resourceIdentifier] = "PolicyStatement"
+    private _: {
+        notPrincipal: boolean
+        principals: PrincipalOut
+        notAction: boolean
+        actions: "*" | Field<string>[]
+        notResource: boolean
+        resources: "*" | Field<string>[]
+        isRestriction: boolean;
+    } = {
+        resources: "*"
+    } as any
+
 
     constructor(
-        sid?: Field<string>
+        private sid?: Field<string>
     ) {
-        this.stack=getShortStack(1);
-        this._sid=sid
-     }
+        super(1)
+    }
 
     //#region simple properties
     /**
@@ -118,23 +130,23 @@ export class PolicyStatement {
      * @param from the type of resource you want to give these permissions to
      * @param principals the resources you want to give the permissions to
      */
-    principals(from: "AWS" | "Federated" | "Service", ...principals: Field<string>[]): this
-    principals(from: "AWS" | "Federated" | "Service" | "*", ...principals: Field<string>[]): this {
+    principals(from: "AWS" | "Federated" | "Service", ...principals: string[]): this
+    principals(from: "AWS" | "Federated" | "Service" | "*", ...principals: string[]): this {
         if (from == "*") {
-            this._principals = from;
+            this._.principals = from;
         } else {
-            if (typeof this._principals == "string" || !this._principals) {
-                this._principals = {
+            if (typeof this._.principals == "string" || !this._.principals) {
+                this._.principals = {
                     AWS: [],
                     Federated: [],
                     Service: []
                 }
             }
-            this._principals[from].push(...principals);
+            this._.principals[from].push(...principals);
         }
         return this;
     }
-    
+
     /**
      * **required:false**
      * @param blacklist set if the Principal identifiers should
@@ -144,7 +156,7 @@ export class PolicyStatement {
      * Field to the `NotPrincipal` Field
      */
     blacklistPrincipals(blacklist: boolean = true) {
-        this.iPrincipal = blacklist;
+        this._.notPrincipal = blacklist;
         return this;
     }
 
@@ -181,12 +193,12 @@ export class PolicyStatement {
     Actions(...actions: Field<string>[]): this;
     Actions(...actions: Field<string>[]): this {
         if (actions.length == 1 && actions[0] == "*") {
-            this._actions = actions[0] as "*";
+            this._.actions = actions[0] as "*";
         } else {
-            if (typeof this._actions == "string" || !this._actions) {
-                this._actions = [];
+            if (typeof this._.actions == "string" || !this._.actions) {
+                this._.actions = [];
             }
-            this._actions.push(...actions);
+            this._.actions.push(...actions);
         }
         return this;
     }
@@ -196,7 +208,7 @@ export class PolicyStatement {
      * @param blacklist set if the Actions should blacklist and not whitelist
      */
     blacklistActions(blacklist: boolean = true) {
-        this.iAction = blacklist;
+        this._.notAction = blacklist;
         return this;
     }
     //TODO use ARNs for resources
@@ -222,15 +234,15 @@ export class PolicyStatement {
      * refer to the documentation for the service whose resources 
      * you're writing a statement for.
      */
-    resources(...resources: Field<string>[]): this
-    resources(...resources: Field<string>[]): this {
+    resources(...resources: Attr<"Arn">[]): this
+    resources(...resources: Attr<"Arn">[]): this {
         if (resources.length == 1 && resources[0] == "*") {
-            this._resources = resources[0] as "*";
+            this._.resources = resources[0] as "*";
         } else {
-            if (typeof this._resources == "string") {
-                this._resources = [];
+            if (typeof this._.resources == "string") {
+                this._.resources = [];
             }
-            this._resources.push(...resources);
+            this._.resources.push(...resources.map(r => Attr.get(r,"Arn")))
         }
         return this;
     }
@@ -241,7 +253,7 @@ export class PolicyStatement {
      * handled like a blacklist 
      */
     blacklistResources(blacklist: boolean = true) {
-        this.iResource = blacklist;
+        this._.notResource = blacklist;
         return this;
     }
 
@@ -252,56 +264,60 @@ export class PolicyStatement {
      * @param restrict if the Statement schould allow or restrict
      */
     restrict(restrict: boolean = true) {
-        this.isRestriction = restrict;
+        this._.isRestriction = restrict;
         return this;
     }
     //#endregion
 
     //#region resource functions
     [checkValid]() {
-        const out:SMap<ResourceError>={}
-        const errors:string[]=[]
-        if(!this._actions){
+        const out: SMap<ResourceError> = {}
+        const errors: string[] = []
+        if (!this._.actions) {
             errors.push("you must specify atleast one action");
         }
-        if(errors.length){
-            out[this.stack]={
-                type:this.resourceIdentifier,
-                errors:errors
+        if (errors.length) {
+            out[this[stacktrace]] = {
+                type: this[resourceIdentifier],
+                errors: errors
             };
         }
-        return out;
+        return callOn([this._, this.sid], Preparable as any, (o: Preparable) => o[checkValid]())
+            .reduce<SMap<ResourceError>>(_.assign, out)
     }
-    [prepareQueue](mod:Module,par:SMap<any>) {
-        _(this)
-            .filter((_v,k) => k.startsWith("_"))
-            .forEach(v => callFieldReferences(v,v => v[prepareQueue](mod,par)))
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
+        callOn([this._, this.sid], Preparable as any, (o: Preparable) => o[prepareQueue](stack, path, true))
     }
-    [generateObject](): StatementOut {
-        const principals = (typeof this._principals == "string" || !this._principals) 
-            ? this._principals 
+    toJSON(): StatementOut {
+        const principals = (typeof this._.principals == "string" || !this._.principals)
+            ? this._.principals
             : {
-                AWS: this._principals.AWS.length ? this._principals.AWS : undefined,
-                Federated: this._principals.Federated.length ? this._principals.Federated : undefined,
-                Service: this._principals.Service.length ? this._principals.Service : undefined,
+                AWS: this._.principals.AWS.length ? this._.principals.AWS : undefined,
+                Federated: this._.principals.Federated.length ? this._.principals.Federated : undefined,
+                Service: this._.principals.Service.length ? this._.principals.Service : undefined,
             };
         return {
-            Sid: this._sid,
-            Effect: this.isRestriction ? "Deny" : "Allow",
+            Sid: this.sid,
+            Effect: this._.isRestriction ? "Deny" : "Allow",
 
-            Principal: !this.iPrincipal ? principals : undefined,
-            NotPrincipal: this.iPrincipal ? principals : undefined,
+            Principal: !this._.notPrincipal ? principals : undefined,
+            NotPrincipal: this._.notPrincipal ? principals : undefined,
 
-            Action: !this.iAction ? this._actions : undefined,
-            NotAction: this.iAction ? this._actions : undefined,
+            Action: !this._.notAction ? this._.actions : undefined,
+            NotAction: this._.notAction ? this._.actions : undefined,
 
-            Resource: !this.iResource ? this._resources : undefined,
-            NotResource: this.iResource ? this._resources : undefined,
+            Resource: !this._.notResource ? this._.resources : undefined,
+            NotResource: this._.notResource ? this._.resources : undefined,
         }
     }
     //#endregion
 }
+export interface PolicyOut {
+    Version: "2012-10-17",
+    Id?: Field<string>,
+    Statement: StatementOut[],
 
+}
 export interface StatementOut {
     Sid?: Field<string>,
     Effect: "Allow" | "Deny",

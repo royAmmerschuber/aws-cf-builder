@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from "lodash/fp";
 import { ProviderBaseData } from "./baseDataDef";
 import { ProviderConfig } from "./config";
 import { generateAttributes } from "./attribute";

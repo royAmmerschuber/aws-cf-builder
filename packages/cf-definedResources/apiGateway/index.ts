@@ -1,0 +1,6 @@
+export { Api } from "./api"
+export { Authorizer } from "./authorizer"
+export { Deployment } from "./deployment"
+export { Method } from "./method"
+export { Model } from "./model"
+export { ApiResource as Resource } from "./resource"

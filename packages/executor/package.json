@@ -13,6 +13,9 @@
         "js-yaml": "^3.13.1"
     },
     "scripts": {
-        "build": "tsc & cp package.json dist/package.json & cp -r types dist/types"
+        "build": "tsc & cp package.json dist/package.json & cp -r types dist/types",
+        "runTest": "npx ts-node -T bin/cf-builder.ts testFiles/test.cf.ts -o testFiles/out",
+        "buildCore":"cd ../core && npm run build",
+        "buildPreDef":"cd ../cf-definedResources && npm run build"
     }
 }

@@ -1,11 +1,12 @@
 import { checkCache, checkValid, prepareQueue, resourceIdentifier, stacktrace, s_path, generateObject, getName } from "./symbols"
-import { SMap, ResourceError, pathItem, Generatable } from "./general"
+import { SMap, ResourceError, Generatable } from "./general"
 import _ from "lodash/fp"
 import { Resource } from "./generatables/resource"
 import { Output } from "./generatables/output"
 import { Parameter } from "./generatables/parameter"
 import { refPlaceholder } from "./refPlaceholder"
 import chalk from "chalk"
+import { pathItem } from "./path"
 
 export class StackBackend{
     private static readonly moduleCache:Map<any,StackBackend>=new Map()

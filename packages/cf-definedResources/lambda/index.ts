@@ -1,0 +1,5 @@
+export { LambdaFunction as Function } from "./function"
+export { Version } from "./version"
+export { Permission } from "./permission"
+export { Layer } from "./layer"
+export { LayerPermission } from "./layerPermission"

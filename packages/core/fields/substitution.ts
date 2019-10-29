@@ -1,10 +1,12 @@
-import { SMap, ResourceError, pathItem } from "../general";
+import { SMap, ResourceError } from "../general";
 import { Field, InlineAdvField, isAdvField } from "../field";
 import { resourceIdentifier, checkValid, prepareQueue } from "../symbols";
 import { stackPreparable } from "../stackBackend";
 import _ from "lodash/fp"
 import { AttributeField } from "./attributeField";
 import { ReferenceField } from "./referenceField";
+import { pathItem } from "../path";
+import { Parameter } from "../generatables/parameter"
 export function Sub(text:TemplateStringsArray,...args:Field<any>[]){
     return new Substitution(text,args)
 }
@@ -24,7 +26,7 @@ export class Substitution extends InlineAdvField<string>{
                 if(v instanceof AttributeField){
                     const getAtt=v.toJSON()["Fn::GetAtt"]
                     templString+=`\${${getAtt[0]}.${getAtt[1]}}`
-                }else if(v instanceof ReferenceField){
+                }else if(v instanceof ReferenceField || v instanceof Parameter){
                     const ref=v.toJSON().Ref
                     templString+=`\${${ref}}`
                 }else{
@@ -40,7 +42,7 @@ export class Substitution extends InlineAdvField<string>{
             templString+=this.text[i+1]
         })
         if(leftovers.length){
-            return { "Fn::Sub":[templString,_.fromPairs(leftovers.map((v,i)=>["par_"+(i+1),v]))]}
+            return { "Fn::Sub":[templString,_.fromPairs(leftovers.map((v,i)=>["par_"+(i+1),v])) as SMap<any>]}
         }else{
             return { "Fn::Sub":templString}
         }
