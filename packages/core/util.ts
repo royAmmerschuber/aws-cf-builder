@@ -16,13 +16,9 @@ export function prepareQueueBase(stack:stackPreparable,path:pathItem,ref:boolean
             throw res[stacktrace]+"\nmultiple attempted creations"
         }
         res[s_path]=path
-    }
-    if(!stack.resources.has(res)){
         stack.resources.add(res)
-        return true
-    }else{
-        return false
     }
+    return !ref
 }
 export function cleanTextForIdentifier(s:string){
     return s//TODO convert to valid Terraform identifier
@@ -87,11 +83,18 @@ export function callOn<T,U>(container:any,instanceOf:new (...args)=>T,iter:(obj:
     }
 }
 export type Ref<T extends Resource>=T | Field<string>
+export namespace Ref{
+    export function get<T extends Resource>(ref:Ref<T>){
+        return ref instanceof Resource
+            ? ref.r
+            : ref
+    }
+}
 export type Attr<T extends Resource|string>=T extends string 
-    ? ( Resource & {a:{[k in T]:AttributeField}} | Field<string>)
+    ? ( Resource & {a:{[k in T]:Field<string>}} | Field<string>)
     : ( T | Field<string>)
 export namespace Attr{
-    export function get<T extends string>(cont:Attr<T>,attr:string):Field<string>{
+    export function get<T extends string>(cont:Attr<T>,attr:T):Field<string>{
         if(cont instanceof Resource){
             return (cont as any).a[attr]
         }else{

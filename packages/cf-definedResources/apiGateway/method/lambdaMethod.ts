@@ -3,8 +3,8 @@ import { Method } from "../method";
 import _ from "lodash/fp";
 import { LambdaExecutable } from "../../lambda/function";
 import { Attr } from "aws-cf-builder-core/util";
-import { Field, isAdvField } from "aws-cf-builder-core/field";
-import { Preparable, SMap, ResourceError } from "aws-cf-builder-core/general";
+import { Field } from "aws-cf-builder-core/field";
+import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { generateObject } from "aws-cf-builder-core/symbols";
 import { checkValid, stacktrace, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { Sub } from "aws-cf-builder-core/fields/substitution"
@@ -37,7 +37,7 @@ export class LambdaMethod extends Method{
      * 
      * **maps:** `Integration.Uri`
      */
-    Lambda(lambda:Attr<LambdaExecutable>):this{
+    Lambda(lambda:Attr<LambdaExecutable>){
         this._.lambda=Attr.get(lambda,"Arn")
         return this;
     }

@@ -30,7 +30,10 @@ export class Model extends Resource implements namedPath{
         restApiId:Field<string>
     }={ } as any
     //#endregion
-    r=new ReferenceField(this)
+    /**
+     * the model name, such as `myModel`
+     */
+    r:ReferenceField
     /**
      * @param name A name for the model. this also gets used to generate the logical Id
      * @param useName If disabled, AWS 

@@ -1,5 +1,5 @@
 import { Generatable } from "../general";
-import { getRef, resourceIdentifier, getName } from "../symbols";
+import { resourceIdentifier, getName } from "../symbols";
 import { generateUniqueIdentifier } from "../util";
 import { ReferenceField } from "../fields/referenceField";
 

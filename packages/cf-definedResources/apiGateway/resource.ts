@@ -9,6 +9,7 @@ import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { PreparableError } from "aws-cf-builder-core/general";
 import { prepareQueueBase, findInPath } from "aws-cf-builder-core/util";
 import { pathItem, namedPath } from "aws-cf-builder-core/path";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 
 /**
  * The AWS::ApiGateway::Resource resource creates a resource in an Amazon API Gateway (API Gateway) API.
@@ -21,6 +22,10 @@ export class ApiResource extends Resource implements namedPath{
     readonly [resourceIdentifier]="AWS::ApiGateway::Resource";
     private parentId:Field<string>
     private restApiId:Field<string>
+    /**
+     * the resource ID, such as `abc123`
+     */
+    r:ReferenceField
     constructor(private pathpart:Field<string>){
         super(2);
     }

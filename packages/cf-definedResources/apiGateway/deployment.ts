@@ -33,6 +33,10 @@ export class Deployment extends Resource implements namedPath{
     private fMethod:ReferenceField
     //#endregion
     /**
+     * the deployment ID, such as `123abc`
+     */
+    r:ReferenceField
+    /**
      * @param name A name for the stage that API Gateway creates with this deployment. 
      * Use only alphanumeric characters. used to generate logicalId
      * 
@@ -43,7 +47,6 @@ export class Deployment extends Resource implements namedPath{
         private name:Field<string>,
         private useName:boolean=false
     ){super(2);}
-
     //#region simple property setters
     
     /**

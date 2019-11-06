@@ -1,11 +1,10 @@
 import _ from "lodash/fp";
 import { InlineAdvField, Field } from "aws-cf-builder-core/field"
-import { resourceIdentifier, checkValid, stacktrace, generateObject, checkCache, prepareQueue } from "aws-cf-builder-core/symbols";
-import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
+import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue } from "aws-cf-builder-core/symbols";
+import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
 import { callOn, Attr } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { pathItem } from "aws-cf-builder-core/path";
-import { Resource } from "aws-cf-builder-core/generatables/resource";
+import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 
 /**
  * the document wich stores the PolicyStatements for a Policy
@@ -45,7 +44,7 @@ export class PolicyDocument extends InlineAdvField<PolicyOut>{
      * @param statements The Statement element contains an 
      * array of individual statements
      */
-    statement(...statements: Field<StatementOut>[]) {
+    Statement(...statements: Field<StatementOut>[]) {
         this.statements.push(...statements);
         return this;
     }
@@ -78,7 +77,7 @@ export class PolicyDocument extends InlineAdvField<PolicyOut>{
         return {
             Version: "2012-10-17",
             Id: this.id,
-            Statement: this.statements.map(s => s[generateObject]())
+            Statement: this.statements
         }
     }
     //#endregion
@@ -287,6 +286,10 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         callOn([this._, this.sid], Preparable as any, (o: Preparable) => o[prepareQueue](stack, path, true))
+        if(path instanceof PathDataCarrier && path.data.skipResources){
+            if(this._.resources!="*") throw new PreparableError(this,"do not specify a resource for a Assume Policy")
+            this._.resources=undefined
+        }
     }
     toJSON(): StatementOut {
         const principals = (typeof this._.principals == "string" || !this._.principals)
@@ -315,7 +318,7 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
 export interface PolicyOut {
     Version: "2012-10-17",
     Id?: Field<string>,
-    Statement: StatementOut[],
+    Statement: Field<StatementOut>[],
 
 }
 export interface StatementOut {

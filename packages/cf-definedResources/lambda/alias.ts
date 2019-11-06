@@ -1,13 +1,16 @@
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { namedPath, pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
-import { resourceIdentifier, checkValid, checkCache, prepareQueue, stacktrace, generateObject, pathName } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, checkCache, prepareQueue, stacktrace, generateObject, pathName, s_path } from "aws-cf-builder-core/symbols";
 import { Field } from "aws-cf-builder-core/field";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { prepareQueueBase, callOn, findInPath } from "aws-cf-builder-core/util";
+import { callOn, findInPath } from "aws-cf-builder-core/util";
 import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
 import _ from "lodash/fp"
 import { LambdaFunction } from "./function";
 import { Version } from "./version";
+import { EventMapping } from "./eventMapping";
+import { refPlaceholder } from "aws-cf-builder-core/refPlaceholder";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 /**
  * The AWS::Lambda::Alias resource creates an alias that points to the 
  * version of an AWS Lambda (Lambda) function that you specify. Use 
@@ -31,6 +34,14 @@ export class Alias extends Resource implements namedPath{
     }={} as any
     private versions:{version:Field<string>,weight:Field<number>}[]=[]
     private eventMappings:EventMapping[]=[];
+
+    /**
+     * the resource ARN.
+     */
+    r:ReferenceField
+    a={
+        Arn:this.r
+    }
     //#endregion
     constructor(){ super(1) }
 
@@ -86,23 +97,32 @@ export class Alias extends Resource implements namedPath{
         return this[checkCache]=callOn(this._,Preparable as any,(o:Preparable)=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }
+
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
-        if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
-            callOn(this.eventMappings,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,false))
+        //TODO antipattern
+        if(ref){
+            stack.resources.add(new refPlaceholder(this,path))
+        }else{
+            if(this[s_path]===undefined){
+                this[s_path]=path
+                stack.resources.add(this)
+                
+                callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+                callOn(this.eventMappings,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,false))
 
-            const { func } =findInPath(path,{func:LambdaFunction})
-            
+                const { func } =findInPath(path,{func:LambdaFunction})
+                
 
-            if(!func) throw new PreparableError(this,"Lambda Function not found in path")
-            this._.functionName=func.obj.r
-        }
-        if(path instanceof PathDataCarrier && "versionWeight" in path.data){
-            const {ver} =findInPath(path,{ver:Version})
-            this.versions.push({
-                version:ver.obj.a.Version,
-                weight:path.data.versionWeight
-            })
+                if(!func) throw new PreparableError(this,"Lambda Function not found in path")
+                this._.functionName=func.obj.r
+            }
+            if(path instanceof PathDataCarrier && "versionWeight" in path.data){
+                const {ver} =findInPath(path,{ver:Version})
+                this.versions.push({
+                    version:ver.obj.a.Version,
+                    weight:path.data.versionWeight
+                })
+            }
         }
     }
 
@@ -119,9 +139,9 @@ export class Alias extends Resource implements namedPath{
                 Name:this._.name,
                 Description:this._.description,
                 FunctionName:this._.functionName,
-                FunctionVersion:nV[0],
+                FunctionVersion:nV[0].version,
                 RoutingConfig:this.versions.length>1 ? {
-                    AdditionalVersionWeights:this.versions.filter(v => v.weight!==undefined).map(v => ({
+                    AdditionalVersionWeights:this.versions.filter(v => v.weight!==null).map(v => ({
                         FunctionVersion:v.version,
                         FunctionWeight:v.weight
                     }))
@@ -134,4 +154,4 @@ export class Alias extends Resource implements namedPath{
         return this._.name
     }
     //#endregion
-} 
+}

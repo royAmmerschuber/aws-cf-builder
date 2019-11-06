@@ -12,8 +12,6 @@ import { resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { pathName } from "aws-cf-builder-core/symbols";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 
-
-
 /**
  * The AWS::ApiGateway::Authorizer resource creates an authorization 
  * layer that Amazon API Gateway (API Gateway) activates for methods 
@@ -38,7 +36,10 @@ export abstract class Authorizer extends Resource implements namedPath{
         providers:[]
     } as any
     //#endregion
-
+    /**
+     * the authorizer's ID, such as `abcde1`.
+     */
+    r:ReferenceField
     /**
      * @param name The name of the authorizer.
      * 
@@ -145,6 +146,7 @@ export abstract class Authorizer extends Resource implements namedPath{
     //#endregion
 }
 import { CognitoAuthorizer } from "./authorizer/cognitoAuthorizer";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 export namespace Authorizer{
     export const Cognito=CognitoAuthorizer
 }

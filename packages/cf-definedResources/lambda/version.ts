@@ -10,6 +10,7 @@ import { LambdaFunction } from "./function";
 import { Alias } from "./alias";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { EventMapping } from "./eventMapping";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 
 /**
  * The AWS::Lambda::Version resource publishes a specified version of 
@@ -21,7 +22,7 @@ import { EventMapping } from "./eventMapping";
  * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-version.html)
  */
 export class Version extends Resource implements namedPath{
-    readonly [resourceIdentifier]="Version";
+    readonly [resourceIdentifier]="AWS::Lambda::Version"
     //#region parameters
     private _:{
         sha:Field<string>,
@@ -32,8 +33,19 @@ export class Version extends Resource implements namedPath{
     private aliases:{alias:Alias,weight?:Field<number>}[]=[];
     private eventMappings:EventMapping[]=[];
 
+    /**
+     * the ARN of the version, such as `arn:aws:lambda:us-west-2:123456789012:function:helloworld:1`.
+     */
+    r:ReferenceField
     a={
-        Version:new AttributeField(this,"Version")
+        /**
+         * The version number.
+         */
+        Version:new AttributeField(this,"Version"),
+        /**
+         * the ARN of the version, such as `arn:aws:lambda:us-west-2:123456789012:function:helloworld:1`.
+         */
+        Arn:this.r
     }
     //#endregion
     /**
@@ -75,7 +87,7 @@ export class Version extends Resource implements namedPath{
      * @param weight a weight to associate with this version. one of the 
      * versions must not have a weight assignt to it for it to work
      */
-    lambdaAlias(alias:Alias,weight?:Field<number>){
+    alias(alias:Alias,weight?:Field<number>){
         this.aliases.push({
             alias: alias,
             weight: weight
@@ -100,7 +112,7 @@ export class Version extends Resource implements namedPath{
             this._,
             this.eventMappings,
             this.aliases
-        ],Preparable as any,(o:PreparableError)=>o[checkValid]()).reduce(_.assign);
+        ],Preparable as any,(o:PreparableError)=>o[checkValid]()).reduce(_.assign,{});
     }
     [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
@@ -119,7 +131,7 @@ export class Version extends Resource implements namedPath{
     }
     [generateObject]() {
         return {
-            Type:"AWS::Lambda::Version",
+            Type:this[resourceIdentifier],
             Properties:{
                 FunctionName:this._.functionName,
                 Description:this._.description,
@@ -129,7 +141,7 @@ export class Version extends Resource implements namedPath{
     }
     [pathName](){
         if(isAdvField(this._.description))return ""
-        return this._.description 
+        return this._.description || ""
     }
     //#endregion
 }

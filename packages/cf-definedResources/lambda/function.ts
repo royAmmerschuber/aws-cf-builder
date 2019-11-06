@@ -12,6 +12,10 @@ import { pathItem } from "aws-cf-builder-core/path";
 import { Permission } from "./permission";
 import { Layer } from "./layer";
 import { Version } from "./version"
+import { EventMapping } from "./eventMapping";
+import { Alias } from "./alias";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { Role } from "../iam/role";
 
 /**
  * The AWS::Lambda::Function resource creates an AWS Lambda (Lambda) 
@@ -53,12 +57,18 @@ export class LambdaFunction extends Resource{
         environment:{},
         layers:[]
     } as any
-    //TODO
     private permissions:Permission[]=[];
     private versions:Version[]=[];
-    /*private eventMappings: EventMapping[]=[]; */
+    private eventMappings: EventMapping[]=[]
     //#endregion
+    /**
+     * the resource name
+     */
+    r:ReferenceField
     a={
+        /**
+         * The Amazon Resource Name (ARN) of the function.
+         */
         Arn:new AttributeField(this,"Arn")
     }
     
@@ -78,6 +88,7 @@ export class LambdaFunction extends Resource{
      */
     name(name:Field<string>){
         this._.name=name
+        return this
     }
     //#region simple properties
     /**
@@ -316,7 +327,7 @@ export class LambdaFunction extends Resource{
      * and Access Management (IAM) execution role that Lambda assumes 
      * when it runs your code to access AWS services.
      */
-    Role(role:Attr<"Arn">/*//TODO Attr<Role> */){
+    Role(role:Attr<Role>){
         this._.role=Attr.get(role,"Arn")
         return this;
     }
@@ -440,14 +451,14 @@ export class LambdaFunction extends Resource{
         this.versions.push(...versions);
         return this;
     }
-//    /**
-//     * **required:false**
-//     * @param maps the EventMaps to add to this function
-//     */
-//    eventMapping(...maps:EventMapping[]){
-//        this.eventMappings.push(...maps);
-//        return this;
-//    }
+   /**
+    * **required:false**
+    * @param maps the EventMaps to add to this function
+    */
+   eventMapping(...maps:EventMapping[]){
+       this.eventMappings.push(...maps);
+       return this;
+   }
     //#endregion
 
     //#region resource functions
@@ -490,8 +501,7 @@ export class LambdaFunction extends Resource{
             this.name,
             this.permissions,
             this.versions,
-            //TODO
-            // this.eventMappings
+            this.eventMappings
         ],Preparable as any, (o:Preparable)=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }
@@ -504,8 +514,8 @@ export class LambdaFunction extends Resource{
 
             ;[
                 this.permissions,
-                this.versions
-                //TODO child resources
+                this.versions,
+                this.eventMappings
             ].forEach(v=>v.forEach(v=>v[prepareQueue](stack,this,false)))
         }
     }
@@ -567,4 +577,4 @@ export type runtimes=
     "ruby2.5"
 ;
 
-export type LambdaExecutable=LambdaFunction/*//TODO |LambdaVersion|LambdaAlias */;
+export type LambdaExecutable=LambdaFunction|Version|Alias;

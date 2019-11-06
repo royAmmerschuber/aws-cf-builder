@@ -7,39 +7,50 @@ import { pathable, pathItem } from "./path";
 // @ts-ignore
 
 
-export interface SMap<T>{
-    [k:string]:T
+export interface SMap<T> {
+    [k: string]: T
 }
 
-export interface ResourceError{
-    type:string,
-    errors:string[]
+export interface ResourceError {
+    type: string,
+    errors: string[]
 }
 
-export abstract class Preparable implements pathable{
-    [stacktrace]:string;
-    [s_path]:pathItem
-    protected [checkCache]:SMap<ResourceError>
+export abstract class Preparable implements pathable {
+    [stacktrace]: string;
+    [s_path]: pathItem
+    protected [checkCache]: SMap<ResourceError>
 
-    abstract [resourceIdentifier]:string;
+    abstract [resourceIdentifier]: string;
 
-    constructor(errorDepth){
-        this[stacktrace]=getShortStack(2+errorDepth);
+    constructor(errorDepth) {
+        this[stacktrace] = getShortStack(2 + errorDepth);
     }
 
-    abstract [checkValid]():SMap<ResourceError>
-    abstract [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean):void
+    abstract [checkValid](): SMap<ResourceError>
+    abstract [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void
 }
-export abstract class Generatable extends Preparable{
-    abstract [generateObject]():any;
+export abstract class Generatable extends Preparable {
+    abstract [generateObject](): any;
 }
-export class PreparableError extends Error{
-    constructor(prep:Preparable,...errors:string[]){
+export class PreparableError extends Error {
+    constructor(prep: Preparable, ...errors: [string, ...string[]])
+    constructor(stack: string, identifier: string, ...errors: string[])
+    constructor(ps: Preparable | string, ie: string, ...errors: string[]) {
         super()
-        this.stack=[
-            prep[stacktrace],
-            chalk.yellow(prep[resourceIdentifier]),
-            ...errors
-        ].join("\n")
+        if (typeof ps == "string") {
+            this.stack = [
+                ps,
+                chalk.yellow(ie),
+                ...errors
+            ].join("\n")
+        } else {
+            this.stack = [
+                ps[stacktrace],
+                chalk.yellow(ps[resourceIdentifier]),
+                ie,
+                ...errors
+            ].join("\n")
+        }
     }
 }

@@ -7,6 +7,7 @@ import _ from "lodash/fp"
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { Layer } from "./layer";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 /**
  * The AWS::Lambda::LayerVersionPermission resource gives other 
  * accounts permission to use a layer version in AWS Lambda. 
@@ -23,7 +24,10 @@ export class LayerPermission extends Resource{
         organizationId: Field<string>
         layerVersionArn: Field<string>
     }={} as any
-
+    /**
+     * the layer version ARN and statement ID, such as `arn:aws:lambda:us-west-2:123456789012:layer:my-layer:1#engineering-org`.
+     */
+    r:ReferenceField
     /**
      * @param name only used for logical id
      * **default:** `"main"`

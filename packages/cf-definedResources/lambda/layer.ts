@@ -10,6 +10,7 @@ import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { LayerPermission } from "./layerPermission";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 
 /**
  * The AWS::Lambda::LayerVersion resource creates a layer version in AWS 
@@ -38,8 +39,15 @@ export class Layer extends Resource{
 
     private permissions:LayerPermission[]=[];
     //#endregion
+    /**
+     * the ARN of the layer version, such as `arn:aws:lambda:us-west-2:123456789012:layer:my-layer:1`.
+     */
+    r:ReferenceField
     a={
-        Arn:new AttributeField(this,"Arn")
+        /**
+         * the ARN of the layer version, such as `arn:aws:lambda:us-west-2:123456789012:layer:my-layer:1`.
+         */
+        Arn:this.r
     }
     constructor(){ super(1) }
     /**

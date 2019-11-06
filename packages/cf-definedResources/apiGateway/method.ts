@@ -39,7 +39,10 @@ export abstract class Method extends Resource implements namedPath{
         method:Field<string>
     }
     //#endregion
-
+    /**
+     * the method ID, such as `mysta-metho-01234b567890example`.
+     */
+    r:ReferenceField
     /**
      * 
      * @param OpName A friendly operation name for the method. For example, you can assign the OperationName
@@ -89,15 +92,11 @@ export abstract class Method extends Resource implements namedPath{
     Authorization(type:"CUSTOM",authorizer:Ref<Authorizer>):this;
     Authorization(type:"COGNITO_USER_POOLS",authorizer:Ref<Authorizer>,scopes?:Field<string>[]):this;
     Authorization(type:AuthorizationType,authorizer?:Ref<Authorizer>,scopes?:Field<string>[]):this{
-        let auth:Field<string>
-        if(authorizer instanceof Authorizer){
-            auth=authorizer.r
-        }else{
-            auth=authorizer
-        }
         this._.authorization={
             type:type,
-            authorizer:auth,
+            authorizer:authorizer instanceof Resource
+                ? authorizer.r
+                : authorizer,
             scopes:scopes
         };
         return this;
@@ -242,6 +241,7 @@ export abstract class Method extends Resource implements namedPath{
 }
 import { OptionsMethod } from "./method/optionsMethod";
 import { LambdaMethod } from "./method/lambdaMethod";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 export namespace Method{
     export const Option=OptionsMethod
     export const Lambda=LambdaMethod

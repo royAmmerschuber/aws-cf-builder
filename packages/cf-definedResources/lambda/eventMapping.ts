@@ -9,6 +9,7 @@ import { pathItem } from "aws-cf-builder-core/path";
 import { LambdaFunction } from "./function";
 import { Version } from "./version";
 import { Alias } from "./alias";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 /**
  * The AWS::Lambda::EventSourceMapping resource creates a mapping 
  * between an event source and an AWS Lambda function. Lambda reads 
@@ -30,6 +31,11 @@ export class EventMapping extends Resource{
         functionName:Field<string>
     }={} as any
     //#endregion
+
+    /**
+     * the mapping's ID.
+     */
+    r:ReferenceField
     /**
      * @param name only used for logical id
      * 
