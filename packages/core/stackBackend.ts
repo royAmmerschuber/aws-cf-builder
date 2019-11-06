@@ -1,5 +1,5 @@
 import { checkCache, checkValid, prepareQueue, resourceIdentifier, stacktrace, s_path, generateObject, getName } from "./symbols"
-import { SMap, ResourceError, Generatable } from "./general"
+import { SMap, ResourceError, Generatable, PreparableError } from "./general"
 import _ from "lodash/fp"
 import { Resource } from "./generatables/resource"
 import { Output } from "./generatables/output"
@@ -20,7 +20,7 @@ export class StackBackend {
             return cacheResult
         }
         StackBackend.moduleCache.set(file, this)
-        
+
         this.resources = getResources(file)
     }
     checkValid(): SMap<ResourceError> {
@@ -28,7 +28,7 @@ export class StackBackend {
             return this[checkCache]
         }
         const out: SMap<ResourceError> = {}
-        
+
         return this[checkCache] = this.resources
             .map(res => res.resource[checkValid]())
             .reduce((o, c) => _.assign(o, c), out)
@@ -74,40 +74,80 @@ export class StackBackend {
             }
             rec(preparable.resources)
             this.preparable = preparable
-    }
+        }
     }
     generateObject(): generationOutput {
         //*sort
-        const resources:Resource[]=[]
-        const outputs:Output<any>[]=[]
-        const parameters:Parameter<any>[]=[]
+        const resources: Resource[] = []
+        const outputs: Output<any>[] = []
+        const parameters: Parameter<any>[] = []
         this.preparable.resources.forEach(res => {
-            if(res instanceof Resource){
+            if (res instanceof Resource) {
                 resources.push(res)
-            }else if(res instanceof Output){
+            } else if (res instanceof Output) {
                 outputs.push(res)
-            }else if(res instanceof Parameter){
+            } else if (res instanceof Parameter) {
                 parameters.push(res)
             }
         })
         //*clean
         //noop
         //*generate
-        return {
-            AWSTemplateFormatVersion:"2010-09-09",
-            Resources:_.flow(
-                _.map((v:Resource) => [v[getName](),v[generateObject]()] ),
+        const errors = []
+        const used = new Map<string, {g:Generatable,duped:boolean}>()
+        const out = {
+            AWSTemplateFormatVersion: "2010-09-09",
+            Resources: _.flow(
+                _.map((v: Resource) => {
+                    const name = v[getName]()
+                    const dupe=used.get(name)
+                    if (dupe) {
+                        errors.push(new PreparableError(v, chalk`duplicate generated Identifier: {bold ${name}}`))
+                        if(!dupe.duped){
+                            errors.push(new PreparableError(dupe.g, chalk`duplicate generated Identifier: {bold ${name}}`))
+                            dupe.duped=true
+                        }
+                    }else{
+                        used.set(name, {g:v,duped:false})
+                    }
+                    const obj = v[generateObject]()
+                    return [name, obj]
+                }),
                 _.fromPairs
             )(resources),
-            Parameters:_.flow(
-                _.map((v:Parameter<any>) => [v[getName](),v[generateObject]()]),
-                _.fromPairs
-            )(parameters),
-            Outputs:_.flow(
-                _.map((v:Output<any>) => [v[getName](),v[generateObject]()]),
-                _.fromPairs
-            )(outputs)
+            Parameters: (() => {
+                const p = _.flow(
+                    _.map((v: Parameter<any>) => {
+                        const name = v[getName]()
+                        const dupe=used.get(name)
+                        if (dupe) {
+                            errors.push(new PreparableError(v,chalk`duplicate generated Identifier: {bold ${name}}`))
+                            if(!dupe.duped){
+                                errors.push(new PreparableError(dupe.g, chalk`duplicate generated Identifier: {bold ${name}}`))
+                                dupe.duped=true
+                            }
+                        }else{
+                            used.set(name, {g:v,duped:false})
+                        }
+                        const obj = v[generateObject]()
+                        return [name, obj]
+                    }),
+                    _.fromPairs
+                )(parameters)
+                return _.size(p) ? p : undefined
+            })(),
+            Outputs: (() => {
+                const o = _.flow(
+                    _.map((v: Output<any>) => [v[getName](), v[generateObject]()]),
+                    _.fromPairs
+                )(outputs)
+                return _.size(o) ? o : undefined
+            })()
         }
+        if(errors.length){
+            throw errors
+        }
+        return out
     }
 }
 
