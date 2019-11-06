@@ -8,65 +8,75 @@ import { refPlaceholder } from "./refPlaceholder"
 import chalk from "chalk"
 import { pathItem } from "./path"
 
-export class StackBackend{
-    private static readonly moduleCache:Map<any,StackBackend>=new Map()
-    private [checkCache]:SMap<ResourceError>
-    static readonly sym=Symbol("moduleBackend")
-    private resources:{path:string[],resource:Generatable}[]
-    private preparable:stackPreparable
-    constructor(file:any){
-        const cacheResult=StackBackend.moduleCache.get(file)
-        if(cacheResult!==undefined){
+export class StackBackend {
+    private static readonly moduleCache: Map<any, StackBackend> = new Map()
+    private [checkCache]: SMap<ResourceError>
+    static readonly sym = Symbol("moduleBackend")
+    private resources: { path: string[], resource: Generatable }[]
+    private preparable: stackPreparable
+    constructor(file: any) {
+        const cacheResult = StackBackend.moduleCache.get(file)
+        if (cacheResult !== undefined) {
             return cacheResult
         }
-        StackBackend.moduleCache.set(file,this)
+        StackBackend.moduleCache.set(file, this)
         
-        this.resources=getResources(file)
+        this.resources = getResources(file)
     }
-    checkValid():SMap<ResourceError>{
-        if(this[checkCache]){
+    checkValid(): SMap<ResourceError> {
+        if (this[checkCache]) {
             return this[checkCache]
         }
-        const out:SMap<ResourceError>={}
+        const out: SMap<ResourceError> = {}
         
-        return this[checkCache]=this.resources
+        return this[checkCache] = this.resources
             .map(res => res.resource[checkValid]())
-            .reduce((o,c)=>_.assign(o,c),out)
+            .reduce((o, c) => _.assign(o, c), out)
     }
-    prepareQueue(moduleSet:Set<StackBackend>){
-        if(!moduleSet.has(this)){
+    prepareQueue(moduleSet: Set<StackBackend>) {
+        if (!moduleSet.has(this)) {
             moduleSet.add(this)
-            const preparable:stackPreparable={
-                moduleBackends:moduleSet,
-                resources:new Set(),
+            const preparable: stackPreparable = {
+                moduleBackends: moduleSet,
+                resources: new Set(),
             }
             this.resources.forEach(res => {
-                res.resource[prepareQueue](preparable,res.path,false)
+                res.resource[prepareQueue](preparable, res.path, false)
             })
-            //cleaning out Refs & storing refs in temporary map
-            const missingRefs=new Map<Generatable,pathItem[]>()
-            preparable.resources.forEach(resource => {
-                if(resource instanceof refPlaceholder){
-                    if(resource.ref[s_path]===undefined){
-                        const refArray=missingRefs.get(resource.ref)
-                        if(refArray){
-                            refArray.push(resource.path)
-                        }else{
-                            missingRefs.set(resource.ref,[resource.path])
+            //unfolding refs recursively
+            const rec = (resources: Set<refPlaceholder<Generatable> | Generatable>) => {
+                const missingRefs = new Map<Generatable, pathItem[]>()
+                resources.forEach(resource => {
+                    if (resource instanceof refPlaceholder) {
+                        if (resource.ref[s_path] === undefined) {
+                            const refArray = missingRefs.get(resource.ref)
+                            if (refArray) {
+                                refArray.push(resource.path)
+                            } else {
+                                missingRefs.set(resource.ref, [resource.path])
+                            }
                         }
+                        resources.delete(resource)
                     }
-                    preparable.resources.delete(resource)
+                })
+                resources.forEach(res => preparable.resources.add(res))
+                //reiterating missing
+                if (missingRefs.size) {
+                    const prep: stackPreparable = {
+                        moduleBackends: moduleSet,
+                        resources: new Set()
+                    }
+                    missingRefs.forEach((refs, resource) => {
+                        resource[prepareQueue](prep, dissolvePaths(refs, resource), false)
+                    })
+                    rec(prep.resources)
                 }
-            })
-            //add main refs for missings
-            missingRefs.forEach((refs,resource) => {
-                resource[prepareQueue](preparable,dissolvePaths(refs,resource),false)
-                preparable.resources.add(resource)
-            })
-            this.preparable=preparable
-        }
+            }
+            rec(preparable.resources)
+            this.preparable = preparable
     }
-    generateObject():generationOutput{
+    }
+    generateObject(): generationOutput {
         //*sort
         const resources:Resource[]=[]
         const outputs:Output<any>[]=[]
@@ -101,45 +111,45 @@ export class StackBackend{
     }
 }
 
-export interface stackPreparable{
-    moduleBackends:Set<StackBackend>
-    resources:Set<Generatable|refPlaceholder<Generatable>>
+export interface stackPreparable {
+    moduleBackends: Set<StackBackend>
+    resources: Set<Generatable | refPlaceholder<Generatable>>
 }
 
-function getResources(file:any):{path:string[],resource:Generatable}[]{
-    const rec=(path:string[],obj:any) => {
-        const out=[]
-        for(const k in obj){
-            const v=obj[k]
-            if(typeof v=="object"){
-                if(v instanceof Generatable){
+function getResources(file: any): { path: string[], resource: Generatable }[] {
+    const rec = (path: string[], obj: any) => {
+        const out = []
+        for (const k in obj) {
+            const v = obj[k]
+            if (typeof v == "object") {
+                if (v instanceof Generatable) {
                     out.push({
-                        path:[...path,k],
-                        resource:v
+                        path: [...path, k],
+                        resource: v
                     })
-                }else{
-                    out.push(...rec([...path,k],v))
+                } else {
+                    out.push(...rec([...path, k], v))
                 }
             }
         }
         return out
     }
-    const out=[]
-    out.push(...rec([],file))
+    const out = []
+    out.push(...rec([], file))
     return out
 }
-function dissolvePaths(paths:pathItem[],resource:Generatable):pathItem{
-    if(paths.length>1){
+function dissolvePaths(paths: pathItem[], resource: Generatable): pathItem {
+    if (paths.length > 1) {
         //TODO do something smart for path resolving
-        throw resource[stacktrace]+"\n"+chalk.yellow(resource[resourceIdentifier])+"\nmultiple references to resource"
-    }else{
+        throw resource[stacktrace] + "\n" + chalk.yellow(resource[resourceIdentifier]) + "\nmultiple references to resource"
+    } else {
         return paths[0]
     }
 }
-interface generationOutput{
-    AWSTemplateFormatVersion:string,
-    Description?:string,
-    Parameters?:SMap<any>,
-    Resources:SMap<any>,
-    Outputs?:SMap<any>
+interface generationOutput {
+    AWSTemplateFormatVersion: string,
+    Description?: string,
+    Parameters?: SMap<any>,
+    Resources: SMap<any>,
+    Outputs?: SMap<any>
 }
