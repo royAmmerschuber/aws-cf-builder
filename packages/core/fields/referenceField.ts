@@ -1,5 +1,5 @@
 import { InlineAdvField } from "../field";
-import { resourceIdentifier, getRef, prepareQueue, checkValid, getName } from "../symbols";
+import { resourceIdentifier, prepareQueue, checkValid, getName } from "../symbols";
 import { Resource } from "../generatables/resource";
 import { stackPreparable } from "../stackBackend";
 import { pathItem } from "../path";
@@ -23,12 +23,16 @@ export class ReferenceField extends InlineAdvField<string>{
         }
     }
     [prepareQueue](stack: stackPreparable,par: pathItem,ref:boolean){
-        this.resource[prepareQueue](stack,par,true);
+        if(typeof this.resource!="string"){
+            this.resource[prepareQueue](stack,par,true);
+        }
     }
     [checkValid](){
+        if(typeof this.resource=="string") return {}
         return this.resource[checkValid]();
     }
     [getName](){
+        if(typeof this.resource=="string") return this.resource
         return this.resource[getName]()
     }
 }
