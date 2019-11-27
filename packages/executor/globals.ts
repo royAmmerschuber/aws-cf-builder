@@ -6,6 +6,7 @@ import * as aws from "aws-cf-builder-defined-resources/aws"
 import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
 import * as lambda from "aws-cf-builder-defined-resources/lambda"
 import * as iam from "aws-cf-builder-defined-resources/iam"
+import * as dynamoDb from "aws-cf-builder-defined-resources/dynamoDb"
 //@ts-ignore
 global.Parameter=Parameter
 //@ts-ignore
@@ -26,3 +27,5 @@ global.ApiGateway= apigateway
 global.Lambda= lambda
 //@ts-ignore
 global.Iam= iam
+//@ts-ignore
+global.DynamoDb= dynamoDb
