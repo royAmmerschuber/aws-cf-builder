@@ -1,5 +1,5 @@
 import fs from "fs"
-import _ from "lodash"
+import _ from "lodash/fp"
 import { generateProvider } from "./generateProvider"
 import { importJson, resrej } from "./util"
 import util from "util" 

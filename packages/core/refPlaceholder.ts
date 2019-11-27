@@ -1,4 +1,4 @@
-import { pathItem } from "./general";
+import { pathItem } from "./path";
 
 export class refPlaceholder<T>{
     constructor(

@@ -1,10 +1,11 @@
-import { SMap, pathItem, Preparable } from "../general";
+import { SMap, Preparable } from "../general";
 import { InlineAdvField } from "../field";
 import { resourceIdentifier, checkValid, prepareQueue, s_path, getRef } from "../symbols";
 import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
 import { ReferenceField } from "../fields/referenceField";
 import { AttributeField } from "../fields/attributeField";
+import { pathItem } from "../path";
 
 export const Parent: SMap<SMap<{ r: ReferenceField, a: SMap<AttributeField> }>> = new Proxy({
     subHandler: {

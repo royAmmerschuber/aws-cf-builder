@@ -1,8 +1,9 @@
 import { InlineAdvField } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue, getRef } from "../symbols";
-import { SMap, ResourceError, pathItem } from "../general";
+import { resourceIdentifier, checkValid, prepareQueue, getRef, getName } from "../symbols";
+import { SMap, ResourceError } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
+import { pathItem } from "../path"
 
 export class AttributeField extends InlineAdvField<any>{
     [resourceIdentifier]: string;
@@ -13,6 +14,13 @@ export class AttributeField extends InlineAdvField<any>{
                     throw new Error("not supported")
                 }
                 return new AttributeField(resource,p)
+            },
+            has(target,p){
+                if(typeof p =="string"){
+                    return true
+                }else{
+                    return false
+                }
             }
         })
     }
@@ -23,7 +31,7 @@ export class AttributeField extends InlineAdvField<any>{
 
     toJSON() {
         return {"Fn::GetAtt":[
-            this.resource[getRef]().Ref,
+            this.resource[getName](),
             this.attr
         ]}
     }    
