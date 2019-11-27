@@ -7,6 +7,7 @@ import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
 import * as lambda from "aws-cf-builder-defined-resources/lambda"
 import * as iam from "aws-cf-builder-defined-resources/iam"
 import * as dynamoDb from "aws-cf-builder-defined-resources/dynamoDb"
+import * as ssm from "aws-cf-builder-defined-resources/ssm"
 declare global{
     export const Parameter:typeof parameter.Parameter
     export const Output:typeof output.Output
@@ -21,4 +22,5 @@ declare global{
     export const Lambda:typeof lambda
     export const Iam:typeof iam
     export const DynamoDb:typeof dynamoDb
+    export const SSM:typeof ssm
 }
