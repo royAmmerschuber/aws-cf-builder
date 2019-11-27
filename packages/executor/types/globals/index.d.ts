@@ -9,6 +9,7 @@ import * as iam from "aws-cf-builder-defined-resources/iam"
 import * as dynamoDb from "aws-cf-builder-defined-resources/dynamoDb"
 import * as ssm from "aws-cf-builder-defined-resources/ssm"
 import * as cloudwatch from "aws-cf-builder-defined-resources/cloudwatch"
+import * as serverless from "aws-cf-builder-defined-resources/serverless"
 declare global{
     export const Parameter:typeof parameter.Parameter
     export const Output:typeof output.Output
@@ -25,4 +26,5 @@ declare global{
     export const DynamoDb:typeof dynamoDb
     export const SSM:typeof ssm
     export const CloudWatch:typeof cloudwatch
+    export const Serverless:typeof serverless
 }

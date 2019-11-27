@@ -27,7 +27,9 @@ const program:commander.Command & {
     output:string,
     check:boolean,
     indent:boolean,
-    yaml:boolean
+    yaml:boolean,
+    sam:boolean,
+    transform:string
 }=new commander.Command()
     .version("0.0.1")
     .arguments('<file>')
@@ -38,6 +40,8 @@ const program:commander.Command & {
     .option('-c, --check',"check the typescript for type errors")
     .option('-y, --yaml','use yaml as output language') //TODO make yaml implementation less retarded
     .option('--no-indent',"doesnt indent json output")
+    .option('--sam','apply the sam transformation, shorthand for `--transform "AWS::Serverless-2016-10-31"`')
+    .option('--transform <transform>',"the transform to apply")
     .parse(process.argv) as any
 
 let err=false
@@ -60,12 +64,23 @@ if(program.typescript){
     console.log(chalk`{red if you specify {redBright --check} then you also need to specify {redBright --typescript}}`)
 }
 if(program.yaml){
-    yaml=require("js-yaml")
+    try{
+        yaml=require("js-yaml")
+    }catch(e){
+        console.log(chalk` {red couldnt load module {redBright "js-yaml"}}\n try running {yellow "{green npm install js-yaml}"}`)
+    }
 }
 if(!program.args[0]){
     console.log(chalk.red("please specify the file to compile"))
     program.outputHelp()
     err=true
+}
+if(program.sam){
+    if(program.transform){
+        console.log(chalk`{red do not specify a {redBright --transform} flag if you are using the {redBright --sam} flag}`)
+        err=true
+    }
+    program.transform="AWS::Serverless-2016-10-31"
 }
 if(err){
     process.exit(1)
@@ -83,10 +98,12 @@ const modules=new Set<StackBackend>()
 try{
     mainModule.prepareQueue(modules)
     const moduleName=path.parse(inPath).name
-    let output:string,ending:string
-    output=JSON.stringify(mainModule.generateObject(),null,program.indent ? 4 : 0)
+    let outputJSON:string,ending:string
+    const outputObject=mainModule.generateObject()
+    outputObject.Transform=program.transform
+    outputJSON=JSON.stringify(outputObject,null,program.indent ? 4 : 0)
     if(program.yaml){
-        output=yaml.safeDump(JSON.parse(output))
+        outputJSON=yaml.safeDump(JSON.parse(outputJSON))
         ending=".yaml"
     }else{
         ending=".json"
@@ -101,7 +118,7 @@ try{
                 console.log("couldnt create folder")
                 process.exit(1)
             }
-            fs.writeFile(path.join(outPath,moduleName+ending),output,err=>{
+            fs.writeFile(path.join(outPath,moduleName+ending),outputJSON,err=>{
                 if(err){
                     console.log("couldnt create file")
                     process.exit(1)
@@ -112,7 +129,7 @@ try{
             })
         })
     }else{
-        console.log(output)
+        console.log(outputJSON)
     }
 }catch(ex){
     console.log(ex)

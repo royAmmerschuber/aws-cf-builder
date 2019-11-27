@@ -9,6 +9,7 @@ import * as iam from "aws-cf-builder-defined-resources/iam"
 import * as dynamoDb from "aws-cf-builder-defined-resources/dynamoDb"
 import * as ssm from "aws-cf-builder-defined-resources/ssm"
 import * as cloudwatch from "aws-cf-builder-defined-resources/cloudwatch"
+import * as serverless from "aws-cf-builder-defined-resources/serverless"
 //@ts-ignore
 global.Parameter=Parameter
 //@ts-ignore
@@ -35,3 +36,5 @@ global.DynamoDb= dynamoDb
 global.SSM=ssm
 //@ts-ignore
 global.CloudWatch=cloudwatch
+//@ts-ignore
+global.Serverless=serverless
