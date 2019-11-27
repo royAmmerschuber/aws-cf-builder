@@ -1,11 +1,11 @@
-import { Authorizer } from "./authorizer";
-import { Api } from "./api";
+import { Authorizer } from "../authorizer";
+import { Api } from "../api";
 import _ from "lodash/fp";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Ref, prepareQueueBase } from "aws-cf-builder-core/util";
 import { Field } from "aws-cf-builder-core/field";
 import { SMap, Preparable, PreparableError } from "aws-cf-builder-core/general";
-import { Model } from "./model";
+import { Model } from "../model";
 import { checkValid, checkCache, pathName } from "aws-cf-builder-core/symbols";
 import { ResourceError } from "aws-cf-builder-core/general";
 import { stacktrace, prepareQueue } from "aws-cf-builder-core/symbols";
@@ -13,7 +13,7 @@ import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { callOn } from "aws-cf-builder-core/util";
 import { generateObject } from "aws-cf-builder-core/symbols";
 import { findInPath } from "aws-cf-builder-core/util";
-import { ApiResource } from "./resource";
+import { ApiResource } from "../resource";
 import { pathItem, namedPath } from "aws-cf-builder-core/path";
 import { PathDataCarrier } from "aws-cf-builder-core/path";
 import { resourceIdentifier } from "aws-cf-builder-core/symbols";
@@ -239,8 +239,8 @@ export abstract class Method extends Resource implements namedPath{
     }
     //#endregion
 }
-import { OptionsMethod } from "./method/optionsMethod";
-import { LambdaMethod } from "./method/lambdaMethod";
+import { OptionsMethod } from "./optionsMethod";
+import { LambdaMethod } from "./lambdaMethod";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 export namespace Method{
     export const Option=OptionsMethod

@@ -70,16 +70,24 @@ namespace findInPath{
         }
     }
 }
-export function callOn<T,U>(container:any,instanceOf:new (...args)=>T,iter:(obj:T)=>U):U[]{
+
+export function callOn<U>(container:any,instanceOf:typeof Preparable,iter:(obj:Preparable)=>U):U[]
+export function callOn<T,U>(container:any,instanceOf:new (...args)=>T,iter:(obj:T)=>U):U[]
+export function callOn<T,U>(container:any,instanceOf:new (...args)=>T|typeof Preparable,iter:(obj:T|Preparable)=>U):U[]{
     if(typeof container=="object"){
         if(container instanceof instanceOf){
-            return [iter(container)]
+            return [iter(container as T)]
         }else{
             return _.flatMap(
-                v => callOn(v,instanceOf,iter),
+                v => callOn(v,instanceOf as new (...args)=>T,iter),
                 container
             )
         }
+    }
+}
+export function notEmpty<T extends string|object>(t:T):T|undefined{
+    if(_.size(t)){
+        return t
     }
 }
 export type Ref<T extends Resource>=T | Field<string>

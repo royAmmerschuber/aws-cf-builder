@@ -1,7 +1,6 @@
 import { Preparable, Generatable } from "./general";
 
 export type Field<T> = T | AdvField<T>
-export type Ref<T, ref> = Field<T> | ref
 export interface AdvField<T> extends Preparable {
     toJSON(): any
 }

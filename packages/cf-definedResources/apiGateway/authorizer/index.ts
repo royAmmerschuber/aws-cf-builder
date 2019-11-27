@@ -7,10 +7,11 @@ import { checkValid, generateObject, checkCache } from "aws-cf-builder-core/symb
 import { stacktrace, prepareQueue } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { findInPath, prepareQueueBase, callOn } from "aws-cf-builder-core/util";
-import { Api } from "./api";
+import { Api } from "../api";
 import { resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { pathName } from "aws-cf-builder-core/symbols";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 
 /**
  * The AWS::ApiGateway::Authorizer resource creates an authorization 
@@ -145,8 +146,7 @@ export abstract class Authorizer extends Resource implements namedPath{
     }
     //#endregion
 }
-import { CognitoAuthorizer } from "./authorizer/cognitoAuthorizer";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { CognitoAuthorizer } from "./cognitoAuthorizer";
 export namespace Authorizer{
     export const Cognito=CognitoAuthorizer
 }

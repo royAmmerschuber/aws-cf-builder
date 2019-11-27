@@ -1,6 +1,6 @@
 import _ from "lodash/fp";
 
-import { PolicyDocument, PolicyStatement, PolicyOut } from "./policy/policyDocument";
+import { PolicyDocument, PolicyStatement, PolicyOut } from "./policyDocument";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
 import { Field } from "aws-cf-builder-core/field";
@@ -113,7 +113,7 @@ export class Policy extends Resource {
     }
     //#endregion
 }
-import { ManagedPolicy } from "./policy/managedPolicy";
+import { ManagedPolicy } from "./managedPolicy";
 export namespace Policy {
     export const Managed = ManagedPolicy
     export type Managed = ManagedPolicy
@@ -126,6 +126,6 @@ export namespace Policy {
     export type Statement = PolicyStatement
 }
 
-import { Role } from "./role";
-import { Group } from "./group";
-import { User } from "./user";
+import { Role } from "../role";
+import { Group } from "../group";
+import { User } from "../user";

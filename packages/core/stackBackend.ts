@@ -188,6 +188,7 @@ function dissolvePaths(paths: pathItem[], resource: Generatable): pathItem {
 }
 interface generationOutput {
     AWSTemplateFormatVersion: string,
+    Transform?:string
     Description?: string,
     Parameters?: SMap<any>,
     Resources: SMap<any>,

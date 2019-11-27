@@ -34,7 +34,7 @@ export class LambdaFunction extends Resource{
         codeStorageMethod: "bucket"|"file"
         environment:SMap<Field<string>>
         handler: Field<string>
-        runtime: runtimes
+        runtime: Field<runtimes>
         tags:Tag[]
         description: Field<string>
         tiemout: Field<number>
@@ -221,7 +221,7 @@ export class LambdaFunction extends Resource{
      * that you are uploading. For valid values, see the Runtime 
      * property in the AWS Lambda Developer Guide.
      */
-    Runtime(runtime:runtimes){
+    Runtime(runtime:Field<runtimes>){
         this._.runtime=runtime;
         return this;
     }
@@ -478,7 +478,7 @@ export class LambdaFunction extends Resource{
         }
         if(!this._.bucketCode){
             if(this._.codeFile){
-                if(this._.runtime.startsWith("python") || this._.runtime.startsWith("nodejs")){
+                if(typeof this._.runtime=="string" && ( this._.runtime.startsWith("python") || this._.runtime.startsWith("nodejs") )){
                     if(typeof this._.codeFile=="string" && this._.codeFile.length>4096){
                         errors.push('the code must be less than 4096 characters long')
                     }

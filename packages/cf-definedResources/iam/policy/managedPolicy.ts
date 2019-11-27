@@ -1,4 +1,4 @@
-import { Policy } from "../policy";
+import { Policy } from ".";
 import { Field } from "aws-cf-builder-core/field";
 import { stacktrace, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { getShortStack } from "aws-cf-builder-core/utilLow"

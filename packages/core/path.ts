@@ -2,7 +2,7 @@ import { pathName, s_path } from "./symbols";
 import { SMap } from "./general";
 
 export type pathItem=string[]|pathable
-export interface namedPath{
+export interface namedPath extends pathable{
     [pathName]():string
 }
 export interface pathable{
