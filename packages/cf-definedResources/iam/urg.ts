@@ -5,7 +5,7 @@ import { Field, isAdvField } from "aws-cf-builder-core/field";
 import { checkValid, checkCache, generateObject } from "aws-cf-builder-core/symbols";
 import { PolicyOut, PolicyDocument } from "./policy/policyDocument";
 import { SMap, PreparableError, Preparable } from "aws-cf-builder-core/general";
-import { Attr, callOn } from "aws-cf-builder-core/util";
+import { Attr, callOn, notEmpty } from "aws-cf-builder-core/util";
 
 export abstract class URG extends Resource {
     //#region properties
@@ -132,9 +132,7 @@ export abstract class URG extends Resource {
     [generateObject]():any{
         return {
             Properties:{
-                ManagedPolicyArns:this._.managedPolicies.length 
-                    ? this._.managedPolicies 
-                    : undefined,
+                ManagedPolicyArns:notEmpty(this._.managedPolicies),
                 Policies:this._.policies.length 
                     ? this._.policies.map(v => ({
                         PolicyDocument:v.policy,

@@ -3,7 +3,7 @@ import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue, generateObject } from "aws-cf-builder-core/symbols";
 import { Field } from "aws-cf-builder-core/field";
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
-import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
+import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
@@ -183,7 +183,7 @@ export class Rule extends Resource{
                 EventPattern:this._.eventPattern,
                 Description:this._.description,
                 State:this._.state,
-                Targets:this._.targets.length ? this._.targets : undefined
+                Targets:notEmpty(this._.targets)
             }
         }
     }

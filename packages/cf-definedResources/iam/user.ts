@@ -3,7 +3,7 @@ import _ from "lodash/fp";
 import { URG } from "./urg";
 import { resourceIdentifier, checkValid, checkCache, prepareQueue, generateObject } from "aws-cf-builder-core/symbols";
 import { Field } from "aws-cf-builder-core/field";
-import { Ref, Attr, prepareQueueBase, callOn } from "aws-cf-builder-core/util";
+import { Ref, Attr, prepareQueueBase, callOn, notEmpty } from "aws-cf-builder-core/util";
 import { ResourceError, SMap, Preparable } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
@@ -122,9 +122,7 @@ export class User extends URG{
                         PasswordResetRequired:this._.passwordReset
                     }
                     : undefined,
-                Groups:this._.groups.length
-                    ? this._.groups
-                    : undefined,
+                Groups:notEmpty(this._.groups),
                 PermissionBoundary:this._.permissionBoundary
             })
         }

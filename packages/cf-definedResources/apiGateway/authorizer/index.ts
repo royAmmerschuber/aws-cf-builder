@@ -6,7 +6,7 @@ import { pathItem, namedPath } from "aws-cf-builder-core/path";
 import { checkValid, generateObject, checkCache } from "aws-cf-builder-core/symbols";
 import { stacktrace, prepareQueue } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { findInPath, prepareQueueBase, callOn } from "aws-cf-builder-core/util";
+import { findInPath, prepareQueueBase, callOn, notEmpty } from "aws-cf-builder-core/util";
 import { Api } from "../api";
 import { resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { pathName } from "aws-cf-builder-core/symbols";
@@ -132,7 +132,7 @@ export abstract class Authorizer extends Resource implements namedPath{
                 IdentitySource: this._.identitySource,
                 Name: this.name,
                 Type: this._.type,
-                ProviderARNs: this._.providers.length ? this._.providers : undefined,
+                ProviderARNs: notEmpty(this._.providers),
                 RestApiId:this._.restApiId,
                 AuthorizerResultTtlInSeconds:this._.resultTtl
             }

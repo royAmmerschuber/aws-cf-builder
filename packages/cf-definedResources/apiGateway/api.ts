@@ -13,7 +13,7 @@ import { OptionsMethod } from "./method/optionsMethod";
 import { checkValid, stacktrace, checkCache, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { prepareQueue } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { prepareQueueBase, callOn } from "aws-cf-builder-core/util";
+import { prepareQueueBase, callOn, notEmpty } from "aws-cf-builder-core/util";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { ApiResource } from "./resource";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
@@ -391,7 +391,7 @@ export class Api extends Resource {
             Properties: {
                 Name: this._.name,
                 ApiKeySourceType: this._.apiKeySourceType,
-                BinaryMediaTypes: this._.binaryMediaTypes.length ? this._.binaryMediaTypes : undefined,
+                BinaryMediaTypes: notEmpty( this._.binaryMediaTypes ),
                 Body: this._.body,
                 BodyS3Location: this._.bodyS3Location,
                 Description: this._.description,

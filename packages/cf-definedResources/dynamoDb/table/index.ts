@@ -4,7 +4,7 @@ import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Tag } from "../../util";
 import { Field } from "aws-cf-builder-core/field";
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
-import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
+import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import { SecondaryIndex, LocalSecondaryIndex, GlobalSecondaryIndex } from "./secondaryIndex";
@@ -345,14 +345,10 @@ export class Table extends Resource{
                         AttributeName:v.name,
                         KeyType:v.key
                     })),
-                GlobalSecondaryIndexes:globalIndexes.length 
-                    ? globalIndexes
-                    : undefined,
-                LocalSecondaryIndexes:localIndexes.length
-                    ? localIndexes
-                    : undefined,
+                GlobalSecondaryIndexes:notEmpty(globalIndexes),
+                LocalSecondaryIndexes:notEmpty(localIndexes),
                 ProvisionedThroughput:this._.capacity,
-                Tags: this._.tags.length ? this._.tags : undefined,
+                Tags: notEmpty(this._.tags),
                 BillingMode:this._.billingMode,
                 TimeToLiveSpecification:this._.ttl,
                 StreamSpecification:this._.streamType && {

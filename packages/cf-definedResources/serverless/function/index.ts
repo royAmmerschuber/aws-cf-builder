@@ -629,8 +629,6 @@ export class ServerlessFunction extends Resource{
                         Variables:this._.environment
                     } 
                     : undefined,
-                Handler:this._.handler,
-                Role:this._.role,
                 Runtime: this._.runtime,
                 Description:this._.description,
                 Timeout:this._.tiemout,
