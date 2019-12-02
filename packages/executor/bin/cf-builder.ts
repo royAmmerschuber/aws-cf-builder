@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as path from "path"
 import * as fs from "fs"
 
@@ -34,8 +35,6 @@ if(!program.args[0]){
     program.outputHelp()
     process.exit(1)
 }
-
-require("../globals")
 
 const inPath=path.resolve(program.args[0]);
 let outputString:string

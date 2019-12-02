@@ -5,7 +5,7 @@ import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { Field } from "aws-cf-builder-core/field";
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { Tag, s3PathConverter } from "../util";
-import { Attr, callOn, prepareQueueBase } from "aws-cf-builder-core/util";
+import { Attr, callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { checkValid, prepareQueue, generateObject, stacktrace, checkCache, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -553,8 +553,8 @@ export class LambdaFunction extends Resource{
                 },
                 KmsKeyArn:this._.kmsArn,
                 VpcConfig:this._.vpcConfig,
-                Layers:this._.layers.length ? this._.layers : undefined,
-                Tags:this._.tags.length ? this._.tags : undefined
+                Layers:notEmpty(this._.layers),
+                Tags:notEmpty(this._.tags)
             }
         };
     }
