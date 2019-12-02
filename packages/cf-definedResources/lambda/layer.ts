@@ -6,7 +6,7 @@ import { s3PathConverter } from "../util";
 import { PreparableError, SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue, generateObject } from "aws-cf-builder-core/symbols";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
-import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
+import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { LayerPermission } from "./layerPermission";
@@ -184,7 +184,7 @@ export class Layer extends Resource{
                 Content:this._.content,
                 Description:this._.description,
                 LicenseInfo:this._.license,
-                CompatibleRuntimes:this._.runtimes.length ? this._.runtimes : undefined
+                CompatibleRuntimes:notEmpty(this._.runtimes)
             }
         }
     }

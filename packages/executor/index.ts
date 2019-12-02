@@ -28,14 +28,14 @@ export function transform(file: string, options: TransformOptions): string {
             const opt: tsN.Options = {
                 compilerOptions: {
                     typeRoots: [
-                        path.join(__dirname, "../types")
+                        path.join(__dirname, "./types")
                     ],
                 },
                 transpileOnly: !options.check
             }
             require("ts-node").register(opt)
         } catch (ex) {
-            throw new Error(chalk`{red couldnt load module {redBright "ts-node"}}\n try running {yellow "{green npm install ts-node}"}`)
+            throw new Error(chalk`{red couldnt load module {redBright "ts-node"}}\n try running "{green npm install typescript ts-node}"`)
         }
     } else if (options.check) {
         throw new Error(chalk`{red if you specify {redBright --check} then you also need to specify {redBright --typescript}}`)
@@ -44,7 +44,7 @@ export function transform(file: string, options: TransformOptions): string {
         try {
             yaml = require("js-yaml")
         } catch (e) {
-            throw new Error(chalk` {red couldnt load module {redBright "js-yaml"}}\n try running {yellow "{green npm install js-yaml}"}`)
+            throw new Error(chalk` {red couldnt load module {redBright "js-yaml"}}\n try running "{green npm install js-yaml}"`)
         }
     }
     if (options.sam) {

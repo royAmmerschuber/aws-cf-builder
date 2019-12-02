@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "typeRoots": [
+            "../types"
+        ],
+        "target": "es2017",
+        "module": "commonjs",
+        "declaration": true,
+        "outDir": "out",
+        "sourceMap": true,
+        "strict": false,
+        "esModuleInterop": true
+    },
+    "include": ["**/*.cf.ts"],
+    "exclude": ["*"]
+}
