@@ -1,0 +1,1 @@
+export { ServerlessFunction as Function } from "./function"

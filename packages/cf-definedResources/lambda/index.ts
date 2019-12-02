@@ -1,0 +1,7 @@
+export { Alias } from "./alias"
+export { EventMapping } from "./eventMapping"
+export { LambdaFunction as Function } from "./function"
+export { Layer } from "./layer"
+export { LayerPermission } from "./layerPermission"
+export { Permission } from "./permission"
+export { Version } from "./version"
