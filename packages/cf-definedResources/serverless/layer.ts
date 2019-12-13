@@ -25,7 +25,9 @@ export class ServerlessLayer extends Resource {
         description: Field<string>,
         license: Field<string>,
         retentionPolicy: Field<retentionPolicy>
-    }
+    }={
+        runtimes:[]
+    } as any
     private permissions: LayerPermission[] = []
     /**
      * the resource ARN of the underlying Lambda LayerVersion
