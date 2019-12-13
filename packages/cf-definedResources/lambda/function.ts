@@ -10,12 +10,13 @@ import { checkValid, prepareQueue, generateObject, stacktrace, checkCache, resou
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { Permission } from "./permission";
-import { Layer } from "./layer";
+import { LambdaLayerable } from "./layer";
 import { Version } from "./version"
 import { EventMapping } from "./eventMapping";
 import { Alias } from "./alias";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { Role } from "../iam/role";
+import { ServerlessFunction } from "../serverless/function";
 
 /**
  * The AWS::Lambda::Function resource creates an AWS Lambda (Lambda) 
@@ -439,7 +440,7 @@ export class LambdaFunction extends Resource{
      * execution environment. Specify each layer by ARN, including the 
      * version.
      */
-    layer(...layers:Attr<Layer>[]){
+    layer(...layers:Attr<LambdaLayerable>[]){
         this._.layers.push(...layers.map(l => Attr.get(l,"Arn")));
         return this;
     }
@@ -469,6 +470,9 @@ export class LambdaFunction extends Resource{
         const errors:string[]=[]
         if(!this._.runtime){
             errors.push(must+"Runtime");
+        }
+        if(!this._.handler){
+            errors.push(must+"handler")
         }
         if(!this._.role){
             errors.push(must+"role");
@@ -510,7 +514,7 @@ export class LambdaFunction extends Resource{
             callOn([
                 this._,
                 this.name
-            ],Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            ],Preparable,o=>o[prepareQueue](stack,this,true))
 
             ;[
                 this.permissions,
@@ -577,4 +581,4 @@ export type runtimes=
     "ruby2.5"
 ;
 
-export type LambdaExecutable=LambdaFunction|Version|Alias;
+export type LambdaExecutable=LambdaFunction|Version|Alias|ServerlessFunction;

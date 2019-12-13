@@ -11,6 +11,7 @@ import { Alias } from "./alias";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { EventMapping } from "./eventMapping";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { ServerlessFunction } from "../serverless/function";
 
 /**
  * The AWS::Lambda::Version resource publishes a specified version of 
@@ -116,17 +117,19 @@ export class Version extends Resource implements namedPath{
     }
     [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
             
             this.eventMappings.forEach(v=>v[prepareQueue](stack,this,false))
             this.aliases.forEach(v=>v.alias[prepareQueue](stack,new PathDataCarrier(this,{
                 versionWeight:v.weight || null
             }),false))
 
-            const { func }=findInPath(path,{func:LambdaFunction})
-
-            if(!func) throw new PreparableError(this,"function not found in path")
-            this._.functionName=func.obj.r
+            const found=findInPath(path,{func:LambdaFunction,sFunc:ServerlessFunction})
+            if(_.size(found)==0){
+                throw new PreparableError(this,"function not found in path")
+            }
+            const first=_.sortBy("depth",found)[0].obj
+            this._.functionName=first.r
         }
     }
     [generateObject]() {

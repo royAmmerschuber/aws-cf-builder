@@ -3,13 +3,14 @@ import { resourceIdentifier, checkValid, checkCache, stacktrace, prepareQueue, g
 import { Field } from "aws-cf-builder-core/field";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Attr, callOn, prepareQueueBase, findInPath } from "aws-cf-builder-core/util";
-import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
+import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { LambdaFunction } from "./function";
 import { Version } from "./version";
 import { Alias } from "./alias";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { ServerlessFunction } from "../serverless/function";
 /**
  * The AWS::Lambda::EventSourceMapping resource creates a mapping 
  * between an event source and an AWS Lambda function. Lambda reads 
@@ -112,15 +113,17 @@ export class EventMapping extends Resource{
                 errors:errors
             }
         }
-        return this[checkCache]=callOn(this._,Preparable as any,(o:Preparable)=>o[checkValid]())
+        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out);
     }
     [prepareQueue](stack:stackPreparable, path:pathItem,ref:boolean) {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
 
-            const found =findInPath(path,{func:LambdaFunction,ver:Version,alias:Alias})
-            
+            const found =findInPath(path,{sFunc:ServerlessFunction,func:LambdaFunction,ver:Version,alias:Alias})
+            if(_.size(found)==0){
+                throw new PreparableError(this,"cant find function,version or alias in path")
+            }
             const first=_.sortBy("depth",found)[0].obj
             this._.functionName=first.r
         }

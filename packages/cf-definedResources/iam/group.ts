@@ -59,7 +59,7 @@ export class Group extends URG{
     [prepareQueue](stack: stackPreparable,path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
             this.policiesR.forEach(v => v[prepareQueue](stack,new PathDataCarrier(this,{policyAttachment:{type:"group",value:this.r}}),true));
-            callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
             if(this._.users.length){
                 new UTG(this._.users)[prepareQueue](stack,this,false);
             }

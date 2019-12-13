@@ -110,12 +110,12 @@ export abstract class Authorizer extends Resource implements namedPath{
                 errors:errors
             }
         }
-        return this[checkCache]=callOn([this._, this.name],Preparable as any,(o:Preparable)=>o[checkValid]())
+        return this[checkCache]=callOn([this._, this.name],Preparable,o=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }
     public [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn([this._, this.name],Preparable as any,(o:Preparable)=>{
+            callOn([this._, this.name],Preparable,o=>{
                 o[prepareQueue](stack,this,true)
             })
 

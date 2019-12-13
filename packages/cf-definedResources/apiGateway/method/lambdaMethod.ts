@@ -1,5 +1,4 @@
-
-import { Method } from "../method";
+import { Method, MethodOut } from "../method";
 import _ from "lodash/fp";
 import { LambdaExecutable } from "../../lambda/function";
 import { Attr } from "aws-cf-builder-core/util";
@@ -27,8 +26,8 @@ export class LambdaMethod extends Method{
         lambda:Field<string>
     }
     //#endregion
-    constructor(OpName?:string){
-        super(1,OpName);
+    constructor(){
+        super(1);
     }
     //#region references
     /**
@@ -64,11 +63,11 @@ export class LambdaMethod extends Method{
         return out;
 
     }
-    [generateObject]() {
+    [generateObject]():MethodOut {
         this._.integration={
             Type:"AWS_PROXY",
             IntegrationHttpMethod:"POST",
-            Uri:Sub`arn:aws:apigateway:${AWS.region}:lambda:path/2015-03-31/functions/${this._.lambda}/invocations`
+            Uri:Sub`arn:aws:apigateway:${AWS.region}:lambda:path/2015-03-31/functions/${this._.lambda}/invocations` as Field<string>
         }
         return super[generateObject]();
     }

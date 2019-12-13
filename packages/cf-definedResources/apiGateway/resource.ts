@@ -51,10 +51,10 @@ export class ApiResource extends Resource implements namedPath{
                 throw new PreparableError(this,"api not found in path of resource")
             }
             this.restApiId=api.obj.r
-            if(!res || api.depth>res.depth){
-                this.parentId=api.obj.a.RootResourceId
-            }else{
+            if(res && api.depth>res.depth){
                 this.parentId=res.obj.r
+            }else{
+                this.parentId=api.obj.a.RootResourceId
             }
         }
     }

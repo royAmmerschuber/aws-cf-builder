@@ -33,6 +33,7 @@ export abstract class Method extends Resource implements namedPath{
         integration:Integration,
         responses:MethodResponse[],
         authorization:Authorization,
+        operationName:Field<string>
 
         restApiId:Field<string>,
         resourceId:Field<string>,
@@ -52,7 +53,6 @@ export abstract class Method extends Resource implements namedPath{
      */
     constructor(
         eDepth:number,
-        private operationName?:string
     ){
         super(1+eDepth);
         this._={
@@ -61,7 +61,14 @@ export abstract class Method extends Resource implements namedPath{
     }
 
     //#region simple properties
-    
+    /**
+     * 
+     * @param name A friendly operation name for the method. For example, you can assign the 
+     * OperationName of ListPets for the `GET /pets` method.
+     */
+    operationName(name:Field<string>){
+        this._.operationName=name
+    }
     /**
      * sets the authorization data for the method
      * 
@@ -94,9 +101,7 @@ export abstract class Method extends Resource implements namedPath{
     Authorization(type:AuthorizationType,authorizer?:Ref<Authorizer>,scopes?:Field<string>[]):this{
         this._.authorization={
             type:type,
-            authorizer:authorizer instanceof Resource
-                ? authorizer.r
-                : authorizer,
+            authorizer:Ref.get(authorizer),
             scopes:scopes
         };
         return this;
@@ -175,12 +180,12 @@ export abstract class Method extends Resource implements namedPath{
             }
         }
         if(this[checkCache]) return this[checkCache]
-        return this[checkCache]=callOn(this._,Preparable as any,(o:Preparable)=>o[checkValid]())
+        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,{})
     }
     public [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=>{
+            callOn(this._,Preparable,o=>{
                 o[prepareQueue](stack,this,true)
             })
             const { api, res }=findInPath(path,{
@@ -201,7 +206,7 @@ export abstract class Method extends Resource implements namedPath{
             }
         }
     }
-    [generateObject](){
+    [generateObject]():MethodOut{
         return {
             Type:this[resourceIdentifier],
             Properties:{
@@ -221,7 +226,7 @@ export abstract class Method extends Resource implements namedPath{
                         StatusCode:code
                     }))
                     : undefined,
-                OperationName:this.operationName,
+                OperationName:this._.operationName,
                 ApiKeyRequired:this._.requireKey,
 
                 HttpMethod:this._.method,
@@ -290,4 +295,23 @@ interface Authorization{
     type:string,
     authorizer?:Field<string>,
     scopes?:Field<string>[]
+}
+export interface MethodOut{
+    Type: string;
+    Properties: {
+        AuthorizationType: string;
+        AuthorizationScopes: Field<string>[];
+        AuthorizerId: Field<string>;
+        Integration: Integration;
+        MethodResponses: {
+            ResponseModels: SMap<Field<string>>;
+            ResponseParameters: SMap<Field<boolean>>;
+            StatusCode: Field<string>;
+        }[];
+        OperationName: Field<string>;
+        ApiKeyRequired: boolean;
+        HttpMethod: Field<string>;
+        ResourceId: Field<string>;
+        RestApiId: Field<string>;
+    }
 }

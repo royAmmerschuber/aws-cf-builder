@@ -126,7 +126,7 @@ export abstract class URG extends Resource {
         return this[checkCache]=callOn([
             this._,
             this.policiesR
-        ],Preparable as any,(o:Preparable)=>o[checkValid]())
+        ],Preparable,o=>o[checkValid]())
             .reduce(_.assign,{})
     }
     [generateObject]():any{
