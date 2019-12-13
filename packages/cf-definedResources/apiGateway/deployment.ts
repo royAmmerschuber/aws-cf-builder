@@ -85,13 +85,13 @@ export class Deployment extends Resource implements namedPath{
     //#region resource functions
     public [checkValid]() {
         if(this[checkCache]) return this[checkCache]
-        return this[checkCache]=callOn([this._,this.name],Preparable as any,(o:Preparable)=>o[checkValid]())
+        return this[checkCache]=callOn([this._,this.name],Preparable,o=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,{})
     }
 
     public [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn([this._, this.name],Preparable as any,(o:Preparable)=>{
+            callOn([this._, this.name],Preparable,o=>{
                 o[prepareQueue](stack,this,true)
             })
 

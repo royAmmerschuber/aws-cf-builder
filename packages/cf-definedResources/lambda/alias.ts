@@ -94,7 +94,7 @@ export class Alias extends Resource implements namedPath{
                 type:this[resourceIdentifier]
             }
         }
-        return this[checkCache]=callOn(this._,Preparable as any,(o:Preparable)=>o[checkValid]())
+        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }
 
@@ -107,8 +107,8 @@ export class Alias extends Resource implements namedPath{
                 this[s_path]=path
                 stack.resources.add(this)
                 
-                callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
-                callOn(this.eventMappings,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,false))
+                callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
+                callOn(this.eventMappings,Preparable,o=>o[prepareQueue](stack,this,false))
 
                 const { func } =findInPath(path,{func:LambdaFunction})
                 

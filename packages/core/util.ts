@@ -1,19 +1,18 @@
-import { Generatable, SMap, Preparable } from "./general"
+import { Generatable, SMap, Preparable, PreparableError } from "./general"
 import _ from "lodash/fp"
-import { s_path, stacktrace, pathName } from "./symbols"
+import { s_path, pathName } from "./symbols"
 import { stackPreparable } from "./stackBackend"
 import { refPlaceholder } from "./refPlaceholder"
 import { pathItem } from "./path"
 import { Field } from "./field"
 import { Resource } from "./generatables/resource"
-import { AttributeField } from "./fields/attributeField"
 
 export function prepareQueueBase(stack:stackPreparable,path:pathItem,ref:boolean,res:Generatable){
     if(ref){
         stack.resources.add(new refPlaceholder(res,path))
     }else{
         if(res[s_path]!==undefined){
-            throw res[stacktrace]+"\nmultiple attempted creations"
+            throw new PreparableError(res,"multiple attempted creations")
         }
         res[s_path]=path
         stack.resources.add(res)
@@ -48,6 +47,7 @@ export function findInPath<T extends findInPath.tType>(path:pathItem,objects:T):
     while(!(p instanceof Array)){
         depth++
         opt.forEach(([k,constr])=>{
+            if(k in out) return;
             if(p instanceof constr){
                 out[k]={
                     depth:depth,

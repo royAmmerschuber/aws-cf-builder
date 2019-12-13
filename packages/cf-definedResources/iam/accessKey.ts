@@ -65,12 +65,12 @@ export class AccessKey extends Resource implements namedPath{
     //#endregion
     [checkValid]() {
         if(this[checkCache])return this[checkCache]
-        return this[checkCache]=callOn(this._,Preparable as any,(o:Preparable)=>o[checkValid]())
+        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,{})
     }
     [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
             const {user}=findInPath(path,{user:User})
             this._.userName=user.obj.r
         }

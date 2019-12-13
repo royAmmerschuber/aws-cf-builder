@@ -9,6 +9,7 @@ import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Attr, prepareQueueBase, callOn, findInPath } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, namedPath } from "aws-cf-builder-core/path";
+import { ServerlessFunction } from "../serverless/function";
 
 /**
  * The AWS::Lambda::Permission resource associates a policy statement with 
@@ -148,13 +149,16 @@ export class Permission extends Resource implements namedPath{
     }
     public [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean) {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=> o[prepareQueue](stack,this,true))
-            const { lambda } =findInPath(path,{
-                lambda:LambdaFunction
+            callOn(this._,Preparable,o=> o[prepareQueue](stack,this,true))
+            const found =findInPath(path,{
+                lambda:LambdaFunction,
+                sLambda:ServerlessFunction
             })
-            if(!lambda) throw new PreparableError(this,"Lambda Function not found in path")
-
-            this._.functionName=lambda.obj.r
+            if(_.size(found)==0){
+                throw new PreparableError(this,"Lambda Function not found in path")
+            }
+            const first=_.sortBy("depth",found)[0].obj
+            this._.functionName=first.r
         }
     }
     public [generateObject]() {

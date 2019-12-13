@@ -164,7 +164,7 @@ export class Rule extends Resource{
                 errors:errors
             }
         }
-        return this[checkCache]=callOn(this._,Preparable as any,(o:Preparable) => o[checkValid]())
+        return this[checkCache]=callOn(this._,Preparable,o => o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }
 

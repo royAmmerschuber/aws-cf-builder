@@ -42,7 +42,7 @@ try{
     outputString=transform(inPath,program)
 }catch(e){
     if(e instanceof Error){
-        console.log(e.message)
+        console.log(e.stack)
     }else{
         console.log(e)
     }

@@ -84,12 +84,12 @@ export class LayerPermission extends Resource{
                 errors:errors
             }
         }
-        return this[checkCache]=callOn(this._,Preparable as any,(o:Preparable)=>o[checkValid]())
+        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }
     [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
 
             const { layer }=findInPath(path,{layer:Layer})
 

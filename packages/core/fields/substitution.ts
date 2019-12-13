@@ -7,6 +7,7 @@ import { AttributeField } from "./attributeField";
 import { ReferenceField } from "./referenceField";
 import { pathItem } from "../path";
 import { Parameter } from "../generatables/parameter"
+import { Resource } from "../generatables/resource";
 export function Sub(text:readonly string[],...args:Field<any>[]){
     return new Substitution(1,text,args)
 }
@@ -35,6 +36,9 @@ export class Substitution extends InlineAdvField<string>{
                     leftovers.push(v)
                     templString+=`\${par_${leftovers.length}}`
                 }
+            }else if(v instanceof Resource){
+                const ref=v.r.toJSON().Ref
+                templString+=`\${${ref}}`
             }else if(typeof v == "string" || typeof v=="number"){
                 templString+=v
             }else{

@@ -181,7 +181,39 @@ function getResources(file: any): { path: string[], resource: Generatable }[] {
 function dissolvePaths(paths: pathItem[], resource: Generatable): pathItem {
     if (paths.length > 1) {
         //TODO do something smart for path resolving
-        throw resource[stacktrace] + "\n" + chalk.yellow(resource[resourceIdentifier]) + "\nmultiple references to resource"
+        const depths=new Map<pathItem|"path",number[]>()
+        paths.forEach(v=>{
+            let i=0
+            for(let it:pathItem=v;!(it instanceof Array);it=it[s_path],i++){
+                const d=depths.get(it)
+                if(!d){
+                    depths.set(it,[i])
+                }else{
+                    d.push(i)
+                }
+            }
+            const d=depths.get("path")
+            if(!d){
+                depths.set("path",[i])
+            }else{
+                d.push(i)
+            }
+        })
+        let shortestDepth=Infinity
+        let shortest:pathItem|"path"
+        ;[...depths]
+            .filter(([k,v])=>v.length==paths.length)
+            .forEach(([k,v])=>{
+                const depthSum=v.reduce((o,c)=>o+c,0)
+                if(depthSum<shortestDepth){
+                    shortestDepth=depthSum
+                    shortest=k
+                }
+            })
+        if(shortest=="path"){
+            throw new PreparableError(resource,"multiple references to resource")
+        }
+        return shortest
     } else {
         return paths[0]
     }

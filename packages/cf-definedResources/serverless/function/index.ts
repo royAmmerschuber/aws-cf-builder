@@ -9,7 +9,7 @@ import { checkValid, prepareQueue, generateObject, stacktrace, checkCache, resou
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { Permission } from "../../lambda/permission";
-import { Layer } from "../../lambda/layer";
+import { LambdaLayerable } from "../../lambda/layer";
 import { Version } from "../../lambda/version"
 import { EventMapping } from "../../lambda/eventMapping";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
@@ -531,7 +531,7 @@ export class ServerlessFunction extends Resource{
      * execution environment. Specify each layer by ARN, including the 
      * version.
      */
-    layer(...layers:Attr<Layer>[]){
+    layer(...layers:Attr<LambdaLayerable>[]){
         this._.layers.push(...layers.map(l => Attr.get(l,"Arn")));
         return this;
     }
@@ -562,7 +562,9 @@ export class ServerlessFunction extends Resource{
         if(!this._.runtime){
             errors.push(must+"Runtime");
         }
-        
+        if(!this._.handler){
+            errors.push(must+"handler")
+        }
         if(this._.memory && typeof this._.memory=="number" && this._.memory>3008){
             errors.push("the memory cannot be set to more than 3008");
         }
@@ -599,7 +601,7 @@ export class ServerlessFunction extends Resource{
             callOn([
                 this._,
                 this.name
-            ],Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            ],Preparable,o=>o[prepareQueue](stack,this,true))
 
             ;[
                 this.permissions,
@@ -645,7 +647,9 @@ export class ServerlessFunction extends Resource{
                 DeploymentPreference:this._.deploymentPreference,
                 Events:notEmpty(this._.events),
                 PermissionsBoundary:this._.permissionBoundary,
-                Policies:notEmpty(this._.policies)
+                Policies:notEmpty(this._.policies),
+                Role:this._.role,
+                Handler:this._.handler
             }
         };
     }

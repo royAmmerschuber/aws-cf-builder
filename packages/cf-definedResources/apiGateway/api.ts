@@ -84,7 +84,7 @@ export class Api extends Resource {
      * **required: Conditional. Required if you don't specify a OpenAPI definition**
      * @param name A name for the API Gateway RestApi resource.
      */
-    public name(name:string){
+    public name(name:Field<string>){
         this._.name=name
         return this;
     }
@@ -326,16 +326,15 @@ export class Api extends Resource {
                 this.name,
                 this.$.authorizers,
                 this.$.deployments
-            ], Preparable as any, v => v[checkValid]() as SMap<ResourceError>),
+            ], Preparable, o => o[checkValid]() as SMap<ResourceError>),
             treeErrors
         ].reduce<SMap<ResourceError>>(_.assign, out)
     }
     public [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         if (prepareQueueBase(stack, path, ref, this)) {
             let fMethod: ReferenceField;
-            const prepareTree = (node: ApiNode, resource?: ApiResource) => {
+            const prepareTree = (node: ApiNode, subPath: pathItem) => {
                 let hasMethods = false;
-                const subPath = resource || this
                 for (const k in node) {
                     let e = node[k];
                     switch (k) {
@@ -366,7 +365,7 @@ export class Api extends Resource {
                     node.OPTIONS[prepareQueue](stack, subPath, false);
                 }
             };
-            prepareTree(this.$.methodTree);
+            prepareTree(this.$.methodTree,this);
             const deplCarrier = new PathDataCarrier(this, {
                 fMethod: fMethod
             })
@@ -380,9 +379,8 @@ export class Api extends Resource {
             callOn([
                 this._,
                 this.name,
-            ], Preparable as any, (obj: Preparable) => {
-                obj[prepareQueue](stack, this, true)
-            })
+            ], Preparable, o => o[prepareQueue](stack, this, true))
+
         }
     }
     public [generateObject]() {

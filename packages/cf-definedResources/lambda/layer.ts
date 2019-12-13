@@ -5,13 +5,14 @@ import { Field } from "aws-cf-builder-core/field";
 import { s3PathConverter } from "../util";
 import { PreparableError, SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue, generateObject } from "aws-cf-builder-core/symbols";
-import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { LayerPermission } from "./layerPermission";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { ServerlessLayer } from "../serverless/layer";
 
+export type LambdaLayerable=Layer|ServerlessLayer
 /**
  * The AWS::Lambda::LayerVersion resource creates a layer version in AWS 
  * Lambda. For more information, see AWS Lambda Layers in the AWS Lambda 
@@ -168,11 +169,11 @@ export class Layer extends Resource{
         return this[checkCache]=callOn([
             this._,
             this.permissions
-        ],Preparable as any,(o:Preparable)=>o[checkValid]()).reduce<SMap<ResourceError>>(_.assign,out)
+        ],Preparable,o=>o[checkValid]()).reduce<SMap<ResourceError>>(_.assign,out)
     }
     [prepareQueue](stack: stackPreparable,path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable as any,(o:Preparable)=> o[prepareQueue](stack,this,true));
+            callOn(this._,Preparable,o=> o[prepareQueue](stack,this,true));
             this.permissions.forEach(o=>o[prepareQueue](stack,this,false))
         }
     }

@@ -108,7 +108,7 @@ export class User extends URG{
         if(prepareQueueBase(stack,path,ref,this)){
             this.keys.forEach(o=>o[prepareQueue](stack,this,false))
             this.policiesR.forEach(o=>o[prepareQueue](stack,new PathDataCarrier(this,{policyAttachment:{type:"user",value:this.r}}),true))
-            callOn(this._,Preparable as any,(o:Preparable)=>o[prepareQueue](stack,this,true))
+            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
         }
     }
     [generateObject]() {
