@@ -2,7 +2,8 @@
     "extends": "../../tsconfig.json",
     "exclude": [
         "./testFiles",
-        "./dist"
+        "./dist",
+        "./buildDeploymentPackage.ts"
     ],
     "compilerOptions": {
         "outDir": "./dist"
