@@ -152,7 +152,7 @@ const typesListStringInp = [
     "List<Number>"
 ]
 export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutTypeToTsType<T>>{
-    readonly [resourceIdentifier]: "Parameter"
+    readonly [resourceIdentifier]= "Parameter"
     private _: {
         name: string
         allowedPattern: RegExp,
@@ -231,11 +231,12 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
             AllowedValues: this._.allowedValues,
             ConstraintDescription: this._.constraintDescription,
             Default: (() => {
-                //TODO WIP
                 if (typeof this._.default != "string") {
                     if (typesListStringInp.includes(this._.type)) {
                         return (this._.default as number[]).join(",")
                     }
+                }else{
+                    return this._.default
                 }
             })(),
             Description: this._.description,
