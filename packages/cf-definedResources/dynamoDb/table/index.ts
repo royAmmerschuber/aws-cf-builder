@@ -8,6 +8,8 @@ import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import { SecondaryIndex, LocalSecondaryIndex, GlobalSecondaryIndex } from "./secondaryIndex";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 
 /**
  * The AWS::DynamoDB::Table resource creates a DynamoDB table. For 
@@ -64,7 +66,14 @@ export class Table extends Resource{
 
     private secondaryIndexes:SecondaryIndex[]=[];
     //#endregion
-
+    /**
+     * the resource name
+     */
+    r:ReferenceField
+    a={
+        Arn:new AttributeField(this,"Arn"),
+        StreamArn:new AttributeField(this,"StreamArn")
+    }
     constructor(){super(1);}
 
     /**

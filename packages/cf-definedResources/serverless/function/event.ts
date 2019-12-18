@@ -19,7 +19,11 @@ export namespace EventOut{
         Type:Field<"S3">
     }
     export interface SNS{
-        Properties:{}
+        Properties:{
+            FilterPolicy:{
+
+            }
+        }
         Type:Field<"SNS">
     }
     export interface Kinesis{

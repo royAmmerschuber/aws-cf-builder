@@ -14,7 +14,7 @@ import { Version } from "../../lambda/version"
 import { EventMapping } from "../../lambda/eventMapping";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { Role } from "../../iam/role";
-import { DeploymentPreferenceOut } from "./deploymentPreference";
+import { DeploymentPreferenceOut, DeploymentPreference as DeplPreference } from "./deploymentPreference";
 import { runtimes } from "../../lambda/function";
 import { EventOut } from "./event";
 import { Policy } from "../../iam";
@@ -245,7 +245,7 @@ export class ServerlessFunction extends Resource{
      * 
      * **maps:**`DeploymentPreference`
      */
-    deploymentPreference(preference:Field<DeploymentPreferenceOut>){
+    deploymentPreference(preference:Field<DeploymentPreferenceOut>|ServerlessFunction.DeploymentPreference){
         this._.deploymentPreference=preference
         return this
     }
@@ -653,4 +653,8 @@ export class ServerlessFunction extends Resource{
             }
         };
     }
+}
+export namespace ServerlessFunction{
+    export const DeploymentPreference=DeplPreference
+    export type DeploymentPreference=DeplPreference
 }
