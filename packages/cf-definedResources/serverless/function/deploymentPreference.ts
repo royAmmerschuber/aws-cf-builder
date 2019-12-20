@@ -128,7 +128,7 @@ export class DeploymentPreference extends InlineAdvField<DeploymentPreferenceOut
                 errors:errors
             }
         }
-        return callOn(this._,Preparable,o => o[checkValid]())
+        return this[checkCache]=callOn(this._,Preparable,o => o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {

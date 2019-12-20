@@ -10,12 +10,15 @@ import * as dynamoDb from "aws-cf-builder-defined-resources/dynamoDb"
 import * as ssm from "aws-cf-builder-defined-resources/ssm"
 import * as cloudwatch from "aws-cf-builder-defined-resources/cloudwatch"
 import * as serverless from "aws-cf-builder-defined-resources/serverless"
+import * as local from "aws-cf-builder-core/fields/local"
 import lodash from "lodash"
 declare global{
     export const Parameter:typeof parameter.Parameter
     export const Output:typeof output.Output
 
     export const Sub:typeof sub.Sub
+
+    export const Local:typeof local.Local
 
     export const Aws:typeof aws
 

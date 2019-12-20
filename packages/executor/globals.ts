@@ -2,6 +2,7 @@ import { Output } from "aws-cf-builder-core/generatables/output"
 import { Custom } from "aws-cf-builder-core/custom/resource"
 import { Parameter } from "aws-cf-builder-core/generatables/parameter"
 import { Sub } from "aws-cf-builder-core/fields/substitution"
+import { Local } from "aws-cf-builder-core/fields/local"
 import * as aws from "aws-cf-builder-defined-resources/aws"
 import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
 import * as lambda from "aws-cf-builder-defined-resources/lambda"
@@ -15,7 +16,8 @@ import _ from "lodash"
 global.Parameter=Parameter
 //@ts-ignore
 global.Output=Output 
-
+//@ts-ignore
+global.Local=Local
 //@ts-ignore
 global.Sub=Sub
 

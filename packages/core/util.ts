@@ -22,22 +22,17 @@ export function prepareQueueBase(stack:stackPreparable,path:pathItem,ref:boolean
 export function cleanTextForIdentifier(s:string){
     return s//TODO convert to valid Terraform identifier
 }
-export const generateUniqueIdentifier:(path: pathItem) => string=_.memoize(function generateUniqueIdentifier(path:pathItem):string{
-    //TODO make smarter
-    const rec=(rPath:pathItem):string=>{
-        if(rPath instanceof Array){
-            return rPath.map(_.flow(
-                cleanTextForIdentifier,
-                _.capitalize
-            )).join("")
-        }else if(pathName in rPath){
-
-            return rec(rPath[s_path])+rPath[pathName]()
-        }else{
-            return rec(rPath[s_path])
-        }
+export const generateUniqueIdentifier=_.memoize(function _generateUniqueIdentifier(path:pathItem):string{
+    if(path instanceof Array){
+        return path.map(_.flow(
+            cleanTextForIdentifier,
+            _.capitalize
+        )).join("")
+    }else if(pathName in path){
+        return generateUniqueIdentifier(path[s_path])+cleanTextForIdentifier(path[pathName]())
+    }else{
+        return generateUniqueIdentifier(path[s_path])
     }
-    return rec(path)
 })
 export function findInPath<T extends findInPath.tType>(path:pathItem,objects:T):findInPath.out<T>{
     const opt=_.toPairs(objects)
@@ -84,6 +79,7 @@ export function callOn<T,U>(container:any,instanceOf:new (...args)=>T|typeof Pre
             )
         }
     }
+    return []
 }
 export function notEmpty<T extends string|object>(t:T):T|undefined{
     if(_.size(t)){

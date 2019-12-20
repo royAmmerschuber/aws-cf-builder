@@ -99,7 +99,6 @@ export class Alias extends Resource implements namedPath{
     }
 
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
-        //TODO antipattern
         if(ref){
             stack.resources.add(new refPlaceholder(this,path))
         }else{
