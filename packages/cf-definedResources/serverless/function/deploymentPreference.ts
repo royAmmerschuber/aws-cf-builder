@@ -3,7 +3,7 @@ import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } 
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { Ref, Attr, notEmpty, callOn } from "aws-cf-builder-core/util";
+import { Ref, Attr, notEmpty, callOn, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { LambdaExecutable } from "../../lambda/function";
 import { Role } from "../../iam";
 import _ from "lodash/fp";
@@ -128,10 +128,9 @@ export class DeploymentPreference extends InlineAdvField<DeploymentPreferenceOut
                 errors:errors
             }
         }
-        return this[checkCache]=callOn(this._,Preparable,o => o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign,out)
+        return this[checkCache]=callOnCheckValid(this._,out)
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
-        callOn(this._,Preparable,o => o[prepareQueue](stack,path,true))
+        callOnPrepareQueue(this._,stack,path,true)
     }
 }

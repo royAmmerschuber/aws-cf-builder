@@ -1,6 +1,6 @@
 {
     "name": "aws-cf-builder-run",
-    "version": "0.1.4",
+    "version": "0.1.7",
     "dependencies": {
         "aws-cf-builder-core": "file:../core/dist",
         "aws-cf-builder-defined-resources": "file:../cf-definedResources/dist",

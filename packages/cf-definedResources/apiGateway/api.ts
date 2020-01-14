@@ -13,13 +13,14 @@ import { OptionsMethod } from "./method/optionsMethod";
 import { checkValid, stacktrace, checkCache, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { prepareQueue } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { prepareQueueBase, callOn, notEmpty } from "aws-cf-builder-core/util";
+import { prepareQueueBase, callOn, notEmpty, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { ApiResource } from "./resource";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { Preparable } from "aws-cf-builder-core/general";
 import { PathDataCarrier } from "aws-cf-builder-core/path";
+import { Model } from "./model";
 
 /**
  * resource contains a collection of Amazon API Gateway resources and methods that can be invoked through HTTPS 
@@ -51,11 +52,13 @@ export class Api extends Resource {
         methodTree: ApiNode
         deployments: Deployment[]
         authorizers: Authorizer[]
+        models: Model[]
     } = {
         methodTree: { branch: {} },
         deployments: [],
-        authorizers: []
-    } as any
+        authorizers: [],
+        models: []
+    }
     //#endregion
     /**
      * the `RestApi` ID, such as `a1bcdef2gh`.
@@ -263,7 +266,16 @@ export class Api extends Resource {
      */
     public authorizer(...authorizers: Authorizer[]) {
         this.$.authorizers.push(...authorizers);
-        return this;
+        return this
+    }
+    /**
+     * **required: false**
+     * @param models adds a new Model to the Api. you dont have to specify a Model if you specify
+     * one in a mehtod of this Api.
+     */
+    public model(...models:Model[]){
+        this.$.models.push(...models)
+        return this
     }
     /**
      * set the generator for the standard options Method.
@@ -306,7 +318,7 @@ export class Api extends Resource {
             return true;
         }
 
-        checkNode(this.$.methodTree);
+        checkNode(this.$.methodTree)
         if (!(this.name || this._.body || this._.bodyS3Location)) {
             errors.push("you must set a name or specify a body");
         }
@@ -320,15 +332,12 @@ export class Api extends Resource {
                 type: this[resourceIdentifier]
             }
         }
-        return this[checkCache] = [
-            ...callOn([
-                this._,
-                this.name,
-                this.$.authorizers,
-                this.$.deployments
-            ], Preparable, o => o[checkValid]() as SMap<ResourceError>),
-            treeErrors
-        ].reduce<SMap<ResourceError>>(_.assign, out)
+        return this[checkCache] = callOnCheckValid([
+            this._,
+            this.$.authorizers,
+            this.$.deployments,
+            this.$.models
+        ], out)
     }
     public [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         if (prepareQueueBase(stack, path, ref, this)) {
@@ -369,17 +378,11 @@ export class Api extends Resource {
             const deplCarrier = new PathDataCarrier(this, {
                 fMethod: fMethod
             })
-            this.$.deployments.forEach((d) => {
-                d[prepareQueue](stack, deplCarrier, false)
-            });
-            this.$.authorizers.forEach((a) => {
-                a[prepareQueue](stack, this, false)
-            });
+            this.$.deployments.forEach(d => d[prepareQueue](stack, deplCarrier, false))
+            this.$.authorizers.forEach(a => a[prepareQueue](stack, this, false))
+            this.$.models.forEach(m => m[prepareQueue](stack,this,false))
 
-            callOn([
-                this._,
-                this.name,
-            ], Preparable, o => o[prepareQueue](stack, this, true))
+            callOnPrepareQueue(this._,stack, this, true)
 
         }
     }

@@ -1,6 +1,6 @@
-import { Generatable, SMap, Preparable, PreparableError } from "./general"
+import { Generatable, SMap, Preparable, PreparableError, ResourceError } from "./general"
 import _ from "lodash/fp"
-import { s_path, pathName } from "./symbols"
+import { s_path, pathName, prepareQueue, checkValid } from "./symbols"
 import { stackPreparable } from "./stackBackend"
 import { refPlaceholder } from "./refPlaceholder"
 import { pathItem } from "./path"
@@ -20,7 +20,7 @@ export function prepareQueueBase(stack:stackPreparable,path:pathItem,ref:boolean
     return !ref
 }
 export function cleanTextForIdentifier(s:string){
-    return s//TODO convert to valid Terraform identifier
+    return s//TODO convert to valid CloudFormation identifier
 }
 export const generateUniqueIdentifier=_.memoize(function _generateUniqueIdentifier(path:pathItem):string{
     if(path instanceof Array){
@@ -80,6 +80,13 @@ export function callOn<T,U>(container:any,instanceOf:new (...args)=>T|typeof Pre
         }
     }
     return []
+}
+export function callOnPrepareQueue(container:any,stack:stackPreparable,path:pathItem,ref:boolean){
+    return callOn(container,Preparable,o=>o[prepareQueue](stack,path,ref))
+}
+export function callOnCheckValid(container:any,out:SMap<ResourceError>):SMap<ResourceError>{
+    return callOn(container,Preparable,o=>o[checkValid]())
+        .reduce<SMap<ResourceError>>(_.assign,out)
 }
 export function notEmpty<T extends string|object>(t:T):T|undefined{
     if(_.size(t)){

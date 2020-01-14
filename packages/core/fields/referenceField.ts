@@ -13,13 +13,10 @@ export class ReferenceField extends InlineAdvField<string>{
         super(1)
     }
     toJSON(){
-        if(typeof this.resource=="string"){
-            return {
-                Ref:this.resource
-            }
-        }
         return {
-            Ref:this.resource[getName]()
+            Ref:(typeof this.resource =="string") 
+                ? this.resource 
+                : this.resource[getName]()
         }
     }
     [prepareQueue](stack: stackPreparable,par: pathItem,ref:boolean){

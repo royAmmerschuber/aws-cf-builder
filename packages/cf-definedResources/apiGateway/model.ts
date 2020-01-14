@@ -1,14 +1,14 @@
-import _ from "lodash";
+import _ from "lodash/fp";
 
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { resourceIdentifier, checkValid, stacktrace, prepareQueue, generateObject, checkCache, pathName } from "aws-cf-builder-core/symbols";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Field } from "aws-cf-builder-core/field";
-import { SMap, Preparable, PreparableError } from "aws-cf-builder-core/general";
+import { SMap, PreparableError } from "aws-cf-builder-core/general";
 import { ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, namedPath } from "aws-cf-builder-core/path";
-import { prepareQueueBase, callOn } from "aws-cf-builder-core/util";
+import { prepareQueueBase, callOnPrepareQueue, callOnCheckValid } from "aws-cf-builder-core/util";
 import { findInPath } from "aws-cf-builder-core/util";
 import { Api } from "./api";
 
@@ -110,14 +110,11 @@ export class Model extends Resource implements namedPath{
                 errors:errors
             }
         }
-        return this[checkCache]=callOn([this._,this.name],Preparable,o=>o[checkValid]())
-            .reduce(_.assign,out);
+        return this[checkCache]=callOnCheckValid([this._,this.name],out);
     }
     public [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn([this._, this.name],Preparable,o=>{
-                o[prepareQueue](stack,this,true)
-            })
+            callOnPrepareQueue([this._, this.name],stack,this,true)
 
             const { api }=findInPath(path,{api:Api})
             if(!api) throw new PreparableError(this,"api not found in path")

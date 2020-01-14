@@ -570,14 +570,23 @@ export class LambdaFunction extends Resource{
 export type runtimes=
     "dotnetcore1.0" |
     "dotnetcore2.1" |
+
     "go1.x" |
+
     "java8" |
-    "nodejs10.x" |
+    "java11" |
+
     "nodejs8.10" |
+    "nodejs10.x" |
+    "nodejs12.x" |
+
     "provided" |
+
     "python2.7" |
     "python3.6" |
     "python3.7" |
+    "python3.8" |
+
     "ruby2.5"
 ;
 

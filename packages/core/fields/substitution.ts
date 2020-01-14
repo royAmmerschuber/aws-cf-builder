@@ -67,15 +67,15 @@ export class Substitution extends InlineAdvField<string>{
         args.forEach((v,i) => {
             if(typeof v == "string" || typeof v=="number"){
                 templString+=v
-                return
-            }
-            simple=false
-            const tag=this.generateTag(v)
-            if(tag){
-                templString+=tag
             }else{
-                leftovers.push(v)
-                templString+=`\${par_${leftovers.length}}`
+                simple=false
+                const tag=this.generateTag(v)
+                if(tag){
+                    templString+=tag
+                }else{
+                    leftovers.push(v)
+                    templString+=`\${par_${leftovers.length}}`
+                }
             }
             templString+=text[i+1].replace("${","${!")
         })

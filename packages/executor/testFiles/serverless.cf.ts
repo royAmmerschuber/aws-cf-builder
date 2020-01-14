@@ -10,3 +10,14 @@ export const func=new Serverless.Function()
         one:"four",
         two:"three"
     })
+    .events(new Serverless.Function.Event.Api()
+        .Method("GET")
+        .Path("/paul/peter")
+        .authorizer("somethin")
+        .api("test")
+        .resourcePolicy("AwsAccountWhitelist",["peter","paul"])
+        .requestParameter("header",[
+            "paul",
+            "peter",
+            Sub`franz`
+        ]))
