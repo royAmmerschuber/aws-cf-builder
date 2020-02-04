@@ -2,6 +2,7 @@ import * as parameter from "aws-cf-builder-core/generatables/parameter"
 import * as custom from "aws-cf-builder-core/custom/resource"
 import * as output from "aws-cf-builder-core/generatables/output"
 import * as sub from "aws-cf-builder-core/fields/substitution"
+import * as join from "aws-cf-builder-core/fields/join"
 import * as alias from "aws-cf-builder-core/fields/alias"
 import * as aws from "aws-cf-builder-defined-resources/aws"
 import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
@@ -20,6 +21,7 @@ declare global{
     export const Output:typeof output.Output
     export const Sub:typeof sub.Sub
     export const Local:typeof local.Local
+    export const Join:typeof join.Join
     export const Alias:typeof alias.Alias
 
     export const Custom:typeof custom.Custom

@@ -3,6 +3,7 @@ import { Custom } from "aws-cf-builder-core/custom/resource"
 import { Parameter } from "aws-cf-builder-core/generatables/parameter"
 import { Sub } from "aws-cf-builder-core/fields/substitution"
 import { Local } from "aws-cf-builder-core/fields/local"
+import { Join } from "aws-cf-builder-core/fields/join"
 import { Alias } from "aws-cf-builder-core/fields/alias"
 import * as aws from "aws-cf-builder-defined-resources/aws"
 import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
@@ -21,6 +22,8 @@ global.Output=Output
 global.Local=Local
 //@ts-ignore
 global.Sub=Sub
+//@ts-ignore
+global.Join=Join
 //@ts-ignore
 global.Alias=Alias
 
