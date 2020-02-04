@@ -287,7 +287,7 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         callOn([this._, this.sid], Preparable as any, (o: Preparable) => o[prepareQueue](stack, path, true))
         if(path instanceof PathDataCarrier && path.data.skipResources){
-            if(this._.resources!="*") throw new PreparableError(this,"do not specify a resource for a Assume Policy")
+            if(this._.resources!="*" && this._.resources!=undefined) throw new PreparableError(this,"do not specify a resource for a Assume Policy")
             this._.resources=undefined
         }
     }
