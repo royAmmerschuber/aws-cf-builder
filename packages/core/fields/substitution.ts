@@ -23,7 +23,7 @@ export class Substitution extends InlineAdvField<string>{
         protected readonly args:Field<any>[]
     ){ super(depth) }
     //TODO escape plaintext ${}
-    protected generateSubstituionOutputApi(text:string,subs:SMap<any>){
+    protected generateSubstitutionOutputApi(text:string,subs:SMap<any>){
         const reg=/((?:[^$]|\$(?!{))*)\${([^}]+)}/g
         
         let outS=""
@@ -87,7 +87,7 @@ export class Substitution extends InlineAdvField<string>{
             return { "Fn::Sub":templString}
         }
     }
-    generateTag(val:any):string|void{
+    private generateTag(val:any):string|void{
         if(isAdvField(val)){
             if(val instanceof AttributeField){
                 const getAtt=val.toJSON()["Fn::GetAtt"]
@@ -103,7 +103,7 @@ export class Substitution extends InlineAdvField<string>{
         return null
     }
     toJSON(){
-        if(typeof this.text=="string") return this.generateSubstituionOutputApi(this.text,this.args[0])
+        if(typeof this.text=="string") return this.generateSubstitutionOutputApi(this.text,this.args[0])
         else return this.generateSubstitutionOutput(this.text,this.args)
     }
     [checkValid](): SMap<ResourceError> {
