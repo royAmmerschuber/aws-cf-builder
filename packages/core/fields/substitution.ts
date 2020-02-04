@@ -22,7 +22,6 @@ export class Substitution extends InlineAdvField<string>{
         protected readonly text:readonly string[] | string,
         protected readonly args:Field<any>[]
     ){ super(depth) }
-    //TODO escape plaintext ${}
     protected generateSubstitutionOutputApi(text:string,subs:SMap<any>){
         const reg=/((?:[^$]|\$(?!{))*)\${([^}]+)}/g
         

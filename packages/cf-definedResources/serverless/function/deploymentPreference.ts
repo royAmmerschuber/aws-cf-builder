@@ -3,7 +3,7 @@ import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } 
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { Ref, Attr, notEmpty, callOn, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
+import { Ref, Attr, notEmpty, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { LambdaExecutable } from "../../lambda/function";
 import { Role } from "../../iam";
 import _ from "lodash/fp";

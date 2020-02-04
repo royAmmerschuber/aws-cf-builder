@@ -210,7 +210,6 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
         this._.notAction = blacklist;
         return this;
     }
-    //TODO use ARNs for resources
     /**
      * **required: false**
      * 

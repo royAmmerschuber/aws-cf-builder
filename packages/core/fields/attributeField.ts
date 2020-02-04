@@ -24,10 +24,9 @@ export class AttributeField extends InlineAdvField<any>{
             }
         })
     }
-    constructor(
-        private resource:Resource,
-        private attr:string
-    ){ super(1) }
+    constructor(resource:Resource,attr:string)
+    constructor(pseudoAttribute:string,attr:string)
+    constructor(private resource:Resource|string,private attr:string){ super(1) }
 
     toJSON() {
         return {"Fn::GetAtt":[
