@@ -1,5 +1,5 @@
 {
-    "name": "aws-cf-builder-run",
+    "name": "aws-cf-builder",
     "version": "1.0.0",
     "dependencies": {
         "aws-cf-builder-core": "file:../core/dist",
