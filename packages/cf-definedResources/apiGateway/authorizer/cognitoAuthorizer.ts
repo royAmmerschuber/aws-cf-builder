@@ -2,7 +2,6 @@ import _ from "lodash/fp";
 import { Authorizer } from "../authorizer";
 import { Field } from "aws-cf-builder-core/field";
 import { Attr } from "aws-cf-builder-core/util"
-import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { checkValid, stacktrace, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 /**

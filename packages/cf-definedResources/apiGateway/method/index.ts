@@ -2,15 +2,14 @@ import { Authorizer } from "../authorizer";
 import { Api } from "../api";
 import _ from "lodash/fp";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
-import { Ref, prepareQueueBase } from "aws-cf-builder-core/util";
+import { Ref, prepareQueueBase, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { Field } from "aws-cf-builder-core/field";
-import { SMap, Preparable, PreparableError } from "aws-cf-builder-core/general";
+import { SMap, PreparableError } from "aws-cf-builder-core/general";
 import { Model } from "../model";
 import { checkValid, checkCache, pathName } from "aws-cf-builder-core/symbols";
 import { ResourceError } from "aws-cf-builder-core/general";
 import { stacktrace, prepareQueue } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { callOn } from "aws-cf-builder-core/util";
 import { generateObject } from "aws-cf-builder-core/symbols";
 import { findInPath } from "aws-cf-builder-core/util";
 import { ApiResource } from "../resource";
@@ -18,6 +17,7 @@ import { pathItem, namedPath } from "aws-cf-builder-core/path";
 import { PathDataCarrier } from "aws-cf-builder-core/path";
 import { resourceIdentifier } from "aws-cf-builder-core/symbols";
 
+//TODO add normal Method
 /**
  * The AWS::ApiGateway::Method resource creates Amazon API Gateway (API Gateway) 
  * methods that define the parameters and body that clients must send in their requests.
@@ -68,6 +68,7 @@ export abstract class Method extends Resource implements namedPath{
      */
     operationName(name:Field<string>){
         this._.operationName=name
+        return this
     }
     /**
      * sets the authorization data for the method
@@ -179,15 +180,11 @@ export abstract class Method extends Resource implements namedPath{
                 errors:errors
             }
         }
-        if(this[checkCache]) return this[checkCache]
-        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign,{})
+        return this[checkCache]=callOnCheckValid(this._,out)
     }
     public [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable,o=>{
-                o[prepareQueue](stack,this,true)
-            })
+            callOnPrepareQueue(this._,stack,this,true)
             const { api, res }=findInPath(path,{
                 api:Api,
                 res:ApiResource

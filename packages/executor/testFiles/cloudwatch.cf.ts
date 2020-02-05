@@ -1,7 +1,0 @@
-export const test=new CloudWatch.Rule()
-    .Schedule(new CloudWatch.Rule.Schedule.Cron(4,2,1,"10/3"))
-    .state("DISABLED")
-    .targets(new CloudWatch.Rule.Target()
-        .Id("bla")
-        .Arn("peter")
-        .inputTransformer("bla"))

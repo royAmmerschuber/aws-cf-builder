@@ -1,0 +1,52 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "Param1Parameter": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+                "Name": "boringString",
+                "Type": "String",
+                "Value": "this is a test",
+                "Description": "a boring old string",
+                "AllowedPattern": "^this.+",
+                "Policies": "[{\"Type\":\"Expiration\",\"Version\":\"1.0\",\"Attributes\":{\"Timestamp\":\"2019-02-01\"}},{\"Type\":\"ExpirationNotification\",\"Version\":\"1.0\",\"Attributes\":{\"Before\":\"4\",\"Unit\":\"Days\"}},{\"Type\":\"NoChangeNotification\",\"Version\":\"1.0\",\"Attributes\":{\"After\":\"5\",\"Unit\":\"Hours\"}}]"
+            }
+        },
+        "Param2Parameter": {
+            "Type": "AWS::SSM::Parameter",
+            "Properties": {
+                "Type": "StringList",
+                "Value": "one,two,three",
+                "Policies": "{\"test\":\"paul\"}"
+            }
+        }
+    },
+    "Outputs": {
+        "Out1": {
+            "Value": {
+                "Ref": "Param1Parameter"
+            }
+        },
+        "Out2": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Param1Parameter",
+                    "Type"
+                ]
+            }
+        },
+        "Out3": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Param1Parameter",
+                    "Value"
+                ]
+            }
+        },
+        "Out4": {
+            "Value": {
+                "Fn::Sub": "arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${Param1Parameter}"
+            }
+        }
+    }
+}

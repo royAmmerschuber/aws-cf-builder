@@ -1,15 +1,20 @@
 {
     "name": "aws-cf-builder-core",
-    "version":"0.1.7",
+    "version":"1.0.0",
     "dependencies": {
         "callsite": "^1.0.0",
-        "chalk": "^2.4.2",
-        "lodash": "^4.17.11"
+        "chalk": "^3.0.0",
+        "lodash": "^4.17.15"
     },
     "devDependencies": {
-        "@types/lodash": "^4.14.123"
+        "@types/lodash": "^4.14.149"
     },
     "scripts": {
         "build":"tsc & cp package.json dist/package.json"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/royAmmerschuber/aws-cf-builder/tree/master/packages/core"
+    },
+    "license": "ISC"
 }

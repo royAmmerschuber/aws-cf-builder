@@ -1,0 +1,656 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "ApiRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Name": "wierdApi",
+                "ApiKeySourceType": "AUTHORIZER",
+                "BinaryMediaTypes": [
+                    "x",
+                    "y",
+                    "z"
+                ],
+                "Body": {
+                    "openapi": "some openapi"
+                },
+                "Description": "bla bla bla",
+                "EndpointConfiguration": [
+                    "EDGE",
+                    "REGIONAL"
+                ],
+                "FailOnWarnings": true,
+                "Policy": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Action": "*",
+                            "Resource": "*"
+                        }
+                    ]
+                }
+            }
+        },
+        "ApiPaulResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "PathPart": "paul",
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "ApiRestApi",
+                        "RootResourceId"
+                    ]
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "PathPart": "meier",
+                "ParentId": {
+                    "Ref": "ApiPaulResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierGetMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/someLambdaArn/invocations"
+                    }
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": {
+                                "Ref": "ApiPaulMeierGetNiModel"
+                            }
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "OperationName": "launchLambda",
+                "ApiKeyRequired": true,
+                "HttpMethod": "GET",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierDeleteMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "COGNITO_USER_POOLS",
+                "AuthorizationScopes": [
+                    "one",
+                    "two"
+                ],
+                "AuthorizerId": {
+                    "Ref": "ApiPaulMeierDeleteNiAuthorizer"
+                },
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "DELETE",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierHeadMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "HEAD",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierPatchMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "PATCH",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierPostMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "POST",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierPutMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "PUT",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierCustomoptionResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "PathPart": "customOption",
+                "ParentId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierCustomoptionOptionsMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'sweden'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "OPTIONS",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierCustomoptionResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierNooptionsResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "PathPart": "noOptions",
+                "ParentId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierNooptionsPutMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "AWS_IAM",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/ni/invocations"
+                    }
+                },
+                "HttpMethod": "PUT",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierNooptionsResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierOptionsMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,DELETE,HEAD,PATCH,POST,PUT,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "OPTIONS",
+                "ResourceId": {
+                    "Ref": "ApiPaulMeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulPutMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/some/invocations"
+                    }
+                },
+                "HttpMethod": "PUT",
+                "ResourceId": {
+                    "Ref": "ApiPaulResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulOptionsMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "StatusCode": "200",
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'PUT,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            }
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "HttpMethod": "OPTIONS",
+                "ResourceId": {
+                    "Ref": "ApiPaulResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiDplDeployment": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "DependsOn": "ApiPaulMeierGetMethod",
+            "Properties": {
+                "StageDescription": {
+                    "AccessLogSetting": {
+                        "DestinationArn": "arn:bla"
+                    }
+                },
+                "DeploymentCanarySettings": {
+                    "PercentTraffic": 4
+                },
+                "Description": "aws-some",
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiCogAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+                "IdentitySource": "secret",
+                "Name": "cog",
+                "Type": "COGNITO_USER_POOLS",
+                "ProviderARNs": [
+                    "arn:userpool"
+                ],
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                },
+                "AuthorizerResultTtlInSeconds": 4
+            }
+        },
+        "ApiIchiModel": {
+            "Type": "AWS::ApiGateway::Model",
+            "Properties": {
+                "ContentType": "application/json",
+                "Schema": {
+                    "thisIsASchema": "man!"
+                },
+                "Description": "epic model",
+                "Name": "ichi",
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "Api2RestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "BodyS3Location": {
+                    "Bucket": "bucket",
+                    "ETag": "tag",
+                    "Key": "path/key",
+                    "Version": "version"
+                }
+            }
+        },
+        "Api2MeierResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "PathPart": "meier",
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "Api2RestApi",
+                        "RootResourceId"
+                    ]
+                },
+                "RestApiId": {
+                    "Ref": "Api2RestApi"
+                }
+            }
+        },
+        "Api2MeierGetMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/san/invocations"
+                    }
+                },
+                "HttpMethod": "GET",
+                "ResourceId": {
+                    "Ref": "Api2MeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "Api2RestApi"
+                }
+            }
+        },
+        "Api2MeierOptionsMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/paul/invocations"
+                    }
+                },
+                "HttpMethod": "OPTIONS",
+                "ResourceId": {
+                    "Ref": "Api2MeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "Api2RestApi"
+                }
+            }
+        },
+        "Api3RestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "BodyS3Location": {
+                    "Bucket": "bucket",
+                    "Key": "path/key"
+                }
+            }
+        },
+        "ApiPaulMeierGetNiModel": {
+            "Type": "AWS::ApiGateway::Model",
+            "Properties": {
+                "ContentType": "application/json",
+                "Schema": {},
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierDeleteNiAuthorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+                "IdentitySource": "auth",
+                "Name": "ni",
+                "Type": "COGNITO_USER_POOLS",
+                "ProviderARNs": [
+                    "someone"
+                ],
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        }
+    }
+}

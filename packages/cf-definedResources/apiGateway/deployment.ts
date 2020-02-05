@@ -134,7 +134,7 @@ export class Deployment extends Resource implements namedPath{
 /**
  * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-deployment-stagedescription.html)
  */
-export interface StageDescription{
+export interface StageDescription{ //TODO possibly inline into Deployment
     AccessLogSetting?:{
         DestinationArn?:Field<string>,
         Format?:Field<string>
@@ -161,7 +161,7 @@ export interface StageDescription{
 /**
  * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-deployment-canarysetting.html)
  */
-export interface CanarySetting{
+export interface CanarySetting{ //TODO
     PercentTraffic?:Field<number>;
     StageVariableOverrides?:SMap<Field<string>>;
     UseStageCache?:Field<boolean>;
@@ -170,7 +170,7 @@ export interface CanarySetting{
 /**
  * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-apigateway-deployment-stagedescription-methodsetting.html)
  */
-export interface MethodSetting{
+export interface MethodSetting{ //TODO
     CacheDataEncrypted?:Field<boolean>,
     CacheTtlInSeconds?:Field<number>,
     CachingEnabled?:Field<boolean>,

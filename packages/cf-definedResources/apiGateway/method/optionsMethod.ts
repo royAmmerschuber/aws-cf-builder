@@ -9,7 +9,6 @@ import { ApiNode } from "../api";
  * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-apigateway-method.html)
  */
 export class OptionsMethod extends Method{
-    private static auth={type:"NONE"};
     /**
      * 
      * @param node the Api node where the options method will be placed
@@ -25,8 +24,8 @@ export class OptionsMethod extends Method{
         origin:string="*",
         headers:string="Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token"
     ){
-        super(1);
-        this._.authorization=OptionsMethod.auth;
+        super(2);
+        this._.authorization={type:"NONE"};
         let methods="";
         for(let m in node){
             if(m!="branch"){
