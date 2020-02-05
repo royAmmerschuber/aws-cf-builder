@@ -12,7 +12,7 @@ import { resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { pathName } from "aws-cf-builder-core/symbols";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
-
+//TODO add normal Authorizer
 /**
  * The AWS::ApiGateway::Authorizer resource creates an authorization 
  * layer that Amazon API Gateway (API Gateway) activates for methods 

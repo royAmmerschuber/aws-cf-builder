@@ -1,13 +1,13 @@
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { generateObject, resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } from "aws-cf-builder-core/symbols";
-import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
+import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { runtimes } from "../lambda/function";
 import { Field } from "aws-cf-builder-core/field";
 import { LayerPermission } from "../lambda";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
-import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
+import { prepareQueueBase, notEmpty, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import _ from "lodash/fp";
 
 export type retentionPolicy = "Retain" | "Delete";
@@ -143,14 +143,14 @@ export class ServerlessLayer extends Resource {
                 errors:errors
             }
         }
-        return this[checkCache]=callOn([
+        return this[checkCache]=callOnCheckValid([
             this._,
             this.permissions
-        ],Preparable,o => o[checkValid]()).reduce<SMap<ResourceError>>(_.assign,out)
+        ],out)
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable,o=> o[prepareQueue](stack,this,true));
+            callOnPrepareQueue(this._,stack,this,true);
             this.permissions.forEach(o=>o[prepareQueue](stack,this,false))
         }
     }

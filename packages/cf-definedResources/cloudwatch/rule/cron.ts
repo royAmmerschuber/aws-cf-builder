@@ -5,26 +5,72 @@ import { Substitution } from "aws-cf-builder-core/fields/substitution";
 
 export class CronExpression extends Substitution{
     [resourceIdentifier]="CronExpression"
+    private _:{
+        minutes:Field<wildcard|number>,
+        hours:Field<wildcard|number>,
+        dayOfMonth:Field<wildcard|number>,
+        month:Field<wildcard|MonthString|number>,
+        dayOfWeek:Field<wildcard|WeekdayString|number>,
+        year:Field<wildcard|number>
+    }={} as any
+    constructor(){
+        super(2,[],[])
+    }
     /**
      * @param minutes between:`0-59` wildcards:`,` `-` `*` `/` default:`*`
+     */
+    minutes(minutes:Field<wildcard|number>){
+        this._.minutes=minutes
+        return this
+    }
+    /**
      * @param hours between:`0-23` wildcards:`,` `-` `*` `/` default:`*`
+     */
+    hours(hours:Field<wildcard|number>){
+        this._.hours=hours
+        return this
+    }
+    /**
      * @param dayOfMonth between:`1-31` wildcards:`,` `-` `*` `/` `?` `L` `W` default:`*`
+     */
+    dayOfMonth(dayOfMonth:Field<wildcard|number>){
+        this._.dayOfMonth=dayOfMonth
+        return this
+    }
+    /**
      * @param month between:`1-12` or `JAN-DEC` wildcards:`,` `-` `*` `/` default:`*`
+     */
+    month(month:Field<wildcard|number>):this
+    month(monthS:Field<MonthString>):this
+    month(month:Field<wildcard|MonthString|number>){
+        this._.month=month
+        return this
+    }
+    /**
      * @param dayOfWeek between:`1-31` or `SUN-SAT` wildcards:`,` `-` `*` `/` `?` `L` `#` default:`?`
+     */
+    dayOfWeek(dayOfWeek:Field<wildcard|number>):this
+    dayOfWeek(dayOfWeek:Field<WeekdayString>):this
+    dayOfWeek(dayOfWeek:Field<wildcard|WeekdayString|number>){
+        this._.dayOfWeek=dayOfWeek
+        return this
+    }
+    /**
      * @param year between:`1970-2199` wildcards:`,` `-` `*` `/` `?` default:`*`
      */
-    constructor(
-        minutes:Field<wildcard|number>="*",
-        hours:Field<wildcard|number>="*",
-        dayOfMonth:Field<wildcard|number>="*",
-        month:Field<wildcard|MonthString|number>="*",
-        dayOfWeek:Field<wildcard|WeekdayString|number>="?",
-        year:Field<wildcard|number>="*"
-    ){
-        super(2,...(
-            ((text,...args)=>[text,args])
-                `cron(${minutes} ${hours} ${dayOfMonth} ${month} ${dayOfWeek} ${year})` as [string[],any[]]
-        ))
+    year(year:Field<wildcard|number>){
+        this._.year=year
+        return this
+    }
+    toJSON(){
+        return this.generateSubstitutionOutputApi("cron(${m} ${h} ${dom} ${mon} ${dow} ${y})",{
+            m:this._.minutes || "*",
+            h:this._.hours || "*",
+            dom:this._.dayOfMonth || "*",
+            mon:this._.month || "*",
+            dow:this._.dayOfWeek || "?",
+            y:this._.year || "*"
+        })
     }
     ;[checkValid]() {
         const out=super[checkValid]()

@@ -1,0 +1,6 @@
+[ 
+    ["AWS::SSM::Parameter",[
+        "you must specify a Type",
+        "you must specify a Value"
+    ]]
+]

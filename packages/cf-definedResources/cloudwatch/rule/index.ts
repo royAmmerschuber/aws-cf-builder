@@ -108,7 +108,7 @@ export class Rule extends Resource{
      * [reference](https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html)
      * 
      */
-    Schedule(scheduleExpression:Field<string>|Rule.Schedule.Cron|Rule.Schedule.Rate):this{
+    Schedule(scheduleExpression:Field<string>|Rule.Cron|Rule.Rate):this{
         this._.schedule=scheduleExpression
         return this;
     }
@@ -191,12 +191,12 @@ export class Rule extends Resource{
     //#endregion
 }
 export namespace Rule{
-    export namespace Schedule{
-        export const Rate=RateExpression
-        export type Rate=RateExpression
-        export const Cron=CronExpression
-        export type Cron=CronExpression
-    }
+    export const Rate=RateExpression
+    export type Rate=RateExpression
+
+    export const Cron=CronExpression
+    export type Cron=CronExpression
+
     export const Target=RuleTarget
     export type Target=RuleTarget
 }

@@ -9,17 +9,16 @@ import { Deployment } from "./deployment";
 import { Authorizer } from "./authorizer";
 import { PolicyOut } from "../iam/policy/policyDocument";
 import { Method } from "./method";
-import { OptionsMethod } from "./method/optionsMethod";
 import { checkValid, stacktrace, checkCache, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { prepareQueue } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { prepareQueueBase, callOn, notEmpty } from "aws-cf-builder-core/util";
+import { prepareQueueBase, notEmpty, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { ApiResource } from "./resource";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
-import { Preparable } from "aws-cf-builder-core/general";
 import { PathDataCarrier } from "aws-cf-builder-core/path";
+import { Model } from "./model";
 
 /**
  * resource contains a collection of Amazon API Gateway resources and methods that can be invoked through HTTPS 
@@ -45,17 +44,19 @@ export class Api extends Resource {
         name:Field<string>
     } = {
         binaryMediaTypes: [],
-        optionsMethodGenerator: node => new OptionsMethod(node)
+        optionsMethodGenerator: node => new Method.Option(node)
     } as any
     private $: {
         methodTree: ApiNode
         deployments: Deployment[]
         authorizers: Authorizer[]
+        models: Model[]
     } = {
         methodTree: { branch: {} },
         deployments: [],
-        authorizers: []
-    } as any
+        authorizers: [],
+        models: []
+    }
     //#endregion
     /**
      * the `RestApi` ID, such as `a1bcdef2gh`.
@@ -138,7 +139,7 @@ export class Api extends Resource {
      * 
      * **maps:** `Body`
      */
-    public body(openApi: any): this;
+    public body(openApi: {openapi:string}): this;
     public body(val: any, etag?: Field<string>): this {
         if (typeof val == "string") {
             const s3O = s3PathConverter(val);
@@ -263,7 +264,16 @@ export class Api extends Resource {
      */
     public authorizer(...authorizers: Authorizer[]) {
         this.$.authorizers.push(...authorizers);
-        return this;
+        return this
+    }
+    /**
+     * **required: false**
+     * @param models adds a new Model to the Api. you dont have to specify a Model if you specify
+     * one in a mehtod of this Api.
+     */
+    public model(...models:Model[]){
+        this.$.models.push(...models)
+        return this
     }
     /**
      * set the generator for the standard options Method.
@@ -271,7 +281,7 @@ export class Api extends Resource {
      * 
      * **defult**:
      * ```javascript
-     * (node) => new OptionsMethod(node)
+     * (node) => new ApiGateway.Method.Option(node)
      * ```
      */
     public optionsMethodGenerator(func: (node: ApiNode) => Method): this {
@@ -295,7 +305,9 @@ export class Api extends Resource {
                 if (k != "branch") {
                     hasMethod = true;
                     const f: Method = node[k];
-                    treeErrors = _.assign(treeErrors, f[checkValid]())
+                    if(f){
+                        treeErrors = _.assign(treeErrors, f[checkValid]())
+                    }
                 } else {
                     for (const bk in node[k]) {
                         const n = node[k][bk];
@@ -306,8 +318,8 @@ export class Api extends Resource {
             return true;
         }
 
-        checkNode(this.$.methodTree);
-        if (!(this.name || this._.body || this._.bodyS3Location)) {
+        checkNode(this.$.methodTree)
+        if (!(this._.name || this._.body || this._.bodyS3Location)) {
             errors.push("you must set a name or specify a body");
         }
         if (this.$.deployments.length && !hasMethod) {
@@ -320,15 +332,12 @@ export class Api extends Resource {
                 type: this[resourceIdentifier]
             }
         }
-        return this[checkCache] = [
-            ...callOn([
-                this._,
-                this.name,
-                this.$.authorizers,
-                this.$.deployments
-            ], Preparable, o => o[checkValid]() as SMap<ResourceError>),
-            treeErrors
-        ].reduce<SMap<ResourceError>>(_.assign, out)
+        return this[checkCache] = _.assign(callOnCheckValid([
+            this._,
+            this.$.authorizers,
+            this.$.deployments,
+            this.$.models
+        ], out),treeErrors)
     }
     public [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         if (prepareQueueBase(stack, path, ref, this)) {
@@ -362,24 +371,20 @@ export class Api extends Resource {
                         method:"OPTIONS"
                     }), false);
                 } else if (node.OPTIONS !== null) {
-                    node.OPTIONS[prepareQueue](stack, subPath, false);
+                    node.OPTIONS[prepareQueue](stack, new PathDataCarrier(subPath,{
+                        method:"OPTIONS"
+                    }), false);
                 }
             };
             prepareTree(this.$.methodTree,this);
             const deplCarrier = new PathDataCarrier(this, {
                 fMethod: fMethod
             })
-            this.$.deployments.forEach((d) => {
-                d[prepareQueue](stack, deplCarrier, false)
-            });
-            this.$.authorizers.forEach((a) => {
-                a[prepareQueue](stack, this, false)
-            });
+            this.$.deployments.forEach(d => d[prepareQueue](stack, deplCarrier, false))
+            this.$.authorizers.forEach(a => a[prepareQueue](stack, this, false))
+            this.$.models.forEach(m => m[prepareQueue](stack,this,false))
 
-            callOn([
-                this._,
-                this.name,
-            ], Preparable, o => o[prepareQueue](stack, this, true))
+            callOnPrepareQueue(this._,stack, this, true)
 
         }
     }

@@ -8,6 +8,8 @@ import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import { SecondaryIndex, LocalSecondaryIndex, GlobalSecondaryIndex } from "./secondaryIndex";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 
 /**
  * The AWS::DynamoDB::Table resource creates a DynamoDB table. For 
@@ -64,7 +66,14 @@ export class Table extends Resource{
 
     private secondaryIndexes:SecondaryIndex[]=[];
     //#endregion
-
+    /**
+     * the resource name
+     */
+    r:ReferenceField
+    a={
+        Arn:new AttributeField(this,"Arn"),
+        StreamArn:new AttributeField(this,"StreamArn")
+    }
     constructor(){super(1);}
 
     /**
@@ -182,7 +191,7 @@ export class Table extends Resource{
      * 
      * **maps:** `Tags`
      */
-    tag(tags:SMap<Field<string>>);
+    tag(tags:SMap<Field<string>>):this;
     /**
      * @param key  The key name of the tag. You can specify a value that is 1 
      * to 127 Unicode characters in length and cannot be prefixed with aws:. 
@@ -197,7 +206,7 @@ export class Table extends Resource{
      * 
      * **maps:** `Tags._.Value`
      */
-    tag(key:Field<string>,value:Field<string>);
+    tag(key:Field<string>,value:Field<string>):this;
     tag(tag:Field<string>|SMap<Field<string>>,value?:Field<string>){
         if(value!==undefined){
             this._.tags.push({

@@ -15,13 +15,23 @@ function printErrors(errs: SMap<ResourceError>):string {
     )(errs)
 }
 export interface TransformOptions {
+    /**enable typescript transpilation */
     typescript?: boolean,
+    /**enable typescript typechecking*/
     check?: boolean,
+    /**indent output */
     indent?: boolean,
+    /**enable yaml output */
     yaml?: boolean,
+    /**add sam Transform header */
     sam?: boolean,
+    /**use as transform header */
     transform?: string
 }
+/**
+ * @param file path to file
+ * @param options options
+ */
 export function transform(file: string, options: TransformOptions): string {
     if (options.typescript) {
         try {

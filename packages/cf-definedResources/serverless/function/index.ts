@@ -3,8 +3,8 @@ import _ from "lodash/fp";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { Field } from "aws-cf-builder-core/field";
-import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
-import { Attr, callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
+import { SMap, ResourceError } from "aws-cf-builder-core/general";
+import { Attr, prepareQueueBase, notEmpty, callOnPrepareQueue, callOnCheckValid } from "aws-cf-builder-core/util";
 import { checkValid, prepareQueue, generateObject, stacktrace, checkCache, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -14,9 +14,9 @@ import { Version } from "../../lambda/version"
 import { EventMapping } from "../../lambda/eventMapping";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { Role } from "../../iam/role";
-import { DeploymentPreferenceOut } from "./deploymentPreference";
+import { DeploymentPreferenceOut, DeploymentPreference as DeplPreference } from "./deploymentPreference";
 import { runtimes } from "../../lambda/function";
-import { EventOut } from "./event";
+import { EventOut,Event as EventS } from "./event";
 import { Policy } from "../../iam";
 import { PolicyOut } from "../../iam/policy/policyDocument";
 import { PolicyTemplateOut } from "../policyTemplate";
@@ -245,7 +245,7 @@ export class ServerlessFunction extends Resource{
      * 
      * **maps:**`DeploymentPreference`
      */
-    deploymentPreference(preference:Field<DeploymentPreferenceOut>){
+    deploymentPreference(preference:Field<DeploymentPreferenceOut>|ServerlessFunction.DeploymentPreference){
         this._.deploymentPreference=preference
         return this
     }
@@ -588,21 +588,16 @@ export class ServerlessFunction extends Resource{
             };
         }
 
-        return this[checkCache]=callOn([
+        return this[checkCache]=callOnCheckValid([
             this._,
             this.permissions,
             this.versions,
             this.eventMappings
-        ],Preparable as any, (o:Preparable)=>o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign,out)
+        ],out)
     }
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn([
-                this._,
-                this.name
-            ],Preparable,o=>o[prepareQueue](stack,this,true))
-
+            callOnPrepareQueue(this._,stack,this,true)
             ;[
                 this.permissions,
                 this.versions,
@@ -653,4 +648,11 @@ export class ServerlessFunction extends Resource{
             }
         };
     }
+}
+export namespace ServerlessFunction{
+    export const DeploymentPreference=DeplPreference
+    export type DeploymentPreference=DeplPreference
+
+    export const Event=EventS
+    export type Event<T extends EventOut>=EventS<T>
 }

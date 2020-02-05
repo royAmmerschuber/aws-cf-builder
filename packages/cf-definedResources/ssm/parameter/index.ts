@@ -9,8 +9,10 @@ import { JSONField } from "aws-cf-builder-core/fields/jsonField"
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
 import { Policy as Policies,PolicyOut } from "./policy";
+import * as Aws from "../../aws"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
+import { Sub } from "aws-cf-builder-core/fields/substitution";
 
 export class Parameter extends Resource{
     [resourceIdentifier]="AWS::SSM::Parameter"
@@ -38,7 +40,11 @@ export class Parameter extends Resource{
         /**
          * the value of the parameter.
          */
-        Value:new AttributeField(this,"Value")
+        Value:new AttributeField(this,"Value"),
+        /**
+         * the Arn of the resource
+         */
+        Arn:Sub`arn:${Aws.partition}:ssm:${Aws.region}:${Aws.accountId}:parameter/${this.r}`
     }
 
     constructor(){
