@@ -4,7 +4,7 @@ import { LambdaExecutable } from "../../lambda/function";
 import { Attr } from "aws-cf-builder-core/util";
 import { Field } from "aws-cf-builder-core/field";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
-import { generateObject } from "aws-cf-builder-core/symbols";
+import { generateObject, checkCache } from "aws-cf-builder-core/symbols";
 import { checkValid, stacktrace, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { Sub } from "aws-cf-builder-core/fields/substitution"
 import * as AWS from "../../aws"
@@ -44,6 +44,7 @@ export class LambdaMethod extends Method{
 
     //#region resourceFunctions
     [checkValid](){
+        if(this[checkCache]) return this[checkCache]
         const out:SMap<ResourceError>=super[checkValid]()
         const errors:string[]=[]
         if(!this._.lambda){
@@ -60,8 +61,7 @@ export class LambdaMethod extends Method{
                 };
             }
         }
-        return out;
-
+        return this[checkCache]=out;
     }
     [generateObject]():MethodOut {
         this._.integration={

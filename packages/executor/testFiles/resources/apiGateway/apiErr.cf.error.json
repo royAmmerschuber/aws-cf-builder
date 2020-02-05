@@ -1,0 +1,20 @@
+[ 
+    ["AWS::ApiGateway::RestApi",[
+        "you must set a name or specify a body"
+    ]],
+    ["AWS::ApiGateway::Method",[
+        "you must specify an Authorization",
+        "you must specify a Lambda"
+    ]],
+    ["AWS::ApiGateway::RestApi",[
+        "if your Gateway has Deployments then you must specify a Method"
+    ]],
+    ["AWS::ApiGateway::Authorizer",[
+        "you must specify an IdentitySource",
+        "you must specify atleast one Provider"
+    ]],
+    ["AWS::ApiGateway::Model",[
+        "you must specify a Schema",
+        "you must specify a Type"
+    ]]
+]

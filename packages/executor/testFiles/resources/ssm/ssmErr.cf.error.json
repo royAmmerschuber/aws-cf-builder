@@ -1,3 +1,6 @@
-{
-    "message":"\u001b[33mAWS::SSM::Parameter\u001b[39m\nyou must specify a Type\nyou must specify a Value"
-}
+[ 
+    ["AWS::SSM::Parameter",[
+        "you must specify a Type",
+        "you must specify a Value"
+    ]]
+]

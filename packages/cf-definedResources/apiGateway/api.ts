@@ -9,16 +9,14 @@ import { Deployment } from "./deployment";
 import { Authorizer } from "./authorizer";
 import { PolicyOut } from "../iam/policy/policyDocument";
 import { Method } from "./method";
-import { OptionsMethod } from "./method/optionsMethod";
 import { checkValid, stacktrace, checkCache, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { prepareQueue } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { prepareQueueBase, callOn, notEmpty, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
+import { prepareQueueBase, notEmpty, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { ApiResource } from "./resource";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
-import { Preparable } from "aws-cf-builder-core/general";
 import { PathDataCarrier } from "aws-cf-builder-core/path";
 import { Model } from "./model";
 
@@ -46,7 +44,7 @@ export class Api extends Resource {
         name:Field<string>
     } = {
         binaryMediaTypes: [],
-        optionsMethodGenerator: node => new OptionsMethod(node)
+        optionsMethodGenerator: node => new Method.Option(node)
     } as any
     private $: {
         methodTree: ApiNode
@@ -141,7 +139,7 @@ export class Api extends Resource {
      * 
      * **maps:** `Body`
      */
-    public body(openApi: any): this;
+    public body(openApi: {openapi:string}): this;
     public body(val: any, etag?: Field<string>): this {
         if (typeof val == "string") {
             const s3O = s3PathConverter(val);
@@ -283,7 +281,7 @@ export class Api extends Resource {
      * 
      * **defult**:
      * ```javascript
-     * (node) => new OptionsMethod(node)
+     * (node) => new ApiGateway.Method.Option(node)
      * ```
      */
     public optionsMethodGenerator(func: (node: ApiNode) => Method): this {
@@ -307,7 +305,9 @@ export class Api extends Resource {
                 if (k != "branch") {
                     hasMethod = true;
                     const f: Method = node[k];
-                    treeErrors = _.assign(treeErrors, f[checkValid]())
+                    if(f){
+                        treeErrors = _.assign(treeErrors, f[checkValid]())
+                    }
                 } else {
                     for (const bk in node[k]) {
                         const n = node[k][bk];
@@ -319,7 +319,7 @@ export class Api extends Resource {
         }
 
         checkNode(this.$.methodTree)
-        if (!(this.name || this._.body || this._.bodyS3Location)) {
+        if (!(this._.name || this._.body || this._.bodyS3Location)) {
             errors.push("you must set a name or specify a body");
         }
         if (this.$.deployments.length && !hasMethod) {
@@ -332,12 +332,12 @@ export class Api extends Resource {
                 type: this[resourceIdentifier]
             }
         }
-        return this[checkCache] = callOnCheckValid([
+        return this[checkCache] = _.assign(callOnCheckValid([
             this._,
             this.$.authorizers,
             this.$.deployments,
             this.$.models
-        ], out)
+        ], out),treeErrors)
     }
     public [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         if (prepareQueueBase(stack, path, ref, this)) {
@@ -371,7 +371,9 @@ export class Api extends Resource {
                         method:"OPTIONS"
                     }), false);
                 } else if (node.OPTIONS !== null) {
-                    node.OPTIONS[prepareQueue](stack, subPath, false);
+                    node.OPTIONS[prepareQueue](stack, new PathDataCarrier(subPath,{
+                        method:"OPTIONS"
+                    }), false);
                 }
             };
             prepareTree(this.$.methodTree,this);

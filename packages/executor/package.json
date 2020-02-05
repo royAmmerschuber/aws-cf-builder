@@ -22,8 +22,8 @@
         "aws-cf-builder-defined-resources"
     ],
     "scripts": {
+        "test":"npx jest",
         "build": "tsc & cp package.json dist/package.json & cp -r types dist/ & cp cf.tsconfig.json dist/cf.tsconfig.json",
-        "runTest": "npx ts-node -T bin/cf-builder.ts testFiles/test.cf.ts -o testFiles/out",
         "buildCore": "cd ../core && npm run build",
         "buildPreDef": "cd ../cf-definedResources && npm run build",
         "buildDeployment": "npx ts-node buildDeploymentPackage.ts"
