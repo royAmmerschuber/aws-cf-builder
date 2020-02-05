@@ -2,8 +2,8 @@
     "name": "aws-cf-builder",
     "version": "1.0.0",
     "dependencies": {
-        "aws-cf-builder-core": "file:../core/dist",
-        "aws-cf-builder-defined-resources": "file:../cf-definedResources/dist",
+        "aws-cf-builder-core": "~1.0.0",
+        "aws-cf-builder-defined-resources": "~1.0.1",
         "lodash": "^4.17.15",
         "commander": "^3.0.2",
         "chalk": "^2.4.2"
@@ -17,12 +17,8 @@
         "jest": "^25.1.0",
         "ts-jest": "^25.2.0"
     },
-    "bundleDependencies": [
-        "aws-cf-builder-core",
-        "aws-cf-builder-defined-resources"
-    ],
     "scripts": {
-        "test":"npx jest",
+        "test": "npx jest",
         "build": "tsc & cp package.json dist/package.json & cp -r types dist/ & cp cf.tsconfig.json dist/cf.tsconfig.json",
         "buildCore": "cd ../core && npm run build",
         "buildPreDef": "cd ../cf-definedResources && npm run build",
@@ -30,5 +26,10 @@
     },
     "bin": {
         "cf-builder": "./bin/cf-builder.js"
-    }
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/royAmmerschuber/aws-cf-builder/tree/master/packages/executor"
+    },
+    "license": "ISC"
 }
