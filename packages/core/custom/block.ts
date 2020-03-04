@@ -9,7 +9,7 @@ import { pathItem } from "../path";
 export class customBlock extends InlineAdvField<object>{
     [resourceIdentifier]: string;
     private _: SMap<any> = {}
-    handler: ProxyHandler<this> = {
+    private handler: ProxyHandler<this> = {
         get: (target, p, c) => {
             if (typeof p == "symbol") {
                 const v = this[p as any]
@@ -25,7 +25,7 @@ export class customBlock extends InlineAdvField<object>{
             }
         }
     }
-    proxy: CustomBlock
+    private proxy: CustomBlock
     constructor() {
         super(1)
         this.proxy = new Proxy(this, this.handler) as any

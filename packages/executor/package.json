@@ -1,8 +1,8 @@
 {
     "name": "aws-cf-builder",
-    "version": "1.0.0",
+    "version": "1.0.3",
     "dependencies": {
-        "aws-cf-builder-core": "~1.0.0",
+        "aws-cf-builder-core": "~1.0.3",
         "aws-cf-builder-defined-resources": "~1.0.1",
         "lodash": "^4.17.15",
         "commander": "^3.0.2",

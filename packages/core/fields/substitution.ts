@@ -60,7 +60,8 @@ export class Substitution extends InlineAdvField<string>{
         }
     }
     protected generateSubstitutionOutput(text:readonly string[],args:Field<any>[]){
-        let templString=text[0].replace("${","${!")
+        text=text.map(t=>t.replace(/\$\{/g,"${!"))
+        let templString=text[0]
         const leftovers=[]
         let simple=true
         args.forEach((v,i) => {
@@ -76,7 +77,7 @@ export class Substitution extends InlineAdvField<string>{
                     templString+=`\${par_${leftovers.length}}`
                 }
             }
-            templString+=text[i+1].replace("${","${!")
+            templString+=text[i+1]
         })
         if(simple){
             return templString
