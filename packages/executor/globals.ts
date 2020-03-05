@@ -5,6 +5,7 @@ import { Sub } from "aws-cf-builder-core/fields/substitution"
 import { Local } from "aws-cf-builder-core/fields/local"
 import { Join } from "aws-cf-builder-core/fields/join"
 import { Alias } from "aws-cf-builder-core/fields/alias"
+import { JSONField } from "aws-cf-builder-core/fields/jsonField"
 import * as aws from "aws-cf-builder-defined-resources/aws"
 import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
 import * as lambda from "aws-cf-builder-defined-resources/lambda"
@@ -47,5 +48,7 @@ global.SSM=ssm
 global.CloudWatch=cloudwatch
 //@ts-ignore
 global.Serverless=serverless
+//@ts-ignore
+global.JSONField=JSONField
 //@ts-ignore
 global._=_
