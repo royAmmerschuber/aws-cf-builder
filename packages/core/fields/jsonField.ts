@@ -7,11 +7,12 @@ import _ from "lodash/fp"
 import { AttributeField } from "./attributeField";
 import { ReferenceField } from "./referenceField";
 import { Substitution } from "./substitution";
-
+import { Parameter } from "../generatables/parameter";
+import { localField, s_local_val } from "./local";
 export class JSONField extends Substitution{
+    [Symbol.toStringTag]: string;
     [resourceIdentifier]="JSON"
     constructor(private object:any){super(2,[],[])}
-
     [checkValid](){
         return callOn(this.object,Preparable,o=>o[checkValid]())
             .reduce(_.assign,{})
@@ -20,12 +21,16 @@ export class JSONField extends Substitution{
         callOn(this.object,Preparable,o=>o[prepareQueue](stack,path,true))
     }
     toJSON() {
-        const repl=new Map<string,AttributeField|ReferenceField|Substitution>()
+        const repl=new Map<string,AttributeField|ReferenceField|Substitution|Parameter<any>>()
         let text=JSON.stringify(this.object,function(key,value){
             const field=this[key]
-            if(field instanceof AttributeField || field instanceof ReferenceField || field instanceof Substitution){
+            if(field instanceof localField || field instanceof AttributeField || field instanceof ReferenceField || field instanceof Parameter || field instanceof Substitution){
                 const id="repl_"+String(Math.random()*10**10).slice(0,10)
-                repl.set(id,field)
+                if(field instanceof localField){
+                    repl.set(id,field[s_local_val])
+                }else{
+                    repl.set(id,field)
+                }
                 return {[id]:id}
             }else{
                 return value
