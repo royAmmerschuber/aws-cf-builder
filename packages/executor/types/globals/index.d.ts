@@ -13,6 +13,7 @@ import * as ssm from "aws-cf-builder-defined-resources/ssm"
 import * as cloudwatch from "aws-cf-builder-defined-resources/cloudwatch"
 import * as serverless from "aws-cf-builder-defined-resources/serverless"
 import * as local from "aws-cf-builder-core/fields/local"
+import * as json from "aws-cf-builder-core/fields/jsonField"
 import lodash from "lodash"
 declare global{
     export const _:typeof lodash
@@ -23,6 +24,7 @@ declare global{
     export const Local:typeof local.Local
     export const Join:typeof join.Join
     export const Alias:typeof alias.Alias
+    export const JSONField:typeof json.JSONField
 
     export const Custom:typeof custom.Custom
 
