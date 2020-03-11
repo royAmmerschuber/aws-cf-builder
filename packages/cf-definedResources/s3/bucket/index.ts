@@ -13,10 +13,10 @@ import { AnalyticsConfigOut, AnalyticsConfig as _AnalyticsConfig } from "./analy
 import _ from "lodash/fp"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
-import { InvenetoryConfigOut, InvenetoryConfig } from "./inventoryConfig";
+import { InvenetoryConfigOut, InventoryConfig as _InventoryConfig } from "./inventoryConfig";
+import { Role } from "../../iam";
+import { ReplicationRuleOut, ReplicationRule as _ReplicationRule } from "./replicationRule";
 /*
-
-"ReplicationConfiguration" : ReplicationConfiguration,
 "WebsiteConfiguration" : WebsiteConfiguration
 */
 
@@ -50,6 +50,8 @@ export class Bucket extends Resource {
         encryption:{type:Field<string>,key?:Field<string>}
         metrics:Map<Field<string>,{prefix:Field<string>,tagFilters:SMap<Field<string>>}>
         inventoryConfigs:Field<InvenetoryConfigOut>[]
+        replicationRole:Field<string>
+        replicationRules:Field<ReplicationRuleOut>[]
     } = {
         tags: [],
         corsRules: [],
@@ -61,7 +63,8 @@ export class Bucket extends Resource {
         lifecycleRules: [],
         publicAccessBlock: {},
         metrics:new Map(),
-        invenctoryConfigs:[]
+        invenctoryConfigs:[],
+        replicationRules:[]
     } as any
     /**
      * returns the resource name.
@@ -470,14 +473,31 @@ export class Bucket extends Resource {
      * 
      * **maps:**`InventoryConfiguration`
      */
-    invenctoryConfigs(...configs:(Field<InvenetoryConfigOut>|InvenetoryConfig)[]){
+    invenctoryConfigs(...configs:(Field<InvenetoryConfigOut>|Bucket.InventoryConfig)[]){
         this._.inventoryConfigs.push(...configs)
+        return this
+    }
+    /**
+     * **reuqired:false**
+     * @param role The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that Amazon S3 assumes when replicating objects. For more information, see How to Set Up Replication in the Amazon Simple Storage Service Developer Guide.
+     * 
+     * **maps:**`ReplicationConfiguration.Role`
+     */
+    replicationRole(role:Attr<Role>){
+        this._.replicationRole=Attr.get(role,"Arn")
+        return this
+    }
+    replicationRules(...rules:(Field<ReplicationRuleOut>|Bucket.ReplicationRule)[]){
+        this._.replicationRules.push(...rules)
         return this
     }
     [checkValid](): SMap<ResourceError> {
         if (this[checkCache]) return this[checkCache]
         const out: SMap<ResourceError> = {}
         const errors: string[] = []
+        if(!this._.replicationRole == !this._.replicationRules.length){
+            errors.push("you must specify both a replicationRole and some replicationRules or neither of them")
+        }
         if (errors.length) {
             out[this[stacktrace]] = {
                 type: this[resourceIdentifier],
@@ -547,7 +567,11 @@ export class Bucket extends Resource {
                         Prefix:prefix,
                         TagFilters:tagFilters
                     } ))),
-                InventoryConfigurations:notEmpty(this._.inventoryConfigs)
+                InventoryConfigurations:notEmpty(this._.inventoryConfigs),
+                ReplicationConfiguration:this._.replicationRole && {
+                    Role:this._.replicationRole,
+                    Rules:this._.replicationRules
+                }
             }
         }
     }
@@ -564,6 +588,12 @@ export namespace Bucket {
 
     export const AnalyticsConfig = _AnalyticsConfig
     export type AnalyticsConfig = _AnalyticsConfig
+
+    export const InventoryConfig = _InventoryConfig
+    export type InventoryConfig = _InventoryConfig
+
+    export const ReplicationRule = _ReplicationRule
+    export type ReplicationRule = _ReplicationRule
 
 }
 export type EncrytionType = "AES256" | "aws:kms"
