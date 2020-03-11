@@ -13,9 +13,8 @@ import { AnalyticsConfigOut, AnalyticsConfig as _AnalyticsConfig } from "./analy
 import _ from "lodash/fp"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
+import { InvenetoryConfigOut, InvenetoryConfig } from "./inventoryConfig";
 /*
-"InventoryConfigurations" : [ InventoryConfiguration, ... ],
-
 
 "ReplicationConfiguration" : ReplicationConfiguration,
 "WebsiteConfiguration" : WebsiteConfiguration
@@ -50,6 +49,7 @@ export class Bucket extends Resource {
         versionStatus: Field<string>
         encryption:{type:Field<string>,key?:Field<string>}
         metrics:Map<Field<string>,{prefix:Field<string>,tagFilters:SMap<Field<string>>}>
+        inventoryConfigs:Field<InvenetoryConfigOut>[]
     } = {
         tags: [],
         corsRules: [],
@@ -61,6 +61,7 @@ export class Bucket extends Resource {
         lifecycleRules: [],
         publicAccessBlock: {},
         metrics:new Map(),
+        invenctoryConfigs:[]
     } as any
     /**
      * returns the resource name.
@@ -386,8 +387,48 @@ export class Bucket extends Resource {
         this._.versionStatus = status
         return this
     }
-    encryption(type: Field<"AES256">): this
-    encryption(type: Field<"aws:kms">, key: Attr<"Arn">): this
+    /**
+     * **required:false**
+     * @param type Server-side encryption algorithm to use for the default encryption.
+     * 
+     * **maps:**`BucketEncryption.ServerSideEncryptionConfiguration[0].ServerSideEncryptionByDefault.SSEAlgorithm`
+     */
+    encryption(type: "AES256"): this
+    /**
+     * @param type Server-side encryption algorithm to use for the default encryption.
+     * 
+     * **maps:**`BucketEncryption.ServerSideEncryptionConfiguration[0].ServerSideEncryptionByDefault.SSEAlgorithm`
+     * @param key KMS key ID to use for the default encryption. This parameter is allowed if SSEAlgorithm is aws:kms.
+     * 
+     * You can specify the key ID or the Amazon Resource Name (ARN) of the CMK.
+     * 
+     * For example:
+     * - Key ID: `1234abcd-12ab-34cd-56ef-1234567890ab`
+     * - Key ARN: `arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab`
+     * 
+     * > **Important!**
+     * > 
+     * > Amazon S3 only supports symmetric CMKs and not asymmetric CMKs. For more information, see Using Symmetric and
+     * > Asymmetric Keys in the AWS Key Management Service Developer Guide.
+     */
+    encryption(type: "aws:kms", key: Attr<"Arn">): this
+    /**
+     * @param type Server-side encryption algorithm to use for the default encryption.
+     * 
+     * **maps:**`BucketEncryption.ServerSideEncryptionConfiguration[0].ServerSideEncryptionByDefault.SSEAlgorithm`
+     * @param key KMS key ID to use for the default encryption. This parameter is allowed if SSEAlgorithm is aws:kms.
+     * 
+     * You can specify the key ID or the Amazon Resource Name (ARN) of the CMK.
+     * 
+     * For example:
+     * - Key ID: `1234abcd-12ab-34cd-56ef-1234567890ab`
+     * - Key ARN: `arn:aws:kms:us-east-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab`
+     * 
+     * > **Important!**
+     * > 
+     * > Amazon S3 only supports symmetric CMKs and not asymmetric CMKs. For more information, see Using Symmetric and
+     * > Asymmetric Keys in the AWS Key Management Service Developer Guide.
+     */
     encryption(type: Field<EncrytionType>, key?: Attr<"Arn">): this
     encryption(type: Field<EncrytionType>, key?: Attr<"Arn">) { //TODO
         this._.encryption = {
@@ -396,11 +437,41 @@ export class Bucket extends Resource {
         }
         return this
     }
+    /**
+     * Specifies a metrics configuration for the CloudWatch request metrics (specified by the metrics configuration ID) from an
+     * Amazon S3 bucket. If you're updating an existing metrics configuration, note that this is a full replacement of the
+     * existing metrics configuration. If you don't include the elements you want to keep, they are erased. For more information,
+     * see PUT Bucket metrics in the Amazon Simple Storage Service API Reference.
+     * 
+     * **required:false**
+     * @param id The ID used to identify the metrics configuration. This can be any value you choose that helps you identify your
+     * metrics configuration.
+     * 
+     * **maps:**`MetricsConfiguration[].Id`
+     * @param prefix The prefix that an object must have to be included in the metrics results.
+     * 
+     * **maps:**`MetricsConfiguration[].Prefix`
+     * @param tagFilters Specifies a list of tag filters to use as a metrics configuration filter. The metrics configuration includes
+     * only objects that meet the filter's criteria.
+     * 
+     * **maps:**`MetricsConfiguration[].TagFilters`
+     */
     metricsConfigs(id:Field<string>,prefix?:Field<string>,tagFilters?:SMap<Field<string>>){
         this._.metrics.set(id,{
             prefix,
             tagFilters
         })
+        return this
+    }
+    /**
+     * **reuqired:false**
+     * @param configs Specifies the inventory configuration for an Amazon S3 bucket. For more information, see GET Bucket inventory in
+     * the Amazon Simple Storage Service API Reference.
+     * 
+     * **maps:**`InventoryConfiguration`
+     */
+    invenctoryConfigs(...configs:(Field<InvenetoryConfigOut>|InvenetoryConfig)[]){
+        this._.inventoryConfigs.push(...configs)
         return this
     }
     [checkValid](): SMap<ResourceError> {
@@ -475,7 +546,8 @@ export class Bucket extends Resource {
                         Id:id,
                         Prefix:prefix,
                         TagFilters:tagFilters
-                    } )))
+                    } ))),
+                InventoryConfigurations:notEmpty(this._.inventoryConfigs)
             }
         }
     }
@@ -492,8 +564,8 @@ export namespace Bucket {
 
     export const AnalyticsConfig = _AnalyticsConfig
     export type AnalyticsConfig = _AnalyticsConfig
-}
 
+}
 export type EncrytionType = "AES256" | "aws:kms"
 export type AccessControl =
     "Private" |
