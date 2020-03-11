@@ -13,7 +13,6 @@ export interface CorsRuleOut {
     Id?: Field<string>
     MaxAge?: Field<number>
 }
-//TODO
 export class CorsRule extends InlineAdvField<CorsRuleOut>{
     [resourceIdentifier]="CorsRule"
     private _:{

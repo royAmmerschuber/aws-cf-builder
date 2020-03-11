@@ -1,7 +1,7 @@
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { generateObject, resourceIdentifier, checkValid, checkCache, prepareQueue, stacktrace } from "aws-cf-builder-core/symbols"
 import { SMap, ResourceError, PreparableError } from "aws-cf-builder-core/general"
-import { notEmpty, callOnCheckValid, prepareQueueBase, callOnPrepareQueue, Ref } from "aws-cf-builder-core/util"
+import { notEmpty, callOnCheckValid, prepareQueueBase, callOnPrepareQueue, Ref, Attr } from "aws-cf-builder-core/util"
 import { stackPreparable } from "aws-cf-builder-core/stackBackend"
 import { pathItem } from "aws-cf-builder-core/path"
 import { Field } from "aws-cf-builder-core/field"
@@ -14,9 +14,7 @@ import _ from "lodash/fp"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 /*
-"BucketEncryption" : BucketEncryption,
 "InventoryConfigurations" : [ InventoryConfiguration, ... ],
-"MetricsConfigurations" : [ MetricsConfiguration, ... ],
 
 
 "ReplicationConfiguration" : ReplicationConfiguration,
@@ -38,18 +36,20 @@ export class Bucket extends Resource {
         lifecycleRules: Field<LifecycleRuleOut>[]
         accelerationStatus: Field<string>
         analyticsConfigs: Field<AnalyticsConfigOut>[]
-        loggingConfig:{
-            DestinationBucketName:Field<string>
-            LogFilePrefix:Field<string>
+        loggingConfig: {
+            DestinationBucketName: Field<string>
+            LogFilePrefix: Field<string>
         }
-        lockConfig:{
-            enabled:Field<boolean>
-            mode:Field<string>
-            time:Field<number>
-            unit:"years"|"days"
+        lockConfig: {
+            enabled: Field<boolean>
+            mode: Field<string>
+            time: Field<number>
+            unit: "years" | "days"
         }
-        publicAccessBlock:{[k in PublicAccessBlockConfigFlags]:Field<boolean>}
-        versionStatus:Field<string>
+        publicAccessBlock: { [k in PublicAccessBlockConfigFlags]: Field<boolean> }
+        versionStatus: Field<string>
+        encryption:{type:Field<string>,key?:Field<string>}
+        metrics:Map<Field<string>,{prefix:Field<string>,tagFilters:SMap<Field<string>>}>
     } = {
         tags: [],
         corsRules: [],
@@ -59,27 +59,28 @@ export class Bucket extends Resource {
             topic: []
         },
         lifecycleRules: [],
-        publicAccessBlock:{}
+        publicAccessBlock: {},
+        metrics:new Map(),
     } as any
     /**
      * returns the resource name.
      * Example: `mystack-mybucket-kdwwxmddtr2g`
      */
-    r:ReferenceField
+    r: ReferenceField
 
-    a={
+    a = {
         /**
          * Returns the Amazon Resource Name (ARN) of the specified bucket.
          * 
          * Example: `arn:aws:s3:::mybucket`
          */
-        Arn:new AttributeField(this,"Arn"),
+        Arn: new AttributeField(this, "Arn"),
         /**
          * Returns the IPv4 DNS name of the specified bucket.
          *
          * Example: `mystack-mybucket-kdwwxmddtr2g.s3.amazonaws.com`
          */
-        DomainName:new AttributeField(this,"DomainName"),
+        DomainName: new AttributeField(this, "DomainName"),
         /**
          * Returns the IPv6 DNS name of the specified bucket.
          * 
@@ -87,13 +88,13 @@ export class Bucket extends Resource {
          * 
          * For more information about dual-stack endpoints, see Using Amazon S3 Dual-Stack Endpoints.
          */
-        DualStackDomainName:new AttributeField(this,"DualStackDomainName"),
+        DualStackDomainName: new AttributeField(this, "DualStackDomainName"),
         /**
          * Returns the regional domain name of the specified bucket.
          * 
          * Example: `mystack-mybucket-kdwwxmddtr2g.s3.us-east-2.amazonaws.com`
          */
-        RegionalDomainName:new AttributeField(this,"RegionalDomainName"),
+        RegionalDomainName: new AttributeField(this, "RegionalDomainName"),
         /**
          * Returns the Amazon S3 website endpoint for the specified bucket.
          * 
@@ -101,7 +102,7 @@ export class Bucket extends Resource {
          * 
          * Example (IPv6): `http://mystack-mybucket-kdwwxmddtr2g.s3.dualstack.us-east-2.amazonaws.com/`
          */
-        WebsiteURL:new AttributeField(this,"WebsiteURL")
+        WebsiteURL: new AttributeField(this, "WebsiteURL")
     }
     constructor() {
         super(1)
@@ -280,7 +281,7 @@ export class Bucket extends Resource {
      * 
      * **maps:**`AnalyticsConfigurations`
      */
-    analyticsConfig(...configs: (Field<AnalyticsConfigOut> | Bucket.AnalyticsConfig)[]){
+    analyticsConfig(...configs: (Field<AnalyticsConfigOut> | Bucket.AnalyticsConfig)[]) {
         this._.analyticsConfigs.push(...configs)
         return this
     }
@@ -299,10 +300,10 @@ export class Bucket extends Resource {
      * 
      * **maps:**`LoggingConfiguration.LogFilePrefix
      */
-    loggingConfig(destinationBucket:Ref<Bucket>,filePrefix?:Field<string>){
-        this._.loggingConfig={
-            DestinationBucketName:Ref.get(destinationBucket),
-            LogFilePrefix:filePrefix
+    loggingConfig(destinationBucket: Ref<Bucket>, filePrefix?: Field<string>) {
+        this._.loggingConfig = {
+            DestinationBucketName: Ref.get(destinationBucket),
+            LogFilePrefix: filePrefix
         }
         return this
     }
@@ -322,8 +323,8 @@ export class Bucket extends Resource {
      * **maps:**`ObjectLockConfiguration.Rule.DefaultRetention.Days | ObjectLockConfiguration.Rule.DefaultRetention.Years`
      * @param unit if you want to specify the retention period in years or days
      */
-    objectLockConfig(enabled:Field<boolean>,mode:Field<"COMPLIANCE"|"GOVERNANCE">,time:Field<number>,unit:"years"|"days"){
-        this._.lockConfig={
+    objectLockConfig(enabled: Field<boolean>, mode: Field<"COMPLIANCE" | "GOVERNANCE">, time: Field<number>, unit: "years" | "days") {
+        this._.lockConfig = {
             enabled,
             mode,
             time,
@@ -362,13 +363,13 @@ export class Bucket extends Resource {
      * 
      * **maps:**`PublicAccessBlockConfiguration`
      */
-    publicAccessBlockConfig(flags:{[k in PublicAccessBlockConfigFlags]:Field<boolean>}):this
-    publicAccessBlockConfig(...flags:PublicAccessBlockConfigFlags[]):this
-    publicAccessBlockConfig(f:{[k in PublicAccessBlockConfigFlags]:Field<boolean>}|PublicAccessBlockConfigFlags,...flags:PublicAccessBlockConfigFlags[]){
-        if(typeof f=="string"){
-            [f,...flags].forEach(f => this._.publicAccessBlock[f]=true)
-        }else{
-            this._.publicAccessBlock=_.assign(f,this._.publicAccessBlock)
+    publicAccessBlockConfig(flags: { [k in PublicAccessBlockConfigFlags]: Field<boolean> }): this
+    publicAccessBlockConfig(...flags: PublicAccessBlockConfigFlags[]): this
+    publicAccessBlockConfig(f: { [k in PublicAccessBlockConfigFlags]: Field<boolean> } | PublicAccessBlockConfigFlags, ...flags: PublicAccessBlockConfigFlags[]) {
+        if (typeof f == "string") {
+            [f, ...flags].forEach(f => this._.publicAccessBlock[f] = true)
+        } else {
+            this._.publicAccessBlock = _.assign(f, this._.publicAccessBlock)
         }
         return this
     }
@@ -381,13 +382,29 @@ export class Bucket extends Resource {
      * 
      * **maps:**`VersioningConfiguration.Status`
      */
-    versioningConfig(status:Field<"Enabled"|"Suspended">){
-        this._.versionStatus=status
+    versioningConfig(status: Field<"Enabled" | "Suspended">) {
+        this._.versionStatus = status
+        return this
+    }
+    encryption(type: Field<"AES256">): this
+    encryption(type: Field<"aws:kms">, key: Attr<"Arn">): this
+    encryption(type: Field<EncrytionType>, key?: Attr<"Arn">): this
+    encryption(type: Field<EncrytionType>, key?: Attr<"Arn">) { //TODO
+        this._.encryption = {
+            type,
+            key: Attr.get(key, "Arn")
+        }
+        return this
+    }
+    metricsConfigs(id:Field<string>,prefix?:Field<string>,tagFilters?:SMap<Field<string>>){
+        this._.metrics.set(id,{
+            prefix,
+            tagFilters
+        })
         return this
     }
     [checkValid](): SMap<ResourceError> {
         if (this[checkCache]) return this[checkCache]
-
         const out: SMap<ResourceError> = {}
         const errors: string[] = []
         if (errors.length) {
@@ -409,6 +426,14 @@ export class Bucket extends Resource {
             Type: this[resourceIdentifier],
             Properties: {
                 BucketName: this._.name,
+                BucketEncryption:this._.encryption && {
+                    ServerSideEncryptionConfiguration:[{
+                        ServerSideEncryptionByDefault:{
+                            SSEAlgorithm:this._.encryption.type,
+                            KMSMasterKeyID:this._.encryption.key
+                        }
+                    }]
+                },
                 Tags: notEmpty(this._.tags),
                 AccessControl: this._.accessControl,
                 CorsConfiguration: this._.corsRules.length ? {
@@ -426,25 +451,31 @@ export class Bucket extends Resource {
                     AccelerationStatus: this._.accelerationStatus
                 },
                 AnalyticsConfigurations: notEmpty(this._.analyticsConfigs),
-                LoggingConfiguration:this._.loggingConfig,
+                LoggingConfiguration: this._.loggingConfig,
                 ObjectLockConfiguration: this._.lockConfig && {
-                    Rule:{
-                        DefaultRetention:{
-                            [this._.lockConfig.unit== "years" ? "Years" : "Days"]:this._.lockConfig.time,
-                            Mode:this._.lockConfig.mode
+                    Rule: {
+                        DefaultRetention: {
+                            [this._.lockConfig.unit == "years" ? "Years" : "Days"]: this._.lockConfig.time,
+                            Mode: this._.lockConfig.mode
                         }
                     }
                 },
                 ObjectLockEnabled: this._.lockConfig && this._.lockConfig.enabled,
                 PublicAccessBlockConfiguration: _.size(this._.publicAccessBlock) ? {
-                    BlockPublicAcls:this._.publicAccessBlock.blockPublicAcls,
-                    BlockPublicPolicy:this._.publicAccessBlock.blockPublicPolicy,
-                    IgnorePublicAcls:this._.publicAccessBlock.ignorePublicAcls,
-                    RestrictPublicBuckets:this._.publicAccessBlock.restrictPublicBuckets
+                    BlockPublicAcls: this._.publicAccessBlock.blockPublicAcls,
+                    BlockPublicPolicy: this._.publicAccessBlock.blockPublicPolicy,
+                    IgnorePublicAcls: this._.publicAccessBlock.ignorePublicAcls,
+                    RestrictPublicBuckets: this._.publicAccessBlock.restrictPublicBuckets
                 } : undefined,
                 VersioningConfiguration: this._.versionStatus && {
-                    Status:this._.versionStatus
-                }
+                    Status: this._.versionStatus
+                },
+                MetricsConfigurations:notEmpty([...this._.metrics]
+                    .map(([id,{prefix,tagFilters}])=>( {
+                        Id:id,
+                        Prefix:prefix,
+                        TagFilters:tagFilters
+                    } )))
             }
         }
     }
@@ -463,6 +494,7 @@ export namespace Bucket {
     export type AnalyticsConfig = _AnalyticsConfig
 }
 
+export type EncrytionType = "AES256" | "aws:kms"
 export type AccessControl =
     "Private" |
     "PublicRead" |
@@ -472,7 +504,7 @@ export type AccessControl =
     "BucketOwnerRead" |
     "BucketOwnerFullControl" |
     "AwsExecRead"
-export type PublicAccessBlockConfigFlags=
+export type PublicAccessBlockConfigFlags =
     "blockPublicAcls" |
     "blockPublicPolicy" |
     "ignorePublicAcls" |
