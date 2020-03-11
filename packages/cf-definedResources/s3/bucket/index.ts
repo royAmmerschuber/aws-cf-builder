@@ -16,6 +16,7 @@ import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { InvenetoryConfigOut, InventoryConfig as _InventoryConfig } from "./inventoryConfig";
 import { Role } from "../../iam";
 import { ReplicationRuleOut, ReplicationRule as _ReplicationRule } from "./replicationRule";
+import { WebsiteConfiguration as _WebsiteConfiguration, RoutingRule as _RoutingRule, WebsiteConfigurationOut } from "./websiteConfiguration";
 /*
 "WebsiteConfiguration" : WebsiteConfiguration
 */
@@ -52,6 +53,7 @@ export class Bucket extends Resource {
         inventoryConfigs:Field<InvenetoryConfigOut>[]
         replicationRole:Field<string>
         replicationRules:Field<ReplicationRuleOut>[]
+        websiteConfig:Field<WebsiteConfigurationOut>
     } = {
         tags: [],
         corsRules: [],
@@ -479,7 +481,8 @@ export class Bucket extends Resource {
     }
     /**
      * **reuqired:false**
-     * @param role The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that Amazon S3 assumes when replicating objects. For more information, see How to Set Up Replication in the Amazon Simple Storage Service Developer Guide.
+     * @param role The Amazon Resource Name (ARN) of the AWS Identity and Access Management (IAM) role that Amazon S3 assumes when 
+     * replicating objects. For more information, see How to Set Up Replication in the Amazon Simple Storage Service Developer Guide.
      * 
      * **maps:**`ReplicationConfiguration.Role`
      */
@@ -487,8 +490,25 @@ export class Bucket extends Resource {
         this._.replicationRole=Attr.get(role,"Arn")
         return this
     }
+    /**
+     * **required:false**
+     * @param rules A container for one or more replication rules. A replication configuration must have at least one rule and can 
+     * contain a maximum of 1,000 rules.
+     * 
+     * **maps:**`ReplicationConfiguration.Rules`
+     */
     replicationRules(...rules:(Field<ReplicationRuleOut>|Bucket.ReplicationRule)[]){
         this._.replicationRules.push(...rules)
+        return this
+    }
+    /**
+     * **required:false**
+     * @param config Information used to configure the bucket as a static website. For more information, see Hosting Websites on Amazon S3.
+     * 
+     * **maps:**`WebsiteConfiguration`
+     */
+    websiteConfig(config:Field<WebsiteConfigurationOut>|Bucket.WebsiteConfiguration){
+        this._.websiteConfig=config
         return this
     }
     [checkValid](): SMap<ResourceError> {
@@ -571,7 +591,8 @@ export class Bucket extends Resource {
                 ReplicationConfiguration:this._.replicationRole && {
                     Role:this._.replicationRole,
                     Rules:this._.replicationRules
-                }
+                },
+                WebsiteConfiguration:this._.websiteConfig
             }
         }
     }
@@ -595,6 +616,11 @@ export namespace Bucket {
     export const ReplicationRule = _ReplicationRule
     export type ReplicationRule = _ReplicationRule
 
+    export const WebsiteConfiguration = _WebsiteConfiguration
+    export type WebsiteConfiguration = _WebsiteConfiguration
+
+    export const RoutingRule = _RoutingRule
+    export type RoutingRule = _RoutingRule
 }
 export type EncrytionType = "AES256" | "aws:kms"
 export type AccessControl =
