@@ -4,16 +4,13 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "test ts",
-            "protocol": "inspector",
-            "args": ["./bin/cf-builder.ts","./testFiles/serverless.cf.ts"],
-            "runtimeArgs": ["-r", "ts-node/register/transpile-only"],
-            "outFiles": [
-                "${workspaceFolder}/build/**/*.js"
-            ],
-            "skipFiles": [
-                "${workspaceFolder}/../*/node_modules/lodash/**/*.js"
-            ]
+            "name": "test jest",
+            "program": "${workspaceFolder}/node_modules/.bin/jest",
+            "args":["--runInBand"],
+            "console": "integratedTerminal",
+            "windows": {
+                "program":"${workspaceFolder}/node_modules/jest/bin/jest"
+            }
         }
     ]
 }

@@ -1,0 +1,48 @@
+[
+    ["AWS::S3::Bucket",[
+        "you must specify both a replicationRole and some replicationRules or neither of them"
+    ]],
+    ["CorsRule",[
+        "you need to specify at least one method",
+        "you need to specify at least one origin"
+    ]],
+    ["LambdaNotification",[
+        "you mus specify an event",
+        "you must specify a function"
+    ]],
+    ["QueueNotification",[
+        "you mus specify an event",
+        "you must specify a queue"
+    ]],
+    ["TopicNotification",[
+        "you mus specify an event",
+        "you must specify a topic"
+    ]],
+    ["LifecycleRule",[
+        "You must specify at least one of the following properties: `abortIncompleteMultipartUpload`, `expiration`, `noncurrentVersionExpiration`, `noncurrentVersionTransitions` or `transitions`."
+    ]],
+    ["LifecycleRule",[
+        "you must use everywhere the same type either `days` or `date`"
+    ]],
+    ["InventoryConfig",[
+        "you must specify an id",
+        "you must specify a bucket",
+        "you must specify a frequency",
+        "you must specify the included Versions"
+    ]],
+    ["AnalyticsConfig",[
+        "you must specify an id",
+        "you must specify a schema version",
+        "you must specify a bucket"
+    ]],
+    ["WebsiteConfiguration",[
+        "if you specify the redirectAllRequestsTo behavior then you cant specify anything else"
+    ]],
+    ["AWS::S3::Bucket",[
+        "you must specify both a replicationRole and some replicationRules or neither of them"
+    ]],
+    ["ReplicationRule",[
+        "you must specify an id",
+        "you must specify a prefix"
+    ]]
+]
