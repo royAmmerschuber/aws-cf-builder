@@ -74,7 +74,7 @@ export class CorsRule extends InlineAdvField<CorsRuleOut>{
      * 
      * **maps:**`AllowedMethods`
      */
-    allowedMethods(...methods:Field<CorsMethod>[]){
+    AllowedMethods(...methods:Field<CorsMethod>[]){
         this._.methods.push(...methods)
         return this
     }
@@ -84,7 +84,7 @@ export class CorsRule extends InlineAdvField<CorsRuleOut>{
      * 
      * **maps:**`AllowedOrigins`
      */
-    allowedOrigins(...origins:Field<string>[]){
+    AllowedOrigins(...origins:Field<string>[]){
         this._.origins.push(...origins)
         return this
     }

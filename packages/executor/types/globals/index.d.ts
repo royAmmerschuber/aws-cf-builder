@@ -4,6 +4,8 @@ import * as output from "aws-cf-builder-core/generatables/output"
 import * as sub from "aws-cf-builder-core/fields/substitution"
 import * as join from "aws-cf-builder-core/fields/join"
 import * as alias from "aws-cf-builder-core/fields/alias"
+import * as local from "aws-cf-builder-core/fields/local"
+import * as json from "aws-cf-builder-core/fields/jsonField"
 import * as aws from "aws-cf-builder-defined-resources/aws"
 import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
 import * as lambda from "aws-cf-builder-defined-resources/lambda"
@@ -12,8 +14,7 @@ import * as dynamoDb from "aws-cf-builder-defined-resources/dynamoDb"
 import * as ssm from "aws-cf-builder-defined-resources/ssm"
 import * as cloudwatch from "aws-cf-builder-defined-resources/cloudwatch"
 import * as serverless from "aws-cf-builder-defined-resources/serverless"
-import * as local from "aws-cf-builder-core/fields/local"
-import * as json from "aws-cf-builder-core/fields/jsonField"
+import * as s3 from "aws-cf-builder-defined-resources/s3"
 import lodash from "lodash"
 declare global{
     export const _:typeof lodash
@@ -37,4 +38,5 @@ declare global{
     export const SSM:typeof ssm
     export const CloudWatch:typeof cloudwatch
     export const Serverless:typeof serverless
+    export const S3:typeof s3
 }

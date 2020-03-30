@@ -13,7 +13,7 @@ import { AnalyticsConfigOut, AnalyticsConfig as _AnalyticsConfig } from "./analy
 import _ from "lodash/fp"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
-import { InvenetoryConfigOut, InventoryConfig as _InventoryConfig } from "./inventoryConfig";
+import { InventoryConfigOut, InventoryConfig as _InventoryConfig } from "./inventoryConfig";
 import { Role } from "../../iam";
 import { ReplicationRuleOut, ReplicationRule as _ReplicationRule } from "./replicationRule";
 import { WebsiteConfiguration as _WebsiteConfiguration, RoutingRule as _RoutingRule, WebsiteConfigurationOut } from "./websiteConfiguration";
@@ -49,8 +49,8 @@ export class Bucket extends Resource {
         publicAccessBlock: { [k in PublicAccessBlockConfigFlags]: Field<boolean> }
         versionStatus: Field<string>
         encryption:{type:Field<string>,key?:Field<string>}
-        metrics:Map<Field<string>,{prefix:Field<string>,tagFilters:SMap<Field<string>>}>
-        inventoryConfigs:Field<InvenetoryConfigOut>[]
+        metrics:Map<Field<string>,{prefix?:Field<string>,tagFilters?:{key:Field<string>,value:Field<string>}[]}>
+        inventoryConfigs:Field<InventoryConfigOut>[]
         replicationRole:Field<string>
         replicationRules:Field<ReplicationRuleOut>[]
         websiteConfig:Field<WebsiteConfigurationOut>
@@ -58,14 +58,15 @@ export class Bucket extends Resource {
         tags: [],
         corsRules: [],
         notifications: {
-            lambda: [],
-            queue: [],
-            topic: []
+            Lambda: [],
+            Queue: [],
+            Topic: []
         },
         lifecycleRules: [],
         publicAccessBlock: {},
         metrics:new Map(),
-        invenctoryConfigs:[],
+        inventoryConfigs:[],
+        analyticsConfigs:[],
         replicationRules:[]
     } as any
     /**
@@ -266,6 +267,7 @@ export class Bucket extends Resource {
      */
     lifecycleRule(...rules: (Field<LifecycleRuleOut> | Bucket.LifecycleRule)[]) {
         this._.lifecycleRules.push(...rules)
+        return this
     }
     /**
      * Configures the transfer acceleration state for an Amazon S3 bucket. For more information, see Amazon S3 Transfer
@@ -461,7 +463,28 @@ export class Bucket extends Resource {
      * 
      * **maps:**`MetricsConfiguration[].TagFilters`
      */
-    metricsConfigs(id:Field<string>,prefix?:Field<string>,tagFilters?:SMap<Field<string>>){
+    metricsConfigs(id:Field<string>,prefix?:Field<string>,tagFilters?:SMap<Field<string>>):this
+    /**
+     * @param id The ID used to identify the metrics configuration. This can be any value you choose that helps you identify your
+     * metrics configuration.
+     * 
+     * **maps:**`MetricsConfiguration[].Id`
+     * @param prefix The prefix that an object must have to be included in the metrics results.
+     * 
+     * **maps:**`MetricsConfiguration[].Prefix`
+     * @param tagFilters Specifies a list of tag filters to use as a metrics configuration filter. The metrics configuration includes
+     * only objects that meet the filter's criteria.
+     * 
+     * **maps:**`MetricsConfiguration[].TagFilters`
+     */
+    metricsConfigs(id:Field<string>,prefix?:Field<string>,tagFilters?:{key:Field<string>,value:Field<string>}[]):this
+    metricsConfigs(id:Field<string>,prefix?:Field<string>,tagFilters?:SMap<Field<string>>|{key:Field<string>,value:Field<string>}[]){
+        if(!(tagFilters instanceof Array)){
+            tagFilters=_.flow(
+                _.toPairs,
+                _.map(([key,value]:[string,Field<string>])=>({key,value}))
+            )(tagFilters) as {key:Field<string>,value:Field<string>}[]
+        }
         this._.metrics.set(id,{
             prefix,
             tagFilters
@@ -475,7 +498,7 @@ export class Bucket extends Resource {
      * 
      * **maps:**`InventoryConfiguration`
      */
-    invenctoryConfigs(...configs:(Field<InvenetoryConfigOut>|Bucket.InventoryConfig)[]){
+    inventoryConfigs(...configs:(Field<InventoryConfigOut>|Bucket.InventoryConfig)[]){
         this._.inventoryConfigs.push(...configs)
         return this
     }
@@ -515,7 +538,7 @@ export class Bucket extends Resource {
         if (this[checkCache]) return this[checkCache]
         const out: SMap<ResourceError> = {}
         const errors: string[] = []
-        if(!this._.replicationRole == !this._.replicationRules.length){
+        if(!this._.replicationRole != !this._.replicationRules.length){
             errors.push("you must specify both a replicationRole and some replicationRules or neither of them")
         }
         if (errors.length) {
@@ -584,8 +607,8 @@ export class Bucket extends Resource {
                 MetricsConfigurations:notEmpty([...this._.metrics]
                     .map(([id,{prefix,tagFilters}])=>( {
                         Id:id,
-                        Prefix:prefix,
-                        TagFilters:tagFilters
+                        Prefix:prefix || undefined,
+                        TagFilters:notEmpty(tagFilters)
                     } ))),
                 InventoryConfigurations:notEmpty(this._.inventoryConfigs),
                 ReplicationConfiguration:this._.replicationRole && {

@@ -141,7 +141,7 @@ export class RoutingRule extends InlineAdvField<RoutingRuleOut>{
      * 
      * **maps:**`RedirectRule.ReplaceKeyPrefixWith`
      */
-    replace(type:"prefix",prefix:Field<string>)
+    replace(type:"prefix",prefix:Field<string>):this
     /**
      * @param type what to replace
      * @param key The specific object key to use in the redirect request. For example, redirect request to error.html. 
@@ -149,10 +149,10 @@ export class RoutingRule extends InlineAdvField<RoutingRuleOut>{
      * 
      * **maps:**`RedirectRule.ReplaceKeyPrefixWith`
      */
-    replace(type:"key",key:Field<string>)
+    replace(type:"key",key:Field<string>):this
     replace(type:"prefix"|"key",replacement:Field<string>){
         this._.replace={type,replacement}
-        return
+        return this
     }
     /**
      * **required:false**
@@ -165,7 +165,7 @@ export class RoutingRule extends InlineAdvField<RoutingRuleOut>{
      * 
      * **maps:**`RoutingRuleCondition.HttpErrorCodeReturnedEquals`
      */
-    condition(type:"errorCode",code:Field<string>)
+    condition(type:"errorCode",code:Field<string>):this
     /**
      * @param type the type of condition
      * @param prefix The object key name prefix when the redirect is applied. For example, to redirect requests for 
@@ -177,7 +177,7 @@ export class RoutingRule extends InlineAdvField<RoutingRuleOut>{
      * 
      * **maps:**`RoutingRuleCondition.KeyPrefixEquals`
      */
-    condition(type:"prefix",prefix:Field<string>)
+    condition(type:"prefix",prefix:Field<string>):this
     condition(type:string,comp:Field<string>){
         this._.condition[type]=comp
         return this
@@ -210,6 +210,7 @@ export class RoutingRule extends InlineAdvField<RoutingRuleOut>{
      */
     protocol(protocol:Field<"http"|"https">){
         this._.protocol=protocol
+        return this
     }
     toJSON(): RoutingRuleOut {
         return {
@@ -217,12 +218,9 @@ export class RoutingRule extends InlineAdvField<RoutingRuleOut>{
                 HostName:this._.hostName,
                 HttpRedirectCode:this._.redirectCode,
                 Protocol:this._.protocol,
-                ReplaceKeyPrefixWith:this._.replace.type=="prefix"
-                    ? this._.replace.replacement
-                    : undefined,
-                ReplaceKeyWith:this._.replace.type=="key"
-                    ? this._.replace.replacement
-                    : undefined
+                [this._.replace?.type =="prefix" 
+                    ? "ReplaceKeyPrefixWith" 
+                    : "ReplaceKeyWith"]:this._.replace?.replacement,
             },
             RoutingRuleCondition:_.size(this._.condition)
                 ? {

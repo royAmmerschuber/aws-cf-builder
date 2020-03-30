@@ -37,7 +37,9 @@ export class AnalyticsConfig extends InlineAdvField<AnalyticsConfigOut>{
         outAccountId:Field<string>
         format:Field<string>
         schema:Field<string>
-    }={} as any
+    }={
+        tagFilters:[]
+    } as any
     constructor(){
         super(1)
     }
@@ -140,7 +142,7 @@ export class AnalyticsConfig extends InlineAdvField<AnalyticsConfigOut>{
                     BucketAccountId:this._.outAccountId,
                     BucketArn:this._.bucket,
                     Format:this._.format ?? "CSV",
-                    Prefix:this._.prefix
+                    Prefix:this._.outPath
                 },
                 OutputSchemaVersion:this._.schema
             } },

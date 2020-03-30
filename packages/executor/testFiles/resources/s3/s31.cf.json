@@ -1,0 +1,456 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "EmptybucketBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {}
+        },
+        "Bucket1Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketName": "ichi",
+                "BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "AES256"
+                            }
+                        }
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "hachiJyuuIchi",
+                        "Value": "hachiJyuuNi"
+                    },
+                    {
+                        "Key": "hachiJyuuSan",
+                        "Value": "hachiJyuuYon"
+                    }
+                ],
+                "AccessControl": "Private",
+                "CorsConfiguration": {
+                    "CorsRules": [
+                        {
+                            "AllowedMethods": [
+                                "GET"
+                            ],
+                            "AllowedOrigins": [
+                                "*"
+                            ]
+                        },
+                        {
+                            "AllowedMethods": [
+                                "DELETE",
+                                "HEAD",
+                                "PUT",
+                                "POST"
+                            ],
+                            "AllowedOrigins": [
+                                "niJyuuYon.com",
+                                "niJyuuGo.de"
+                            ],
+                            "AllowedHeaders": [
+                                "niJyuuRoku",
+                                "niJyuuNana"
+                            ],
+                            "ExposedHeaders": [
+                                "niJyuuNana"
+                            ],
+                            "Id": "niJyuuHachi",
+                            "MaxAge": 290
+                        }
+                    ]
+                },
+                "NotificationConfiguration": {
+                    "LambdaConfigurations": [
+                        {
+                            "Event": "s3:ObjectCreated:*",
+                            "Function": "arn:aws:lambda:::function/rokuJyuuSan"
+                        },
+                        {
+                            "Event": "s3:Replication:OperationFailedReplication",
+                            "Filter": {
+                                "S3Key": {
+                                    "Rules": [
+                                        {
+                                            "Name": "prefix",
+                                            "Value": "rokuJyuu/Nana/"
+                                        },
+                                        {
+                                            "Name": "suffix",
+                                            "Value": ".Hachi"
+                                        }
+                                    ]
+                                }
+                            },
+                            "Function": "arn:aws:lambda:::function/rokuJyuuRoku"
+                        },
+                        {
+                            "Function": "arn:aws:lambda:::function/nanaJyuuIchi",
+                            "Event": "nonStandardEvent",
+                            "somethingSlightly": "Different"
+                        },
+                        {
+                            "something": [
+                                "completely",
+                                "different"
+                            ]
+                        }
+                    ],
+                    "QueueConfigurations": [
+                        {
+                            "Event": "s3:ObjectRemoved:*",
+                            "Queue": "arn:aws:sqs:::queue/rokuJyuuYon"
+                        },
+                        {
+                            "Queue": "arn:aws:sqs:::queue/rokuJyuuKyuu",
+                            "Event": "nonStandardEvent",
+                            "somethingSlightly": "Different"
+                        },
+                        {
+                            "something": [
+                                "completely",
+                                "different"
+                            ]
+                        }
+                    ],
+                    "TopicConfigurations": [
+                        {
+                            "Event": "s3:ReducedRedundancyLostObject",
+                            "Topic": "arn:aws:sns:::topic/rokuJyuuGo"
+                        },
+                        {
+                            "Topic": "arn:aws:sns:::topic/nanaJyuu",
+                            "Event": "nonStandardEvent",
+                            "somethingSlightly": "Different"
+                        },
+                        {
+                            "something": [
+                                "completely",
+                                "different"
+                            ]
+                        }
+                    ]
+                },
+                "LifecycleConfiguration": {
+                    "Rules": [
+                        {
+                            "Status": "Enabled",
+                            "AbortIncompleteMultipartUpload": {
+                                "DaysAfterInitiation": 37
+                            }
+                        },
+                        {
+                            "Status": "Enabled",
+                            "ExpirationDate": "2019-10-20"
+                        },
+                        {
+                            "Status": "Enabled",
+                            "NoncurrentVersionExpirationInDays": 38
+                        },
+                        {
+                            "Status": "Enabled",
+                            "NoncurrentVersionTransitions": [
+                                {
+                                    "StorageClass": "DEEP_ARCHIVE",
+                                    "TransitionInDays": 39
+                                }
+                            ]
+                        },
+                        {
+                            "Status": "Enabled",
+                            "Transitions": [
+                                {
+                                    "StorageClass": "GLACIER",
+                                    "TransitionInDays": 40
+                                }
+                            ]
+                        },
+                        {
+                            "Id": "yonJyuuIchi",
+                            "Status": "Disabled",
+                            "Prefix": "yonJyuu/Go/",
+                            "TagFilters": [
+                                {
+                                    "Key": "yonJyuuRoku",
+                                    "Value": "yonJyuuNana"
+                                },
+                                {
+                                    "Key": "yonJyuuHachi",
+                                    "Value": "yonJyuuKyuu"
+                                }
+                            ],
+                            "AbortIncompleteMultipartUpload": {
+                                "DaysAfterInitiation": 6
+                            },
+                            "ExpirationDate": "2020-02-20",
+                            "NoncurrentVersionExpirationInDays": 42,
+                            "NoncurrentVersionTransitions": [
+                                {
+                                    "StorageClass": "DEEP_ARCHIVE",
+                                    "TransitionInDays": 43
+                                },
+                                {
+                                    "StorageClass": "GLACIER",
+                                    "TransitionInDays": 44
+                                }
+                            ],
+                            "Transitions": [
+                                {
+                                    "StorageClass": "INTELLIGENT_TIERING",
+                                    "TransitionDate": "2020-03-01"
+                                },
+                                {
+                                    "StorageClass": "GLACIER",
+                                    "TransitionDate": "2020-04-01"
+                                }
+                            ]
+                        },
+                        {
+                            "Status": "Enabled",
+                            "ExpirationInDays": 52,
+                            "Transitions": [
+                                {
+                                    "StorageClass": "DEEP_ARCHIVE",
+                                    "TransitionInDays": 50
+                                },
+                                {
+                                    "StorageClass": "GLACIER",
+                                    "TransitionInDays": 51
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "AccelerateConfiguration": {
+                    "AccelerationStatus": "Enabled"
+                },
+                "AnalyticsConfigurations": [
+                    {
+                        "Id": "ni",
+                        "StorageClassAnalysis": {
+                            "DataExport": {
+                                "Destination": {
+                                    "BucketArn": "arn:aws:s3:::san",
+                                    "Format": "CSV"
+                                },
+                                "OutputSchemaVersion": "V_1"
+                            }
+                        }
+                    },
+                    {
+                        "Id": "yon",
+                        "Prefix": "jyuuNana",
+                        "StorageClassAnalysis": {
+                            "DataExport": {
+                                "Destination": {
+                                    "BucketAccountId": "890123456",
+                                    "BucketArn": "arn:aws:s3:::go",
+                                    "Format": "CSV",
+                                    "Prefix": "roku/nana/"
+                                },
+                                "OutputSchemaVersion": "V_1"
+                            }
+                        },
+                        "TagFilters": [
+                            {
+                                "Key": "jyuuHachi",
+                                "Value": "jyuuKyuu"
+                            },
+                            {
+                                "Key": "niJyuu",
+                                "Value": "niJyuuIchi"
+                            },
+                            {
+                                "Key": "niJyuuNi",
+                                "Value": "niJyuuSan"
+                            }
+                        ]
+                    }
+                ],
+                "LoggingConfiguration": {
+                    "DestinationBucketName": "arn:aws:s3:::goJyuuIchi",
+                    "LogFilePrefix": "goJyuu/ni/"
+                },
+                "ObjectLockConfiguration": {
+                    "Rule": {
+                        "DefaultRetention": {
+                            "Days": 72,
+                            "Mode": "GOVERNANCE"
+                        }
+                    }
+                },
+                "ObjectLockEnabled": true,
+                "PublicAccessBlockConfiguration": {
+                    "BlockPublicAcls": true,
+                    "BlockPublicPolicy": true,
+                    "IgnorePublicAcls": false
+                },
+                "VersioningConfiguration": {
+                    "Status": "Enabled"
+                },
+                "MetricsConfigurations": [
+                    {
+                        "Id": "rokuJyuuSan"
+                    },
+                    {
+                        "Id": "goJyuuYon",
+                        "Prefix": "goJyuu/Go/",
+                        "TagFilters": [
+                            {
+                                "key": "goJyuuRoku",
+                                "value": "goJyuuNana"
+                            },
+                            {
+                                "key": "goJyuuHachi",
+                                "value": "goJyuuKyuu"
+                            }
+                        ]
+                    },
+                    {
+                        "Id": "rokuJyuu",
+                        "TagFilters": [
+                            {
+                                "key": "rokuJyuuIchi",
+                                "value": "rokuJyuuNi"
+                            }
+                        ]
+                    }
+                ],
+                "InventoryConfigurations": [
+                    {
+                        "Destination": {
+                            "BucketArn": "arn:aws:s3:::SanJyuuNi",
+                            "Format": "CSV"
+                        },
+                        "Id": "niJyuuSan",
+                        "Enabled": true,
+                        "IncludedObjectVersions": "Current",
+                        "ScheduleFrequency": "Weekly"
+                    },
+                    {
+                        "Destination": {
+                            "BucketArn": "arn:aws:s3:::niJyuuYon",
+                            "Format": "CSV",
+                            "BucketAccountId": "2567890123",
+                            "Prefix": "ni/jyuu/go/"
+                        },
+                        "Id": "sanJyuuYon",
+                        "Enabled": false,
+                        "IncludedObjectVersions": "All",
+                        "ScheduleFrequency": "Weekly",
+                        "OptionalFields": [
+                            "sanJyuuGo",
+                            "sanJyuuRoku"
+                        ],
+                        "Prefix": "/sanJyuu/Nana"
+                    }
+                ],
+                "ReplicationConfiguration": {
+                    "Role": "arn:aws:iam:::role/nanaJyuuSan",
+                    "Rules": [
+                        {
+                            "Id": "nanaJyuuYon",
+                            "Prefix": "nanaJyuu/Go/",
+                            "Status": "Enabled",
+                            "Destination": {
+                                "Bucket": "arn:aws:s3:::nanaJyuuRoku"
+                            }
+                        },
+                        {
+                            "Id": "nanaJyuuNana",
+                            "Prefix": "nanaJyuu/Hachi",
+                            "Status": "Disabled",
+                            "SourceSelectionCriteria": {
+                                "SseKmsEncryptedObjects": {
+                                    "Status": "Disabled"
+                                }
+                            },
+                            "Destination": {
+                                "Bucket": "arn:aws:s3:::nanaJyuuKyuu",
+                                "StorageClass": "DEEP_ARCHIVE",
+                                "Account": "5748290753429",
+                                "AccessControlTranslation": {
+                                    "Owner": "Destination"
+                                },
+                                "EncryptionConfiguration": {
+                                    "ReplicaKmsKeyID": "arn:aws:kms:::key/hachiJyuu"
+                                }
+                            }
+                        }
+                    ]
+                },
+                "WebsiteConfiguration": {
+                    "ErrorDocument": "hachiJyuuGo.html",
+                    "IndexDocument": "index.html",
+                    "RoutingRules": [
+                        {
+                            "RedirectRule": {}
+                        },
+                        {
+                            "RedirectRule": {
+                                "HostName": "hachiJyuuNana.com",
+                                "HttpRedirectCode": "487",
+                                "Protocol": "http",
+                                "ReplaceKeyWith": "hachiJyuuHachi"
+                            },
+                            "RoutingRuleCondition": {
+                                "HttpErrorCodeReturnedEquals": "200",
+                                "KeyPrefixEquals": "hachiJyuuKyuu"
+                            }
+                        },
+                        {
+                            "RedirectRule": {
+                                "ReplaceKeyPrefixWith": "kyuuJyuu"
+                            },
+                            "RoutingRuleCondition": {
+                                "KeyPrefixEquals": "kyuuJyuu/Ichi"
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+        "Bucket2Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "BucketEncryption": {
+                    "ServerSideEncryptionConfiguration": [
+                        {
+                            "ServerSideEncryptionByDefault": {
+                                "SSEAlgorithm": "aws:kms",
+                                "KMSMasterKeyID": "372893723-3823824-38294-318938291"
+                            }
+                        }
+                    ]
+                },
+                "LoggingConfiguration": {
+                    "DestinationBucketName": "arn:aws:s3:::goJyuuSan"
+                },
+                "WebsiteConfiguration": {}
+            }
+        },
+        "Bucket3Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "WebsiteConfiguration": {
+                    "RedirectAllRequestsTo": {
+                        "HostName": "hachiJyuuRoku.com"
+                    }
+                }
+            }
+        },
+        "Bucket4Bucket": {
+            "Type": "AWS::S3::Bucket",
+            "Properties": {
+                "WebsiteConfiguration": {
+                    "RedirectAllRequestsTo": {
+                        "HostName": "hachiJyuuRoku.com",
+                        "Protocol": "https"
+                    }
+                }
+            }
+        }
+    }
+}

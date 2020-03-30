@@ -5,6 +5,7 @@ import { stackPreparable } from "../stackBackend";
 import { CustomParameters, CustomPropFunction } from "./resource";
 import _ from "lodash/fp"
 import { pathItem } from "../path";
+import { callOnCheckValid } from "../util";
 
 export class customBlock extends InlineAdvField<object>{
     [resourceIdentifier]: string;
@@ -14,12 +15,12 @@ export class customBlock extends InlineAdvField<object>{
             if (typeof p == "symbol") {
                 const v = this[p as any]
                 if (v instanceof Function) {
-                    return (...args) => (this[p as any] as Function).call(this, ...args);
+                    return v.bind(this);
                 }
-                return this[p as any]
+                return v
             } else if (typeof p == "string") {
                 if (p == "toJSON") {
-                    return () => this.toJSON()
+                    return this.toJSON.bind(this)
                 }
                 return CustomPropFunction.create(p, this._, this.proxy)
             }
@@ -33,11 +34,7 @@ export class customBlock extends InlineAdvField<object>{
     }
     [checkValid](): SMap<ResourceError> {
         if (this[checkCache]) return this[checkCache]
-        return this[checkCache] = _.flow(
-            _.filter(v => v instanceof Preparable),
-            _.map((o) => o[checkValid]()),
-            _.reduce(_.assign, {})
-        )(this._)
+        return this[checkCache] = callOnCheckValid(this._,{})
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         const subPath = path

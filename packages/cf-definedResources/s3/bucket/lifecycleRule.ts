@@ -31,7 +31,7 @@ export interface VersionTransition {
     StorageClass: Field<string>
     TransitionInDays: Field<number>
 }
-export type LifecycleState= "Disabled"|"Enabled"
+export type LifecycleState = "Disabled" | "Enabled"
 export type StorageClass =
     "DEEP_ARCHIVE" |
     "GLACIER" |
@@ -43,11 +43,11 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
     [resourceIdentifier] = "LifecycleRule"
     private _: {
         id: Field<string>
-        status:Field<string>
+        status: Field<string>
         prefix: Field<string>
-        tagFilters:Tag[]
+        tagFilters: Tag[]
         abortMultipart: Field<number>
-        expiration: Field<number | string>
+        expiration: { type: string, value: Field<number | string> }
         transitions: Map<Field<string>, {
             type: string,
             value: Field<number | string>
@@ -55,11 +55,13 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
         noncurrentVersionExpiration: Field<number>
         noncurrentVersionTransitions: Map<Field<string>, Field<number>>
     } = {
-        transitions:new Map(),
+        transitions: new Map(),
         noncurrentVersionTransitions: new Map(),
-        tagFilters:[]
+        tagFilters: []
     } as any
-    private expirationType: string
+    constructor() {
+        super(1)
+    }
     /**
      * **required:false**
      * @param id Unique identifier for the rule. The value can't be longer than 255 characters.
@@ -87,8 +89,8 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
      * **default:**`Enabled`
      * **maps:**`Status`
      */
-    status(state:Field<LifecycleState>){
-        this._.status=state
+    status(state: Field<LifecycleState>) {
+        this._.status = state
         return this
     }
     /**
@@ -151,7 +153,7 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
      */
     expiration(type: "date", date: Field<string>): this
     expiration(type: string, value: Field<number | string>) {
-        this._.expiration[type] = value
+        this._.expiration = { value, type }
         return this
     }
 
@@ -167,7 +169,7 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
      * 
      * **maps:**`Transition[].TransitionInDays`
      */
-    transitions(type: "days", to: Field<StorageClass>, days: Field<number>)
+    transitions(type: "days", to: Field<StorageClass>, days: Field<number>): this
     /**
      * @param type type of expiration
      * @param to The storage class to which you want the object to transition.
@@ -177,8 +179,8 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
      * 
      * **maps:**`Transition[].TransitionDate`
      */
-    transitions(type: "date", to: Field<StorageClass>, days: Field<string>)
-    transitions(type: string, to: Field<StorageClass>, value: Field<number|string>) {
+    transitions(type: "date", to: Field<StorageClass>, days: Field<string>): this
+    transitions(type: string, to: Field<StorageClass>, value: Field<number | string>) {
         this._.transitions.set(to, {
             value,
             type
@@ -212,56 +214,59 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
         this._.noncurrentVersionTransitions.set(to, days)
         return this
     }
-    toJSON():LifecycleRuleOut {
+    toJSON(): LifecycleRuleOut {
         return {
-            Id:this._.id,
-            Status:this._.status ?? "Enabled",
-            Prefix:this._.prefix,
-            TagFilters:notEmpty(this._.tagFilters),
-            AbortIncompleteMultipartUpload:this._.abortMultipart && {
-                DaysAfterInitiation:this._.abortMultipart
+            Id: this._.id,
+            Status: this._.status ?? "Enabled",
+            Prefix: this._.prefix,
+            TagFilters: notEmpty(this._.tagFilters),
+            AbortIncompleteMultipartUpload: this._.abortMultipart && {
+                DaysAfterInitiation: this._.abortMultipart
             },
-            ExpirationDate:this.expirationType=="date" ? this._.expiration as any: undefined,
-            ExpirationInDays:this.expirationType=="days" ? this._.expiration as any: undefined,
-            NoncurrentVersionExpirationInDays:this._.noncurrentVersionExpiration,
-            NoncurrentVersionTransitions:notEmpty([...this._.noncurrentVersionTransitions].map(([klass,days])=>({
-                StorageClass:klass,
-                TransitionInDays:days
+            ...this._.expiration?.type == "date"
+                ? { ExpirationDate: this._.expiration.value as any }
+                : this._.expiration?.type == "days"
+                    ? { ExpirationInDays: this._.expiration.value as any }
+                    : {},
+            NoncurrentVersionExpirationInDays: this._.noncurrentVersionExpiration,
+            NoncurrentVersionTransitions: notEmpty([...this._.noncurrentVersionTransitions].map(([klass, days]) => ({
+                StorageClass: klass,
+                TransitionInDays: days
             }))),
-            Transitions:notEmpty([...this._.transitions].map(([k,v])=>({
-                StorageClass:k,
-                TransitionDate:v.type=="date" ? v.value as any : undefined,
-                TransitionInDays:v.type=="days" ? v.value as any : undefined
+            Transitions: notEmpty([...this._.transitions].map(([k, v]) => ({
+                StorageClass: k,
+                TransitionDate: v.type == "date" ? v.value as any : undefined,
+                TransitionInDays: v.type == "days" ? v.value as any : undefined
             }))),
         }
     }
     [checkValid](): SMap<ResourceError> {
-        if(this[checkCache]) return this[checkCache]
-        const out:SMap<ResourceError>={}
-        const errors:string[]=[]
-        if(
+        if (this[checkCache]) return this[checkCache]
+        const out: SMap<ResourceError> = {}
+        const errors: string[] = []
+        if (
             !this._.expiration && !this._.transitions.size &&
             !this._.abortMultipart && !this._.noncurrentVersionExpiration &&
             !this._.noncurrentVersionTransitions.size
-        ){
+        ) {
             errors.push("You must specify at least one of the following properties: `abortIncompleteMultipartUpload`, `expiration`, `noncurrentVersionExpiration`, `noncurrentVersionTransitions` or `transitions`.")
         }
-        const trans=[...this._.transitions]
-        if( this.expirationType && trans.length){
-            const comp=this.expirationType ?? trans[0][1].type
-            if(!trans.every(([,v])=>v.type==comp)){
+        const trans = [...this._.transitions]
+        if (this._.expiration && trans.length) {
+            const comp = this._.expiration.type ?? trans[0][1].type
+            if (!trans.every(([, v]) => v.type == comp)) {
                 errors.push("you must use everywhere the same type either `days` or `date`")
             }
         }
-        if(errors.length){
-            out[this[stacktrace]]={
-                type:this[resourceIdentifier],
+        if (errors.length) {
+            out[this[stacktrace]] = {
+                type: this[resourceIdentifier],
                 errors
             }
         }
-        return this[checkCache]=callOnCheckValid(this._,out)
+        return this[checkCache] = callOnCheckValid(this._, out)
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
-        callOnPrepareQueue(this._,stack,path,true)
+        callOnPrepareQueue(this._, stack, path, true)
     }
 }

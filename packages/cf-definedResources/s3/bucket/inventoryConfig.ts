@@ -7,7 +7,7 @@ import { Attr, callOnCheckValid, callOnPrepareQueue, notEmpty } from "aws-cf-bui
 import { ExportFormat } from "./analyticsConfig";
 import { Bucket } from "."
 
-export interface InvenetoryConfigOut{
+export interface InventoryConfigOut{
     Destination: {
         BucketArn: Field<string>
         Format: Field<string>
@@ -22,7 +22,7 @@ export interface InvenetoryConfigOut{
     Prefix?: Field<string>
 }
 
-export class InventoryConfig extends InlineAdvField<InvenetoryConfigOut>{
+export class InventoryConfig extends InlineAdvField<InventoryConfigOut>{
     [resourceIdentifier]="InventoryConfig"
     private _:{
         bucket:Field<string>
@@ -69,6 +69,7 @@ export class InventoryConfig extends InlineAdvField<InvenetoryConfigOut>{
      */
     optionalFields(...fields:string[]){
         this._.optionalFields.push(...fields)
+        return this
     }
     /**
      * **required:true**
@@ -132,10 +133,11 @@ export class InventoryConfig extends InlineAdvField<InvenetoryConfigOut>{
      * 
      * **maps:**`ScheduleFrequency`
      */
-    frequency(frequency:Field<"Daily"|"Weekly">){
+    Frequency(frequency:Field<"Daily"|"Weekly">){
         this._.frequency=frequency
+        return this
     }
-    toJSON():InvenetoryConfigOut {
+    toJSON():InventoryConfigOut {
         return {
             Destination:{
                 BucketArn:this._.bucket,

@@ -36,7 +36,7 @@ export type StorageClassRep=
     "STANDARD" |
     "STANDARD_IA"
 export class ReplicationRule extends InlineAdvField<ReplicationRuleOut>{
-    [resourceIdentifier]: string;
+    [resourceIdentifier]="ReplicationRule"
     private _:{
         destinationKey:Field<string>
         destinationOwner:Field<string>
@@ -94,8 +94,8 @@ export class ReplicationRule extends InlineAdvField<ReplicationRuleOut>{
      * 
      * **maps:**`SourceSelectionCriteria.SseKmsEncryptedObjects.Status`
      */
-    sourceSelectionCriteria(sseKmsEncyptedReplication:Field<"Enabled"|"Disabled">){
-        this._.encryptedReplication=sseKmsEncyptedReplication
+    sseKmsEncyptedReplication(enabled:Field<"Enabled"|"Disabled">){
+        this._.encryptedReplication=enabled
         return this
     }
     /**
@@ -114,6 +114,7 @@ export class ReplicationRule extends InlineAdvField<ReplicationRuleOut>{
     Destination(bucket:Attr<Bucket>,storageClass?:Field<StorageClassRep>){
         this._.bucket=Attr.get(bucket,"Arn")
         if(storageClass) this._.storageClass=storageClass
+        return this
     }
 
     /**
