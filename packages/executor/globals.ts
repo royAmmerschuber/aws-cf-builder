@@ -15,6 +15,7 @@ import * as ssm from "aws-cf-builder-defined-resources/ssm"
 import * as cloudwatch from "aws-cf-builder-defined-resources/cloudwatch"
 import * as serverless from "aws-cf-builder-defined-resources/serverless"
 import * as s3 from "aws-cf-builder-defined-resources/s3"
+import * as sqs from "aws-cf-builder-defined-resources/sqs"
 import _ from "lodash"
 //@ts-ignore
 global.Parameter=Parameter
@@ -53,5 +54,7 @@ global.CloudWatch=cloudwatch
 global.Serverless=serverless
 //@ts-ignore
 global.S3=s3
+//@ts-ignore
+global.SQS=sqs
 //@ts-ignore
 global._=_
