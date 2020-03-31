@@ -1,0 +1,20 @@
+[ 
+    ["AWS::SQS::Queue",[
+        "the delay must be between 0 and 900 Seconds",
+        "the kms reusePeriod must be between 60 and 86'400 seconds",
+        "the maxMessageSize must be between 1'024 and 262'144 bytes",
+        "the messageRetentionPeriod must be between 60 and 1'209'600 seconds",
+        "the receiveMessageWaitTime must be between 0 and 20 seconds",
+        "the visibilityTimeout must be between 0 and 43'200 seconds"
+    ]],
+    ["AWS::SQS::QueuePolicy",[
+        "you must specify a Document"
+    ]],
+    ["AWS::SQS::Queue",[
+        "the delay must be between 0 and 900 Seconds",
+        "the kms reusePeriod must be between 60 and 86'400 seconds",
+        "the maxMessageSize must be between 1'024 and 262'144 bytes",
+        "the messageRetentionPeriod must be between 60 and 1'209'600 seconds",
+        "the receiveMessageWaitTime must be between 0 and 20 seconds"
+    ]]
+]

@@ -138,14 +138,9 @@ export abstract class Method extends Resource implements namedPath{
      */
     response(code:string,models?:SMap<Ref<Model>>,headers?:SMap<boolean>):this{
         this._.responses.push({
-            code:code,
-            models:models && _.mapValues(v =>{
-                if(v instanceof Model){
-                    return v.r
-                }
-                return v
-            },models),
-            headers:headers
+            models:models && _.mapValues(v =>Ref.get(v), models),
+            headers,
+            code,
         });
         return this;
     }

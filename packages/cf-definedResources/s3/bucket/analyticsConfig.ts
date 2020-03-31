@@ -21,7 +21,7 @@ export interface AnalyticsConfigOut {
             OutputSchemaVersion: Field<string>
         }
     }
-    TagFilters: Tag[]
+    TagFilters?: Tag[]
 }
 export type ExportFormat="CSV"
 export type SchemaVersion="V_1"

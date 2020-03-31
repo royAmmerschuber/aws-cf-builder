@@ -15,6 +15,7 @@ import * as ssm from "aws-cf-builder-defined-resources/ssm"
 import * as cloudwatch from "aws-cf-builder-defined-resources/cloudwatch"
 import * as serverless from "aws-cf-builder-defined-resources/serverless"
 import * as s3 from "aws-cf-builder-defined-resources/s3"
+import * as sqs from "aws-cf-builder-defined-resources/sqs"
 import lodash from "lodash"
 declare global{
     export const _:typeof lodash
@@ -39,4 +40,5 @@ declare global{
     export const CloudWatch:typeof cloudwatch
     export const Serverless:typeof serverless
     export const S3:typeof s3
+    export const SQS:typeof sqs
 }

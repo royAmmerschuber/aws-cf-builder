@@ -37,20 +37,19 @@ export class PreparableError extends Error {
     constructor(prep: Preparable, ...errors: [string, ...string[]])
     constructor(stack: string, identifier: string, ...errors: string[])
     constructor(ps: Preparable | string, ie: string, ...errors: string[]) {
-        super()
         if (typeof ps == "string") {
-            this.stack = [
+            super([
                 ps,
                 chalk.yellow(ie),
                 ...errors
-            ].join("\n")
+            ].join("\n"))
         } else {
-            this.stack = [
+            super([
                 ps[stacktrace],
                 chalk.yellow(ps[resourceIdentifier]),
                 ie,
                 ...errors
-            ].join("\n")
+            ].join("\n"))
         }
     }
 }
