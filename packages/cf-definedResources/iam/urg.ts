@@ -4,8 +4,8 @@ import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Field, isAdvField } from "aws-cf-builder-core/field";
 import { checkValid, checkCache, generateObject } from "aws-cf-builder-core/symbols";
 import { PolicyOut, PolicyDocument } from "./policy/policyDocument";
-import { SMap, PreparableError, Preparable } from "aws-cf-builder-core/general";
-import { Attr, callOn, notEmpty } from "aws-cf-builder-core/util";
+import { SMap, PreparableError } from "aws-cf-builder-core/general";
+import { Attr, notEmpty, callOnCheckValid } from "aws-cf-builder-core/util";
 
 export abstract class URG extends Resource {
     //#region properties
@@ -19,7 +19,7 @@ export abstract class URG extends Resource {
         policies:[]
     } as any
 
-    protected policiesR:Policy[]=[];
+    protected policiesR:(ManagedPolicy|Policy)[]=[];
 
     //#endregion
     constructor(errorDepth){
@@ -50,7 +50,7 @@ export abstract class URG extends Resource {
      * @param policies a list of policy resources that should 
      * be attached to this Resource
      */
-    policy(...policies:Policy[]):this;
+    policy(...policies:(Policy|ManagedPolicy)[]):this;
     /**
      * The policies to associate with this resource. For 
      * sample templates, see Template Examples.
@@ -83,17 +83,17 @@ export abstract class URG extends Resource {
      * @param policy the Document
      */
     policy(name:Field<string>,policy:Field<PolicyOut>|PolicyDocument):this;
-    policy(dn:SMap<Field<PolicyOut>>|Field<string>|Policy,policy?:Field<PolicyOut>|Policy,...policies:Policy[]):this{
+    policy(dn:SMap<Field<PolicyOut>>|Field<string>|Policy|ManagedPolicy,policy?:Field<PolicyOut>|Policy|ManagedPolicy,...policies:(Policy|ManagedPolicy)[]):this{
         if(typeof dn=="string" || isAdvField(dn)){
-            if(policy instanceof Policy) throw new PreparableError(this,"policy must be a PolicyDocument not a Policy")
+            if(policy instanceof Policy || policy instanceof ManagedPolicy) throw new PreparableError(this,"policy must be a PolicyDocument not a Policy")
             this._.policies.push({
                 name:dn,
                 policy:policy
             })
         }else{
-            if(dn instanceof Policy){
+            if(dn instanceof Policy || dn instanceof ManagedPolicy){
                 this.policiesR.push(dn)
-                if(policy instanceof Policy) this.policiesR.push(policy)
+                if(policy instanceof Policy || policy instanceof ManagedPolicy) this.policiesR.push(policy)
                 this.policiesR.push(...policies)
             }else{
                 this._.policies.push(..._.flow(
@@ -114,7 +114,7 @@ export abstract class URG extends Resource {
      * @param arns One or more managed policy ARNs to attach to this 
      * resource.
      */
-    managedPolicies(...arns:Attr<Policy.Managed>[]){
+    managedPolicies(...arns:Attr<ManagedPolicy>[]){
         this._.managedPolicies.push(...arns.map(a=>Attr.get(a,"Arn")));
         return this;
     }
@@ -123,11 +123,10 @@ export abstract class URG extends Resource {
     //#region resource functions
     [checkValid](){
         if(this[checkCache])return this[checkCache]
-        return this[checkCache]=callOn([
+        return this[checkCache]=callOnCheckValid([
             this._,
             this.policiesR
-        ],Preparable,o=>o[checkValid]())
-            .reduce(_.assign,{})
+        ],{})
     }
     [generateObject]():any{
         return {
@@ -146,3 +145,4 @@ export abstract class URG extends Resource {
     //#endregion
 }
 import { Policy } from "./policy";
+import { ManagedPolicy } from "./managedPolicy";

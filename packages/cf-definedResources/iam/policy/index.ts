@@ -2,10 +2,11 @@ import _ from "lodash/fp";
 
 import { PolicyDocument, PolicyStatement, PolicyOut } from "./policyDocument";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
-import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
+import { prepareQueueBase, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { Field } from "aws-cf-builder-core/field";
-import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
-import { checkValid, stacktrace, resourceIdentifier, checkCache, prepareQueue, s_path, generateObject } from "aws-cf-builder-core/symbols";
+import { notEmpty } from "aws-cf-builder-core/util";
+import { SMap, ResourceError } from "aws-cf-builder-core/general";
+import { checkValid, stacktrace, resourceIdentifier, checkCache, prepareQueue, generateObject } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
@@ -78,13 +79,12 @@ export class Policy extends Resource {
                 errors: errors
             };
         }
-        return this[checkCache] = callOn(this._, Preparable, o => o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign, out)
+        return this[checkCache] = callOnCheckValid(this._, out)
     }
 
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         if (prepareQueueBase(stack,path,ref,this)) {
-            callOn(this._, Preparable, o => o[prepareQueue](stack, this, true))
+            callOnPrepareQueue(this._,stack, this, true)
         }else{
             if(path instanceof PathDataCarrier && "policyAttachment" in path.data){
                 const {type,value}=path.data.policyAttachment;
@@ -105,27 +105,18 @@ export class Policy extends Resource {
             Properties: {
                 PolicyName: this._.name,
                 PolicyDocument: this._.document,
-                Roles: this.roles.length ? this.roles : undefined,
-                Groups: this.groups.length ? this.groups : undefined,
-                Users: this.users.length ? this.users : undefined
+                Roles: notEmpty(this.roles),
+                Groups: notEmpty(this.groups),
+                Users: notEmpty(this.users),
             }
         }
     }
     //#endregion
 }
-import { ManagedPolicy } from "./managedPolicy";
 export namespace Policy {
-    export const Managed = ManagedPolicy
-    export type Managed = ManagedPolicy
-
-
     export const Document = PolicyDocument
     export type Document = PolicyDocument
 
     export const Statement = PolicyStatement
     export type Statement = PolicyStatement
 }
-
-import { Role } from "../role";
-import { Group } from "../group";
-import { User } from "../user";

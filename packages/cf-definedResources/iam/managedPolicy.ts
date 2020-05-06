@@ -1,9 +1,15 @@
-import { Policy } from ".";
 import { Field } from "aws-cf-builder-core/field";
-import { stacktrace, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
+import { stacktrace, generateObject, resourceIdentifier, prepareQueue, checkValid, checkCache } from "aws-cf-builder-core/symbols";
 import { getShortStack } from "aws-cf-builder-core/utilLow"
+import { notEmpty, callOnCheckValid } from "aws-cf-builder-core/util"
 import _ from "lodash/fp"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { PolicyOut, PolicyDocument } from "./policy/policyDocument";
+import { Resource } from "aws-cf-builder-core/generatables/resource";
+import { stackPreparable } from "aws-cf-builder-core/stackBackend";
+import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
+import { prepareQueueBase, callOnPrepareQueue } from "aws-cf-builder-core/util";
+import { SMap, ResourceError } from "aws-cf-builder-core/general";
 
 
 /**
@@ -16,13 +22,18 @@ import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
  * 
  * [cloudfront reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-managedpolicy.html)
  */
-export class ManagedPolicy extends Policy{ //TODO
+export class ManagedPolicy extends Resource{ //TODO
     readonly [resourceIdentifier]="AWS::IAM::ManagedPolicy" 
     //#region parameters
-    protected _:Policy["_"] & {
+    protected _: {
+        name: Field<string>
+        document: Field<PolicyOut>
         path:Field<string>
-        description: Field<string>;
-    }
+        description: Field<string>
+    }={} as any
+    protected roles: Field<string>[] = [];
+    protected groups: Field<string>[] = [];
+    protected users: Field<string>[] = [];
     /**
      * the ARN.
      * such as `arn:aws:iam::123456789012:policy/teststack-CreateTestDBPolicy-16M23YE3CS700`
@@ -33,11 +44,11 @@ export class ManagedPolicy extends Policy{ //TODO
          * the ARN.
          * such as `arn:aws:iam::123456789012:policy/teststack-CreateTestDBPolicy-16M23YE3CS700`
          */
-        Arn:this.r
+        Arn:this.r,
     }
     //#endregion
     constructor(){
-        super();
+        super(1)
         this[stacktrace]=getShortStack(1)
     }
     /**
@@ -104,7 +115,7 @@ export class ManagedPolicy extends Policy{ //TODO
         if(typeof pathName=="string"){
             const split=pathName.lastIndexOf("/");
             this._.path=pathName.slice(0,split+1) || undefined;
-            name=pathName.slice(split+1);
+            this._.name=pathName.slice(split+1);
         }else{
             if(name==undefined){
                 this._.name=pathName
@@ -127,16 +138,63 @@ export class ManagedPolicy extends Policy{ //TODO
         this._.description=description;
         return this;
     }
+    /**
+     * **required:true**
+     * 
+     * **maps:** `PolicyDocument`
+     * @param doc A policy document that contains permissions to add 
+     * to the specified users or groups. 
+     */
+    Document(doc: Field<PolicyOut>|PolicyDocument) {
+        this._.document = doc;
+        return this;
+    }
     //#endregion
+    [checkValid]() {
+        if (this[checkCache]) return this[checkCache]
+        const out: SMap<ResourceError> = {}
+        const errors: string[] = []
+        if (!this._.document) {
+            errors.push("you must specify the Document")
+        }
+        if (errors.length) {
+            out[this[stacktrace]] = {
+                type: this[resourceIdentifier],
+                errors: errors
+            };
+        }
+        return this[checkCache] = callOnCheckValid(this._,out)
+    }
     
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
+        if (prepareQueueBase(stack,path,ref,this)) {
+            callOnPrepareQueue(this._,stack, this, true)
+        }else{
+            if(path instanceof PathDataCarrier && "policyAttachment" in path.data){
+                const {type,value}=path.data.policyAttachment;
+                if(type=="group"){
+                    this.groups.push(value)
+                }else if(type=="role"){
+                    this.roles.push(value)
+                }else if(type=="user"){
+                    this.users.push(value)
+                }
+            }
+        }
+    }
     //#region resource parameters
     [generateObject]() {
         return {
             Type:this[resourceIdentifier],
-            Properties:_.defaults(super[generateObject]().Properties,{
-                Description:this._.description,
+            Properties:{
+                ManagedPolicyName:this._.name,
                 Path:this._.path,
-            })
+                PolicyDocument:this._.document,
+                Description:this._.description,
+                Roles:notEmpty(this.roles),
+                Groups:notEmpty(this.groups),
+                Users:notEmpty(this.users)
+            }
         }
     }
     //#endregion

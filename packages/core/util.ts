@@ -127,3 +127,6 @@ export namespace Attr {
         }
     }
 }
+export function thrw(err:Error):never{
+    throw err
+}
