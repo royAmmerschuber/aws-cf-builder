@@ -1,0 +1,13 @@
+[
+    ["AWS::EC2::SecurityGroup",[
+        "you must specify a description"
+    ]],
+    ["Ingress",[
+        "you must specify a protocol",
+        "you must speccify exactly one of sourceGroup,cidrIp,cidrIpv6,sourcePrefixList"
+    ]],
+    ["Egress",[
+        "you must specify a protocol",
+        "you must speccify exactly one of destinationGroup,cidrIp,cidrIpv6,destionationPrefixList"
+    ]]
+]

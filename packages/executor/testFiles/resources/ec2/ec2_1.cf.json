@@ -1,0 +1,79 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "Sg1SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "paul",
+                "GroupName": "calabrese",
+                "SecurityGroupEgress": [
+                    {
+                        "CidrIp": "somecidr",
+                        "Description": "velo",
+                        "FromPort": 200,
+                        "IpProtocol": "-1",
+                        "ToPort": 300
+                    },
+                    {
+                        "CidrIpv6": "somecidr6",
+                        "IpProtocol": "icmp"
+                    },
+                    {
+                        "IpProtocol": "icmpv6",
+                        "DestinationPrefixListId": "listId"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "DestinationSecurityGroupId": "sg-someid"
+                    }
+                ],
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "somecidr",
+                        "Description": "yolo",
+                        "FromPort": 200,
+                        "IpProtocol": "-1",
+                        "ToPort": 300
+                    },
+                    {
+                        "CidrIpv6": "somecidr6",
+                        "IpProtocol": "icmp"
+                    },
+                    {
+                        "IpProtocol": "icmpv6",
+                        "SourcePrefixListId": "listId"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "SourceSecurityGroupName": "sg-someid"
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "SourceSecurityGroupId": "peter"
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "paul",
+                        "Value": "meier"
+                    },
+                    {
+                        "Key": "kevin",
+                        "Value": "seven"
+                    },
+                    {
+                        "Key": "eleven",
+                        "Value": "heaven"
+                    }
+                ],
+                "VpcId": "vpc-randomid"
+            }
+        },
+        "Sg2SecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "paul"
+            }
+        }
+    }
+}
