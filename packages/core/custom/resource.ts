@@ -11,6 +11,7 @@ import { Parent } from "./parent";
 import { ReferenceField } from "../fields/referenceField";
 import { AttributeField } from "../fields/attributeField"
 import { pathItem } from "../path";
+import { Parameter } from "../generatables/parameter";
 const pascalCase=_.flow(
     _.camelCase,
     _.upperFirst
@@ -94,7 +95,7 @@ export class customResource extends Resource{
             const subPath=this
             const rec = v => {
                 if (v instanceof Preparable) {
-                    if(isAdvField(v)){
+                    if(isAdvField(v) || v instanceof Parameter){
                         v[prepareQueue](stack,subPath,true)
                     }else{
                         v[prepareQueue](stack,subPath,false)

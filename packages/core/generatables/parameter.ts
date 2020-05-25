@@ -166,7 +166,7 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
         type: T,
     } = {} as any
     constructor(name?: string, type?: T) {
-        super(0)
+        super(2)
         this._.name = name
         this._.type = type
     }
@@ -203,14 +203,14 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
         return this
     }
     [checkValid](): SMap<ResourceError> {
-        const errs: string[] = []
+        const errors: string[] = []
         if (!this._.type) {
-            errs.push("you must specify a type")
+            errors.push("you must specify a type")
         }
-        if (errs.length) {
+        if (errors.length) {
             return {
                 [this[stacktrace]]: {
-                    errors: errs,
+                    errors,
                     type: this[resourceIdentifier]
                 }
             }
