@@ -14,9 +14,11 @@ import _ from "lodash/fp"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { InventoryConfigOut, InventoryConfig as _InventoryConfig } from "./inventoryConfig";
-import { Role } from "../../iam";
+import { Role, Policy } from "../../iam";
 import { ReplicationRuleOut, ReplicationRule as _ReplicationRule } from "./replicationRule";
 import { WebsiteConfiguration as _WebsiteConfiguration, RoutingRule as _RoutingRule, WebsiteConfigurationOut } from "./websiteConfiguration";
+import { BucketPolicy } from "../bucketPolicy";
+import { PolicyOut } from "../../iam/policy/policyDocument";
 /*
 "WebsiteConfiguration" : WebsiteConfiguration
 */
@@ -69,6 +71,7 @@ export class Bucket extends Resource {
         analyticsConfigs:[],
         replicationRules:[]
     } as any
+    private $policy:BucketPolicy
     /**
      * returns the resource name.
      * Example: `mystack-mybucket-kdwwxmddtr2g`
@@ -534,6 +537,10 @@ export class Bucket extends Resource {
         this._.websiteConfig=config
         return this
     }
+    policy(policy:Field<PolicyOut>|Policy.Document){
+        this.$policy=new BucketPolicy(policy)
+        return this
+    }
     [checkValid](): SMap<ResourceError> {
         if (this[checkCache]) return this[checkCache]
         const out: SMap<ResourceError> = {}
@@ -553,6 +560,7 @@ export class Bucket extends Resource {
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         if (prepareQueueBase(stack, path, ref, this)) {
             callOnPrepareQueue(this._, stack, this, true)
+            if(this.$policy)this.$policy[prepareQueue](stack,this,false)
         }
     }
     [generateObject]() {
