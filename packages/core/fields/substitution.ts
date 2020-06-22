@@ -89,7 +89,16 @@ export class Substitution extends InlineAdvField<string>{
     }
     private generateTag(val:any):string|void{
         if(isAdvField(val)){
-            if(val instanceof AttributeField){
+            if(val instanceof Substitution){
+                const subs=val.toJSON()
+                if(typeof subs=="string"){
+                    return subs
+                }else if(typeof subs["Fn::Sub"]=="string"){
+                    return subs["Fn::Sub"]
+                }else {
+                    return null
+                }
+            }else if(val instanceof AttributeField){
                 const getAtt=val.toJSON()["Fn::GetAtt"]
                 return `\${${getAtt[0]}.${getAtt[1]}}`
             }else if(val instanceof ReferenceField || val instanceof Parameter){

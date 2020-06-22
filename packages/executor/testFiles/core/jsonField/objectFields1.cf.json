@@ -1,0 +1,9 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {},
+    "Outputs": {
+        "Test": {
+            "Value": "{\"test\":{\"paul\":\"meier\",\"sven\":5},\"local\":{\"kevin\":\"nivek\"}}"
+        }
+    }
+}
