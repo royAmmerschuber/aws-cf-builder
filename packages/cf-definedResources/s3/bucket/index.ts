@@ -374,9 +374,9 @@ export class Bucket extends Resource {
      * 
      * **maps:**`PublicAccessBlockConfiguration`
      */
-    publicAccessBlockConfig(flags: { [k in PublicAccessBlockConfigFlags]: Field<boolean> }): this
+    publicAccessBlockConfig(flags: { [k in PublicAccessBlockConfigFlags]?: Field<boolean> }): this
     publicAccessBlockConfig(...flags: PublicAccessBlockConfigFlags[]): this
-    publicAccessBlockConfig(f: { [k in PublicAccessBlockConfigFlags]: Field<boolean> } | PublicAccessBlockConfigFlags, ...flags: PublicAccessBlockConfigFlags[]) {
+    publicAccessBlockConfig(f: { [k in PublicAccessBlockConfigFlags]?: Field<boolean> } | PublicAccessBlockConfigFlags, ...flags: PublicAccessBlockConfigFlags[]) {
         if (typeof f == "string") {
             [f, ...flags].forEach(f => this._.publicAccessBlock[f] = true)
         } else {

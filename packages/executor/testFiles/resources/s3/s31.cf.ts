@@ -124,10 +124,10 @@ export const bucket1=new S3.Bucket()
             somethingSlightly:"Different"
         },
     )
-    .notificationConfig("Lambda",{something:["completely","different"]})
-    .notificationConfig("Queue",{something:["completely","different"]})
-    .notificationConfig("Topic",{something:["completely","different"]})
-    .objectLockConfig(true,"GOVERNANCE",72)
+    .notificationConfig("Lambda",{something:["completely","different"]} as any)
+    .notificationConfig("Queue",{something:["completely","different"]} as any)
+    .notificationConfig("Topic",{something:["completely","different"]} as any)
+    .objectLockConfig(true,"GOVERNANCE",72,"days")
     .publicAccessBlockConfig("blockPublicAcls","blockPublicPolicy")
     .publicAccessBlockConfig({
         ignorePublicAcls:false
