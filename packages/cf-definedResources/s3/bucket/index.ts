@@ -437,7 +437,7 @@ export class Bucket extends Resource {
      * > Asymmetric Keys in the AWS Key Management Service Developer Guide.
      */
     encryption(type: Field<EncrytionType>, key?: Attr<"Arn">): this
-    encryption(type: Field<EncrytionType>, key?: Attr<"Arn">) { //TODO
+    encryption(type: Field<EncrytionType>, key?: Attr<"Arn">) { //TODO KMS
         this._.encryption = {
             type,
             key: Attr.get(key, "Arn")

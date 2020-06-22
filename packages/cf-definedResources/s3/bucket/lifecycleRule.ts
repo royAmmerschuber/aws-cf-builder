@@ -38,7 +38,6 @@ export type StorageClass =
     "INTELLIGENT_TIERING" |
     "ONEZONE_IA" |
     "STANDARD_IA"
-//TODO
 export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
     [resourceIdentifier] = "LifecycleRule"
     private _: {

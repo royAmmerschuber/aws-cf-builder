@@ -227,7 +227,6 @@ export class Target extends InlineAdvField<TargetOut>{
      * 
      * **maps:**`SqsParameters.MessageGroupId`
      */
-    //TODO change to Ref
     sqsMessageGroup(id:Field<string>){
         this._.sqsMessageGroup=id;
         return this;
@@ -277,7 +276,6 @@ export class Target extends InlineAdvField<TargetOut>{
                 errors:errors
             }
         }
-        //TODO Arn to Arn<ECS>
         return this[checkCache]=callOn(this._,Preparable,(o)=>o[checkValid]())
             .reduce<SMap<ResourceError>>(_.assign,out)
     }

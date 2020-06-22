@@ -22,7 +22,7 @@ import { SMap, ResourceError } from "aws-cf-builder-core/general";
  * 
  * [cloudfront reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-managedpolicy.html)
  */
-export class ManagedPolicy extends Resource{ //TODO
+export class ManagedPolicy extends Resource{
     readonly [resourceIdentifier]="AWS::IAM::ManagedPolicy" 
     //#region parameters
     protected _: {

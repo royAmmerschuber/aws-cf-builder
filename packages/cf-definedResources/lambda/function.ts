@@ -176,17 +176,18 @@ export class LambdaFunction extends Resource{
      * @param key the key of the Variable
      * @param value the value
      */
-    environment(key:string,value:Field<string>):this;
+    environment(key:string,value:Field<string|number>):this;
     /**
      * @param map a key value Map
      */
-    environment(map:SMap<Field<string>>):this;
-    environment(km:string|SMap<Field<string>>,value?:Field<string>):this{
+    environment(map:SMap<Field<string|number>>):this;
+    environment(km:string|SMap<Field<string|number>>,value?:Field<string|number>):this{ //TODO accept numbers
         if(value){
-            this._.environment[km as string]=value;
+            this._.environment[km as string]=typeof value=="number" ? String(value) : value;
         }else{
-            for(const k in km as SMap<Field<string>>){
-                this._.environment[k]=km[k];
+            for(const k in km as SMap<Field<string|number>>){
+                const value=km[k]
+                this._.environment[k]=typeof value=="number" ? String(value) : value;
             }
         }
         return this;

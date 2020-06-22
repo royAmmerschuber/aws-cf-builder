@@ -21,13 +21,12 @@ const program:commander.Command & {
     .arguments('<file>')
 
     .option('-o, --output <folder>',"the folder to output to")
-
     .option('-t, --typescript',"transpile Typescript files")
     .option('-c, --check',"check the typescript for type errors")
     .option('-y, --yaml','use yaml as output language') //TODO make yaml implementation less retarded
-    .option('--no-indent',"doesnt indent json output")
-    .option('--sam','apply the sam transformation, shorthand for `--transform "AWS::Serverless-2016-10-31"`')
-    .option('--transform <transform>',"the transform to apply")
+    .option('    --no-indent',"doesnt indent json output")
+    .option('    --sam','apply the sam transformation, shorthand for `--transform "AWS::Serverless-2016-10-31"`')
+    .option('    --transform <transform>',"the transform to apply")
     .parse(process.argv) as any
 
 if(!program.args[0]){
