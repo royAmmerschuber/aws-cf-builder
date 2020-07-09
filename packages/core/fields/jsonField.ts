@@ -12,7 +12,7 @@ import { localField, s_local_val } from "./local";
 /**
  * converts JS object to Substitution json string with parameters
  */
-export class JSONField extends Substitution{//todo handle nested jsonFields
+export class JSONField extends Substitution{
     [resourceIdentifier]="JSON"
     private nestedness=0
     constructor(private object:any){super(2,[],[])}
