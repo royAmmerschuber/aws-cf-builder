@@ -510,8 +510,26 @@ export class ServerlessFunction extends Resource{
         this._.permissionBoundary = Attr.get(permissionBoundary, "Arn");
         return this;
     }
-    policies(...policies:(Field<string|PolicyOut|PolicyTemplateOut>|Policy.Document)[]){
-        this._.policies.push(...policies)
+    /**
+     * **required:conditional**
+     * @param policies One or more policies that this function needs. They will be appended to the 
+     * default role for this function.
+     * 
+     * This property accepts a single string or a list of strings, and can be the name of AWS managed 
+     * IAM policies or AWS SAM policy templates, or inline IAM policy document(s) formatted in YAML.
+     * 
+     * For more information about AWS managed IAM policies, see AWS Managed Policies. For more 
+     * information about AWS SAM policy templates, see AWS SAM Policy Templates. For more information 
+     * about inline policies, see Inline Policies.
+     * 
+     * **NOTE:** If the Role property is set, this property is ignored.
+     * 
+     * **maps:**`Policies`
+     */
+    policies(...policies:(Attr<ManagedPolicy>|Field<PolicyOut/*TODO |PolicyTemplateOut */>|Policy.Document)[]){
+        this._.policies.push(...policies.map(p => p instanceof Resource 
+            ? Attr.get(p,"Arn") 
+            : p))
         return this
     }
     //#endregion

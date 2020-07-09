@@ -4,81 +4,6 @@
         "ManagedpolicyManagedPolicy": {
             "Type": "AWS::IAM::ManagedPolicy",
             "Properties": {
-                "ManagedPolicyName": "paul",
-                "Path": "karl/",
-                "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Sid": "peter",
-                            "Effect": "Allow",
-                            "Principal": "*",
-                            "Action": "*",
-                            "Resource": "*"
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Action": [
-                                "something",
-                                "somethingelse"
-                            ],
-                            "Resource": "*"
-                        },
-                        {
-                            "Effect": "Deny",
-                            "Principal": {
-                                "Service": [
-                                    "ichi",
-                                    "ni"
-                                ]
-                            },
-                            "Action": [
-                                "one",
-                                "two"
-                            ],
-                            "Resource": "*"
-                        },
-                        {
-                            "Effect": "Allow",
-                            "NotPrincipal": {
-                                "Federated": [
-                                    "one",
-                                    "two"
-                                ]
-                            },
-                            "NotAction": [
-                                "yo"
-                            ],
-                            "NotResource": [
-                                "yo",
-                                "lo",
-                                "no"
-                            ]
-                        },
-                        {
-                            "Effect": "Allow",
-                            "Action": [
-                                "yo"
-                            ]
-                        }
-                    ]
-                },
-                "Description": "something"
-            }
-        },
-        "Mngd2ManagedPolicy": {
-            "Type": "AWS::IAM::ManagedPolicy",
-            "Properties": {
-                "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": []
-                }
-            }
-        },
-        "Mngd3ManagedPolicy": {
-            "Type": "AWS::IAM::ManagedPolicy",
-            "Properties": {
-                "ManagedPolicyName": "paul",
                 "PolicyDocument": {
                     "Version": "2012-10-17",
                     "Statement": []
@@ -88,16 +13,6 @@
                         "Ref": "RoleRole"
                     }
                 ]
-            }
-        },
-        "Mngd4ManagedPolicy": {
-            "Type": "AWS::IAM::ManagedPolicy",
-            "Properties": {
-                "ManagedPolicyName": "peter",
-                "PolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": []
-                }
             }
         },
         "Policy1Policy": {
@@ -132,7 +47,7 @@
                     ]
                 },
                 "PermissionBoundary": {
-                    "Ref": "Mngd2ManagedPolicy"
+                    "Ref": "ManagedpolicyManagedPolicy"
                 },
                 "ManagedPolicyArns": [
                     "something",
@@ -207,7 +122,15 @@
                 "RoleName": "peter",
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
-                    "Statement": []
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
                 }
             }
         },
@@ -233,7 +156,19 @@
                 },
                 "AssumeRolePolicyDocument": {
                     "Version": "2012-10-17",
-                    "Statement": []
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "AWS": [
+                                    "arn:something:::"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
                 },
                 "Path": "peter"
             }

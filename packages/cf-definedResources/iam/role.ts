@@ -91,7 +91,7 @@ export class Role extends URG {
      * IAM policy, see IAM Policy Elements Reference in the IAM User 
      * Guide.
      */
-    AssumePolicy(doc:Field<PolicyOut>|Policy.Document)
+    AssumePolicy(doc:Field<PolicyOut>|Policy.Document):this
     AssumePolicy(universal: "*"): this;
     /**
      * @param from the type of resource you want to give these permissions to
