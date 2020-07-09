@@ -17,7 +17,7 @@ import { Role } from "../../iam/role";
 import { DeploymentPreferenceOut, DeploymentPreference as DeplPreference } from "./deploymentPreference";
 import { runtimes } from "../../lambda/function";
 import { EventOut,Event as EventS } from "./event";
-import { Policy } from "../../iam";
+import { Policy, ManagedPolicy } from "../../iam";
 import { PolicyOut } from "../../iam/policy/policyDocument";
 import { PolicyTemplateOut } from "../policyTemplate";
 
@@ -504,7 +504,7 @@ export class ServerlessFunction extends Resource{
      * 
      * **maps:**`PermissionsBoundary`
      */
-    permissionBoundary(permissionBoundary: Attr<Policy.Managed>): this {
+    permissionBoundary(permissionBoundary: Attr<ManagedPolicy>): this {
         this._.permissionBoundary = Attr.get(permissionBoundary, "Arn");
         return this;
     }

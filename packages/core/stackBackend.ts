@@ -1,4 +1,4 @@
-import { checkCache, checkValid, prepareQueue, resourceIdentifier, stacktrace, s_path, generateObject, getName } from "./symbols"
+import { checkCache, checkValid, prepareQueue, s_path, generateObject, getName } from "./symbols"
 import { SMap, ResourceError, Generatable, PreparableError } from "./general"
 import _ from "lodash/fp"
 import { Resource } from "./generatables/resource"

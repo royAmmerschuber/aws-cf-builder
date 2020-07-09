@@ -1,15 +1,17 @@
 import { PolicyOut } from "./policy/policyDocument";
 import { URG } from "./urg";
 import { Field } from "aws-cf-builder-core/field";
-import { Attr, prepareQueueBase, callOn } from "aws-cf-builder-core/util";
+import { Local } from "aws-cf-builder-core/fields/local";
+import { Attr, prepareQueueBase, callOnPrepareQueue, thrw } from "aws-cf-builder-core/util";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { checkValid, stacktrace, checkCache, prepareQueue, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
-import { Preparable } from "aws-cf-builder-core/general";
+import { Preparable, PreparableError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import _ from "lodash/fp"
-import { Policy } from "./policy";
+import { ManagedPolicy } from "./managedPolicy";
+import { InstanceProfile } from "./instanceProfile";
 
 /**
  * Creates an AWS Identity and Access Management (IAM) role. Use an IAM 
@@ -28,8 +30,10 @@ export class Role extends URG {
     protected _: URG["_"] & {
         maxDuration: Field<number>
         permissionBoundary: Field<string>
+        instanceProfile: boolean
     }
     private assumePolicy: Field<PolicyOut>
+    private instanceProfileR=new InstanceProfile()
     /**
      * returns the resource name
      */
@@ -46,7 +50,9 @@ export class Role extends URG {
          * For more information about IDs, see [IAM Identifiers](https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_identifiers.html)
          * in the IAM User Guide.
          */
-        RoleId: new AttributeField(this, "RoleId")
+        RoleId: new AttributeField(this, "RoleId"),
+        instanceProfileArn: Local(() => this._.instanceProfile ? this.instanceProfileR.a.Arn : thrw(new PreparableError(this,"you cannot reference the instanceProfile without activating it"))),
+        instanceProfileName: Local(() => this._.instanceProfile ? this.instanceProfileR.r : thrw(new PreparableError(this,"you cannot reference the instanceProfile without activating it")))
     }
     //#endregion
     constructor() {
@@ -99,8 +105,87 @@ export class Role extends URG {
      * 
      * **maps:**`PermissionBoundary`
      */
-    permissionBoundary(permissionBoundary: Attr<Policy.Managed>): this {
+    permissionBoundary(permissionBoundary: Attr<ManagedPolicy>): this {
         this._.permissionBoundary = Attr.get(permissionBoundary, "Arn");
+        return this;
+    }
+    instanceProfile():this
+    /**
+     * @param pathName a combination of path and name. everything 
+     * before and including the last slash is the path and 
+     * everything after is the name
+     * 
+     * > **Important**
+     * > 
+     * > If you specify a name, you cannot perform updates that 
+     * > require replacement of this resource. You can perform updates 
+     * > that require no or some interruption. If you must replace the 
+     * > resource, specify a new name.
+     * 
+     * **required:false**
+     * 
+     * **maps:** `ManagedPolicyName` & `Path`
+     */
+    instanceProfile(pathName:string):this;
+    /**
+     * @param name A custom, friendly name for your IAM managed policy. 
+     * For valid values, see the PolicyName parameter of the 
+     * CreatePolicy action in the IAM API Reference.
+     * 
+     * **required:false**
+     * 
+     * **maps:** `ManagedPolicyName` & `Path`
+     * 
+     * > **Important**
+     * > 
+     * > If you specify a name, you cannot perform updates that 
+     * > require replacement of this resource. You can perform updates 
+     * > that require no or some interruption. If you must replace the 
+     * > resource, specify a new name.
+     */
+    instanceProfile(name:Field<string>):this;
+    /**
+     * 
+     * @param path The path for the IAM policy. By default, the path is 
+     * /. For more information, see IAM Identifiers in the IAM User 
+     * Guide.
+     * 
+     * **required:false**
+     * 
+     * **maps:**`Path`
+     * @param name A custom, friendly name for your IAM managed policy. 
+     * For valid values, see the PolicyName parameter of the 
+     * CreatePolicy action in the IAM API Reference.
+     * 
+     * 
+     * **maps:** `ManagedPolicyName`
+     * @param useName If you set this, AWS CloudFormation generates 
+     * a unique physical ID and uses that ID for the Policy name.
+     * 
+     * > **Important**
+     * > 
+     * > If you specify a name, you cannot perform updates that 
+     * > require replacement of this resource. You can perform updates 
+     * > that require no or some interruption. If you must replace the 
+     * > resource, specify a new name.
+     */
+    instanceProfile(path:Field<string>,name:Field<string>):this;
+    instanceProfile(pathName?:Field<string>,name?:Field<string>):this{
+        this._.instanceProfile=true
+        if(pathName==undefined) return this
+
+        if(typeof pathName=="string"){
+            const split=pathName.lastIndexOf("/");
+            this.instanceProfileR._.path=pathName.slice(0,split+1) || undefined;
+            this.instanceProfileR._.name=pathName.slice(split+1);
+        }else{
+            if(name==undefined){
+                this.instanceProfileR._.name=pathName
+            }else{
+                this.instanceProfileR._.path=pathName
+                this.instanceProfileR._.name=name
+            }
+        }
         return this;
     }
     //#endregion
@@ -128,10 +213,11 @@ export class Role extends URG {
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         if (prepareQueueBase(stack, path, ref, this)) {
-            callOn(this._, Preparable as any, (o: Preparable) => o[prepareQueue](stack, this, true))
+            callOnPrepareQueue(this._, stack, this, true)
 
             if (this.assumePolicy instanceof Preparable) this.assumePolicy[prepareQueue](stack, new PathDataCarrier(this, { skipResources: true }), false)
             this.policiesR.forEach(o => o[prepareQueue](stack, new PathDataCarrier(this, { policyAttachment: { type: "role", value: this.r } }), true))
+            if(this._.instanceProfile) this.instanceProfileR[prepareQueue](stack,this,false)
         }
     }
     [generateObject]() {

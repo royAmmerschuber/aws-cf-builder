@@ -6,8 +6,8 @@ import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { Field } from "aws-cf-builder-core/field";
 import { Tag } from "../../util";
 import { JSONField } from "aws-cf-builder-core/fields/jsonField"
-import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
-import { callOn, prepareQueueBase } from "aws-cf-builder-core/util";
+import { SMap, ResourceError } from "aws-cf-builder-core/general";
+import { prepareQueueBase, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { Policy as Policies,PolicyOut } from "./policy";
 import * as Aws from "../../aws"
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
@@ -194,12 +194,11 @@ export class Parameter extends Resource{
                 errors:errors
             };
         }
-        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign,out)
+        return this[checkCache]=callOnCheckValid(this._,out)
     }
     [prepareQueue](stack: stackPreparable, path:pathItem, ref: boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
+            callOnPrepareQueue(this._,stack,this,true)
         }
     }
 

@@ -3,7 +3,7 @@ import { generateObject, resourceIdentifier, checkValid, prepareQueue, checkCach
 import { SMap, ResourceError, PreparableError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { callOnPrepareQueue, callOnCheckValid, prepareQueueBase } from "aws-cf-builder-core/util";
+import { callOnPrepareQueue, callOnCheckValid } from "aws-cf-builder-core/util";
 import { Field } from "aws-cf-builder-core/field";
 import { findInPath } from "aws-cf-builder-core/util";
 import { PolicyDocument, PolicyOut } from "../iam/policy/policyDocument";

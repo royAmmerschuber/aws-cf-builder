@@ -7,11 +7,11 @@ import { Ref, Attr, prepareQueueBase, callOn, notEmpty } from "aws-cf-builder-co
 import { ResourceError, SMap, Preparable } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
-import { Policy } from "./policy";
 import { Group } from "./group";
 import { AccessKey } from "./accessKey";
 import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
+import { ManagedPolicy } from "./managedPolicy";
 
 export class User extends URG{
     readonly [resourceIdentifier]="AWS::IAM::User";
@@ -82,7 +82,7 @@ export class User extends URG{
      * 
      * **maps:**`PermissionsBoundary`
      */
-    permissionsBoundary(policy:Attr<Policy.Managed>){
+    permissionsBoundary(policy:Attr<ManagedPolicy>){
         this._.permissionBoundary=Attr.get<"Arn">(policy,"Arn")
         return this;
     }

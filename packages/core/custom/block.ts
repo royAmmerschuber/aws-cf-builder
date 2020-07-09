@@ -6,6 +6,7 @@ import { CustomParameters, CustomPropFunction } from "./resource";
 import _ from "lodash/fp"
 import { pathItem } from "../path";
 import { callOnCheckValid } from "../util";
+import { Parameter } from "../generatables/parameter";
 
 export class customBlock extends InlineAdvField<object>{
     [resourceIdentifier]: string;
@@ -40,7 +41,7 @@ export class customBlock extends InlineAdvField<object>{
         const subPath = path
         const rec = v => {
             if (v instanceof Preparable) {
-                if (isAdvField(v)) {
+                if (isAdvField(v) || v instanceof Parameter) {
                     v[prepareQueue](stack, subPath, true)
                 } else {
                     v[prepareQueue](stack, subPath, false)
