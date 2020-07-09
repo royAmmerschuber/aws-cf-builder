@@ -1,6 +1,6 @@
 {
     "name": "aws-cf-builder-defined-resources",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "dependencies": {
         "lodash": "^4.17.15"
     },
@@ -9,10 +9,12 @@
         "@types/lodash": "^4.14.149"
     },
     "peerDependencies": {
-        "aws-cf-builder-core": "~1.0.8"
+        "aws-cf-builder-core": "~1.0.9"
     },
     "scripts": {
-        "build": "tsc && cp package.json dist/package.json"
+        "build": "tsc && cp package.json dist/package.json",
+        "publish":"npm run build && cd dist && npm publish"
+
     },
     "repository": {
         "type": "git",
