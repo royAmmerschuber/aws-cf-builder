@@ -19,11 +19,11 @@
     },
     "scripts": {
         "test": "npx jest",
-        "build": "rm -rf dist && tsc && cp  package.json dist/package.json && cp -r types dist/ && cp cf.tsconfig.json dist/cf.tsconfig.json",
+        "build": "rm -rf dist/* && tsc && cp  package.json dist/package.json && cp -r types dist/ && cp cf.tsconfig.json dist/cf.tsconfig.json",
         "buildCore": "cd ../core && npm run build",
         "buildPreDef": "cd ../cf-definedResources && npm run build",
         "link": "cd ../core/dist && npm link && cd ../../cf-definedResources && npm link aws-cf-builder-core && cd dist && npm link && cd ../../executor && npm link aws-cf-builder-core && npm link aws-cf-builder-defined-resources",
-        "publish":"npm run build && cd dist && npm publish"
+        "pub":"npm run build && npm publish dist"
     },
     "bin": {
         "cf-builder": "./bin/cf-builder.js"
