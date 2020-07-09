@@ -64,12 +64,14 @@ export class LambdaMethod extends Method{
         return this[checkCache]=out;
     }
     [generateObject]():MethodOut {
-        this._.integration={
+        const base=super[generateObject]();
+        base.Properties.Integration={
+            ...base.Properties.Integration,
             Type:"AWS_PROXY",
             IntegrationHttpMethod:"POST",
             Uri:Sub`arn:aws:apigateway:${AWS.region}:lambda:path/2015-03-31/functions/${this._.lambda}/invocations` as Field<string>
         }
-        return super[generateObject]();
+        return base
     }
     //#endregion
 }

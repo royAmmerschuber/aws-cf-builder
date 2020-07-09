@@ -1,5 +1,7 @@
 import { Method } from "../method";
 import { ApiNode } from "../api";
+import { IntegrationResponse } from "./integrationResponse";
+import { generateObject } from "aws-cf-builder-core/symbols";
 /**
  * this Method is used to generate an Options method for a given api node
  * 
@@ -33,33 +35,28 @@ export class OptionsMethod extends Method{
             }
         }
         methods+="OPTIONS";
-        this._.integration={
-            IntegrationResponses:[
-                {
-                    StatusCode:"200",
-                    ResponseParameters:{
-                        "method.response.header.Access-Control-Allow-Headers": `'${headers}'`,
-                        "method.response.header.Access-Control-Allow-Methods": `'${methods}'`,
-                        "method.response.header.Access-Control-Allow-Origin": `'${origin}'`
-                    }
-                }
-            ],
-            PassthroughBehavior:"WHEN_NO_MATCH",
-            RequestTemplates:{
-                "application/json": '{"statusCode":200}'
-            },
-            Type:"MOCK"
-        },
-        this._.responses=[{
-            code:"200",
-            models:{
-                "application/json":"Empty"
-            },
-            headers:{
-                "Access-Control-Allow-Headers": false,
-                "Access-Control-Allow-Methods": false,
-                "Access-Control-Allow-Origin": false
-            }
-        }]
+        this.integrationResponse(new IntegrationResponse()
+            .StatusCode("200")
+            .parameterMapping({
+                "method.response.header.Access-Control-Allow-Headers": `'${headers}'`,
+                "method.response.header.Access-Control-Allow-Methods": `'${methods}'`,
+                "method.response.header.Access-Control-Allow-Origin": `'${origin}'`
+            }))
+        this.passthrougBehavior("WHEN_NO_MATCH")
+        this.requestTemplateMapping("application/json",JSON.stringify({
+            statusCode:200
+        }))
+        this.response("200",{
+            "application/json":"Empty"
+        },{
+            "Access-Control-Allow-Headers": false,
+            "Access-Control-Allow-Methods": false,
+            "Access-Control-Allow-Origin": false
+        })
+    }
+    [generateObject](){
+        const base=super[generateObject]()
+        base.Properties.Integration.Type="MOCK"
+        return base
     }
 }

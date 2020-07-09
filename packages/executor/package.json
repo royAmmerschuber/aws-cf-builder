@@ -4,9 +4,9 @@
     "dependencies": {
         "aws-cf-builder-core": "~1.0.8",
         "aws-cf-builder-defined-resources": "~1.1.1",
-        "lodash": "^4.17.15",
+        "chalk": "^2.4.2",
         "commander": "^3.0.2",
-        "chalk": "^2.4.2"
+        "lodash": "^4.17.15"
     },
     "devDependencies": {
         "@types/lodash": "^4.14.123",
@@ -21,7 +21,8 @@
         "test": "npx jest",
         "build": "rm -rf dist && tsc && cp  package.json dist/package.json && cp -r types dist/ && cp cf.tsconfig.json dist/cf.tsconfig.json",
         "buildCore": "cd ../core && npm run build",
-        "buildPreDef": "cd ../cf-definedResources && npm run build"
+        "buildPreDef": "cd ../cf-definedResources && npm run build",
+        "link": "cd ../core/dist && npm link && cd ../../cf-definedResources && npm link aws-cf-builder-core && cd dist && npm link && cd ../../executor && npm link aws-cf-builder-core && npm link aws-cf-builder-defined-resources"
     },
     "bin": {
         "cf-builder": "./bin/cf-builder.js"

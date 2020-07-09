@@ -74,7 +74,7 @@ export class Model extends Resource implements namedPath{
      * more output formats. Specify null ({}) if you don't want 
      * to specify a schema.
      */
-    Shema(shema:Field<any>):this{
+    Schema(shema:Field<any>):this{
         this._.schema=shema;
         return this;
     }
