@@ -1,0 +1,21 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "LFunction": {
+            "Type": "AWS::Serverless::Function",
+            "Properties": {
+                "CodeUri": "somePath",
+                "Environment": {
+                    "Variables": {
+                        "paul": "4",
+                        "meier": "sven",
+                        "karl": "95",
+                        "karl2": "nivek"
+                    }
+                },
+                "Runtime": "dotnetcore1.0",
+                "Handler": "index.handler"
+            }
+        }
+    }
+}

@@ -11,20 +11,22 @@ const options: TransformOptions = {
     check:true
 }
 function handleHead(area: string, folders: string[]) {
-    folders.forEach(folder => {
-        const files = fs.readdirSync(path.join(__dirname, area, folder))
-            .sort()
-        describe(`${area}/${folder}`, () => {
-            files.forEach((respName, i) => {
-                const inpName = respName.slice(0, respName.lastIndexOf(".cf")) + ".cf.ts"
-                if (respName.endsWith(".cf.json") && files.includes(inpName, i + 1)) {
-                    testFile(inpName, path.join(__dirname, area, folder, inpName), require(`./${area}/${folder}/${respName}`))
-                } else if (respName.endsWith(".cf.error.json") && files.includes(inpName, i + 1)) {
-                    testError(inpName,path.join(__dirname,area,folder,inpName), require(`./${area}/${folder}/${respName}`))
-                }
+    describe(area,()=>{
+        folders.forEach(folder => {
+            const files = fs.readdirSync(path.join(__dirname, area, folder))
+                .sort()
+            describe(folder, () => {
+                files.forEach((respName, i) => {
+                    const inpName = respName.slice(0, respName.lastIndexOf(".cf")) + ".cf.ts"
+                    if (respName.endsWith(".cf.json") && files.includes(inpName, i + 1)) {
+                        testFile(inpName, path.join(__dirname, area, folder, inpName), require(`./${area}/${folder}/${respName}`))
+                    } else if (respName.endsWith(".cf.error.json") && files.includes(inpName, i + 1)) {
+                        testError(inpName,path.join(__dirname,area,folder,inpName), require(`./${area}/${folder}/${respName}`))
+                    }
+                })
+            })
         })
     })
-})
 }
 function testFile(name: string, path: string, comparison: any) {
     test(name, () => {

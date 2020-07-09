@@ -1,0 +1,11 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {},
+    "Outputs": {
+        "Test": {
+            "Value": {
+                "Fn::Sub": "{\"paul\":\"{\\\"meier\\\":\\\"${peter}\\\",\\\"new\\\":\\\"${peter.version}\\\",\\\"sven\\\":\\\"paul\\\",\\\"karl\\\":\\\"{\\\\\\\"meier\\\\\\\":\\\\\\\"${peter}\\\\\\\",\\\\\\\"new\\\\\\\":\\\\\\\"${peter.version}\\\\\\\",\\\\\\\"sven\\\\\\\":\\\\\\\"paul\\\\\\\"}\\\"}\"}"
+            }
+        }
+    }
+}

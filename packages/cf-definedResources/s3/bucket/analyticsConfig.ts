@@ -25,7 +25,6 @@ export interface AnalyticsConfigOut {
 }
 export type ExportFormat="CSV"
 export type SchemaVersion="V_1"
-//TODO
 export class AnalyticsConfig extends InlineAdvField<AnalyticsConfigOut>{
     [resourceIdentifier] = "AnalyticsConfig"
     private _:{

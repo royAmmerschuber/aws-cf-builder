@@ -1,4 +1,4 @@
-import { PolicyOut } from "./policy/policyDocument";
+import { PolicyOut, PrincipalKeys } from "./policy/policyDocument";
 import { URG } from "./urg";
 import { Field } from "aws-cf-builder-core/field";
 import { Local } from "aws-cf-builder-core/fields/local";
@@ -12,6 +12,7 @@ import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import _ from "lodash/fp"
 import { ManagedPolicy } from "./managedPolicy";
 import { InstanceProfile } from "./instanceProfile";
+import { Policy } from "./policy";
 
 /**
  * Creates an AWS Identity and Access Management (IAM) role. Use an IAM 
@@ -90,8 +91,29 @@ export class Role extends URG {
      * IAM policy, see IAM Policy Elements Reference in the IAM User 
      * Guide.
      */
-    AssumePolicy(doc: Field<PolicyOut>) {
-        this.assumePolicy = doc
+    AssumePolicy(doc:Field<PolicyOut>|Policy.Document):this
+    AssumePolicy(universal: "*"): this;
+    /**
+     * @param from the type of resource you want to give these permissions to
+     * @param principals the resources you want to give the permissions to
+     */
+    AssumePolicy(from: PrincipalKeys, ...principals: Field<string>[]): this
+    AssumePolicy(df: Field<PolicyOut|PrincipalKeys|"*">,...principals:Field<string>[]) {
+        if(typeof df=="string"){
+            if(df=="*"){
+                this.assumePolicy=new Policy.Document()
+                    .Statement(new Policy.Statement()
+                        .Actions("sts:AssumeRole")
+                        .principals(df))
+            }else{
+                this.assumePolicy=new Policy.Document()
+                    .Statement(new Policy.Statement()
+                        .Actions("sts:AssumeRole")
+                        .principals(df,...principals))
+            }
+        }else{
+            this.assumePolicy = df
+        }
         return this
     }
     //#endregion

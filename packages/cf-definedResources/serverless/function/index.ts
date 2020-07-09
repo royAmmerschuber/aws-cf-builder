@@ -5,7 +5,7 @@ import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { Field } from "aws-cf-builder-core/field";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { Attr, prepareQueueBase, notEmpty, callOnPrepareQueue, callOnCheckValid } from "aws-cf-builder-core/util";
-import { checkValid, prepareQueue, generateObject, stacktrace, checkCache, resourceIdentifier } from "aws-cf-builder-core/symbols";
+import { checkValid, prepareQueue, generateObject, stacktrace, checkCache, resourceIdentifier, getName } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { Permission } from "../../lambda/permission";
@@ -20,6 +20,7 @@ import { EventOut,Event as EventS } from "./event";
 import { Policy, ManagedPolicy } from "../../iam";
 import { PolicyOut } from "../../iam/policy/policyDocument";
 import { PolicyTemplateOut } from "../policyTemplate";
+import { Queue } from "../../sqs";
 
 export class ServerlessFunction extends Resource{
     readonly [resourceIdentifier]="AWS::Serverless::Function"
@@ -218,17 +219,18 @@ export class ServerlessFunction extends Resource{
      * @param key the key of the Variable
      * @param value the value
      */
-    environment(key:string,value:Field<string>):this;
+    environment(key:string,value:Field<string|number>):this;
     /**
      * @param map a key value Map
      */
-    environment(map:SMap<Field<string>>):this;
-    environment(km:string|SMap<Field<string>>,value?:Field<string>):this{
+    environment(map:SMap<Field<string|number>>):this;
+    environment(km:string|SMap<Field<string|number>>,value?:Field<string|number>):this{
         if(value){
-            this._.environment[km as string]=value;
+            this._.environment[km as string]=typeof value=="number" ? String(value) : value;
         }else{
             for(const k in km as SMap<Field<string>>){
-                this._.environment[k]=km[k];
+                const value=km[k]
+                this._.environment[k]=typeof value=="number" ? String(value) : value;
             }
         }
         return this;
@@ -441,12 +443,12 @@ export class ServerlessFunction extends Resource{
      * 
      * **maps:** `DeadLetterConfig.TargetArn`
      */
-    deadLetterTarget(dlq:Attr<"Arn">,type:Field<"SNS"|"SQS">){
+    deadLetterTarget(dlq:Attr<"Arn"|Queue>,type:Field<"SNS"|"SQS">){
         this._.dlq={
             TargetArn:Attr.get(dlq,"Arn"),
             Type:type
         }
-        //TODO use correct Arn reference (SNS|SQS)
+        //TODO use correct Arn reference (SNS)
         return this
     }
     /**
@@ -508,8 +510,26 @@ export class ServerlessFunction extends Resource{
         this._.permissionBoundary = Attr.get(permissionBoundary, "Arn");
         return this;
     }
-    policies(...policies:(Field<string|PolicyOut|PolicyTemplateOut>|Policy.Document)[]){
-        this._.policies.push(...policies)
+    /**
+     * **required:conditional**
+     * @param policies One or more policies that this function needs. They will be appended to the 
+     * default role for this function.
+     * 
+     * This property accepts a single string or a list of strings, and can be the name of AWS managed 
+     * IAM policies or AWS SAM policy templates, or inline IAM policy document(s) formatted in YAML.
+     * 
+     * For more information about AWS managed IAM policies, see AWS Managed Policies. For more 
+     * information about AWS SAM policy templates, see AWS SAM Policy Templates. For more information 
+     * about inline policies, see Inline Policies.
+     * 
+     * **NOTE:** If the Role property is set, this property is ignored.
+     * 
+     * **maps:**`Policies`
+     */
+    policies(...policies:(Attr<ManagedPolicy>|Field<PolicyOut/*TODO |PolicyTemplateOut */>|Policy.Document)[]){
+        this._.policies.push(...policies.map(p => p instanceof Resource 
+            ? Attr.get(p,"Arn") 
+            : p))
         return this
     }
     //#endregion
@@ -568,8 +588,8 @@ export class ServerlessFunction extends Resource{
         if(this._.memory && typeof this._.memory=="number" && this._.memory>3008){
             errors.push("the memory cannot be set to more than 3008");
         }
-        if(this._.codeStorageMethod){
-            if(this._.codeUri){
+        if(this._.codeStorageMethod=="inline"){
+            if(this._.inlineCode){
                 if(typeof this._.runtime=="string" && ( this._.runtime.startsWith("python") || this._.runtime.startsWith("nodejs") )){
                     if(typeof this._.codeUri=="string" && this._.codeUri.length>4096){
                         errors.push('the code must be less than 4096 characters long')
@@ -577,8 +597,10 @@ export class ServerlessFunction extends Resource{
                 }else{
                     errors.push('you can only specify a CodeFile with the runtimes "python" or "nodejs"');
                 }
+            }else{
+                errors.push("inline code missing")
             }
-        }else{
+        }else if(!this._.codeStorageMethod){
             errors.push(must+"CodeUri or InlineCode")
         }
         if(errors.length){

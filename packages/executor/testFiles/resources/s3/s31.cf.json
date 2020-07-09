@@ -412,6 +412,19 @@
                 }
             }
         },
+        "Bucket1BucketPolicy": {
+            "Type": "AWS::S3::BucketPolicy",
+            "Properties": {
+                "Bucket": {
+                    "Ref": "Bucket1Bucket"
+                },
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [],
+                    "Id": "testOfPolicyAttachment"
+                }
+            }
+        },
         "Bucket2Bucket": {
             "Type": "AWS::S3::Bucket",
             "Properties": {

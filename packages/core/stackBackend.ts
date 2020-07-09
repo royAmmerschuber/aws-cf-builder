@@ -1,5 +1,5 @@
 import { checkCache, checkValid, prepareQueue, s_path, generateObject, getName } from "./symbols"
-import { SMap, ResourceError, Generatable, PreparableError } from "./general"
+import { SMap, ResourceError, Generatable, PreparableError, Preparable } from "./general"
 import _ from "lodash/fp"
 import { Resource } from "./generatables/resource"
 import { Output } from "./generatables/output"
@@ -162,11 +162,13 @@ function getResources(file: any): { path: string[], resource: Generatable }[] {
         for (const k in obj) {
             const v = obj[k]
             if (typeof v == "object") {
-                if (v instanceof Generatable) {
-                    out.push({
-                        path: [...path, k],
-                        resource: v
-                    })
+                if(v instanceof Preparable){
+                    if (v instanceof Generatable) {
+                        out.push({
+                            path: [...path, k],
+                            resource: v
+                        })
+                    }
                 } else {
                     out.push(...rec([...path, k], v))
                 }

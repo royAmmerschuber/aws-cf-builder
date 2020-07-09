@@ -1,0 +1,110 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "ManagedpolicyManagedPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "ManagedPolicyName": "paul",
+                "Path": "karl/",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "peter",
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": "*",
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "something",
+                                "somethingelse"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Deny",
+                            "Principal": {
+                                "Service": [
+                                    "ichi",
+                                    "ni"
+                                ]
+                            },
+                            "Action": [
+                                "one",
+                                "two"
+                            ],
+                            "Resource": "*"
+                        },
+                        {
+                            "Effect": "Allow",
+                            "NotPrincipal": {
+                                "Federated": [
+                                    "one",
+                                    "two"
+                                ]
+                            },
+                            "NotAction": [
+                                "yo"
+                            ],
+                            "NotResource": [
+                                "yo",
+                                "lo",
+                                "no"
+                            ]
+                        },
+                        {
+                            "Effect": "Allow",
+                            "Action": [
+                                "yo"
+                            ]
+                        }
+                    ]
+                },
+                "Description": "something"
+            }
+        },
+        "Mngd2ManagedPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": []
+                }
+            }
+        },
+        "Mngd3ManagedPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "ManagedPolicyName": "paul",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": []
+                }
+            }
+        },
+        "Mngd4ManagedPolicy": {
+            "Type": "AWS::IAM::ManagedPolicy",
+            "Properties": {
+                "ManagedPolicyName": "paul",
+                "Path":"peter",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": []
+                }
+            }
+        },
+        "Policy1Policy": {
+            "Type": "AWS::IAM::Policy",
+            "Properties": {
+                "PolicyName": "paul",
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": []
+                }
+            }
+        }
+    }
+}

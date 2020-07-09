@@ -29,15 +29,19 @@ export class AttributeField extends InlineAdvField<any>{
     constructor(private resource:Resource|string,private attr:string){ super(1) }
 
     toJSON() {
-        return {"Fn::GetAtt":[
-            this.resource[getName](),
-            this.attr
-        ]}
+        const resourceName=this.resource instanceof Resource ? this.resource[getName]() : this.resource
+        return {"Fn::GetAtt":[ resourceName, this.attr ]}
     }    
     [checkValid](): SMap<ResourceError> {
-        return this.resource[checkValid]()
+        if(this.resource instanceof Resource){
+            return this.resource[checkValid]()
+        }else{
+            return {}
+        }
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
-        this.resource[prepareQueue](stack,path,true);
+        if(this.resource instanceof Resource){
+            this.resource[prepareQueue](stack,path,true);
+        }
     }
 }

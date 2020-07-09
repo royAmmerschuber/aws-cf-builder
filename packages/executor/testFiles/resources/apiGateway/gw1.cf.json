@@ -1,6 +1,72 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Resources": {
+        "Api2RestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "BodyS3Location": {
+                    "Bucket": "bucket",
+                    "ETag": "tag",
+                    "Key": "path/key",
+                    "Version": "version"
+                }
+            }
+        },
+        "Api2MeierResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "PathPart": "meier",
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "Api2RestApi",
+                        "RootResourceId"
+                    ]
+                },
+                "RestApiId": {
+                    "Ref": "Api2RestApi"
+                }
+            }
+        },
+        "Api2MeierGetMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/san/invocations"
+                    }
+                },
+                "HttpMethod": "GET",
+                "ResourceId": {
+                    "Ref": "Api2MeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "Api2RestApi"
+                }
+            }
+        },
+        "Api2MeierOptionsMethod": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/paul/invocations"
+                    }
+                },
+                "HttpMethod": "OPTIONS",
+                "ResourceId": {
+                    "Ref": "Api2MeierResource"
+                },
+                "RestApiId": {
+                    "Ref": "Api2RestApi"
+                }
+            }
+        },
         "ApiRestApi": {
             "Type": "AWS::ApiGateway::RestApi",
             "Properties": {
@@ -64,6 +130,52 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
+                    "Credentials": "arn:aws:iam::*:user/*",
+                    "CacheKeyParameters": [
+                        "some",
+                        "random",
+                        {
+                            "Ref": "Api2RestApi"
+                        }
+                    ],
+                    "CacheNamespace": "thaNameS",
+                    "ConnectionType": "VPC_LINK",
+                    "ConnectionId": "vpc-someId",
+                    "ContentHandling": "CONVERT_TO_BINARY",
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestParameters": {
+                        "end": "start",
+                        "to": "from",
+                        "dest": "src"
+                    },
+                    "RequestTemplates": {
+                        "type": "t",
+                        "application/html": "<body/>",
+                        "application/json": "templ"
+                    },
+                    "IntegrationResponses": [
+                        {
+                            "ContentHandling": "CONVERT_TO_BINARY",
+                            "ResponseParameters": {
+                                "klaus": "haus",
+                                "raus": "schlauch",
+                                "paul": "meier"
+                            },
+                            "ResponseTemplates": {
+                                "application/javascript": "yoyoyo",
+                                "none": "nother text",
+                                "application/json": "some boring template"
+                            },
+                            "StatusCode": "200"
+                        },
+                        {
+                            "StatusCode": "400"
+                        },
+                        {
+                            "StatusCode": "432"
+                        }
+                    ],
+                    "TimeoutInMillis": 1234,
                     "Type": "AWS_PROXY",
                     "IntegrationHttpMethod": "POST",
                     "Uri": {
@@ -75,11 +187,32 @@
                         "ResponseModels": {
                             "application/json": {
                                 "Ref": "ApiPaulMeierGetNiModel"
-                            }
+                            },
+                            "differentResponse": "somethingRandom"
                         },
                         "StatusCode": "200"
                     }
                 ],
+                "RequestModels": {
+                    "application/json": {
+                        "Ref": "ApiPaulMeierGetSanModel"
+                    },
+                    "some/thing": {
+                        "Ref": "ApiPaulMeierGetYonModel"
+                    },
+                    "other/form": "idAsString"
+                },
+                "RequestParameters": {
+                    "method.request.header.paul": true,
+                    "method.request.querystring.paul": false,
+                    "method.request.path.peter": true,
+                    "method.request.path.pan": {
+                        "Ref": "Api2RestApi"
+                    }
+                },
+                "RequestValidatorId": {
+                    "Ref": "ApiPaulMeierGetRequestValidator"
+                },
                 "OperationName": "launchLambda",
                 "ApiKeyRequired": true,
                 "HttpMethod": "GET",
@@ -103,20 +236,20 @@
                     "Ref": "ApiPaulMeierDeleteNiAuthorizer"
                 },
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    ],
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -146,20 +279,27 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    ],
+                    "Credentials": {
+                        "Fn::GetAtt": [
+                            "ApiPaulMeierHeadRole",
+                            "Arn"
+                        ]
+                    },
+                    "ConnectionType": "INTERNET",
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -175,6 +315,9 @@
                         "StatusCode": "200"
                     }
                 ],
+                "RequestValidatorId": {
+                    "Ref": "ApiPaulMeierHeadRequestValidator"
+                },
                 "HttpMethod": "HEAD",
                 "ResourceId": {
                     "Ref": "ApiPaulMeierResource"
@@ -189,20 +332,20 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    ],
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -232,20 +375,20 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    ],
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -275,20 +418,20 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    ],
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -330,20 +473,20 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'sweden'"
-                            }
-                        }
-                    ],
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'sweden'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -405,20 +548,20 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'GET,DELETE,HEAD,PATCH,POST,PUT,OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    ],
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,DELETE,HEAD,PATCH,POST,PUT,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -468,20 +611,20 @@
             "Properties": {
                 "AuthorizationType": "NONE",
                 "Integration": {
-                    "IntegrationResponses": [
-                        {
-                            "StatusCode": "200",
-                            "ResponseParameters": {
-                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
-                                "method.response.header.Access-Control-Allow-Methods": "'PUT,OPTIONS'",
-                                "method.response.header.Access-Control-Allow-Origin": "'*'"
-                            }
-                        }
-                    ],
                     "PassthroughBehavior": "WHEN_NO_MATCH",
                     "RequestTemplates": {
                         "application/json": "{\"statusCode\":200}"
                     },
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'PUT,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
                     "Type": "MOCK"
                 },
                 "MethodResponses": [
@@ -553,72 +696,6 @@
                 }
             }
         },
-        "Api2RestApi": {
-            "Type": "AWS::ApiGateway::RestApi",
-            "Properties": {
-                "BodyS3Location": {
-                    "Bucket": "bucket",
-                    "ETag": "tag",
-                    "Key": "path/key",
-                    "Version": "version"
-                }
-            }
-        },
-        "Api2MeierResource": {
-            "Type": "AWS::ApiGateway::Resource",
-            "Properties": {
-                "PathPart": "meier",
-                "ParentId": {
-                    "Fn::GetAtt": [
-                        "Api2RestApi",
-                        "RootResourceId"
-                    ]
-                },
-                "RestApiId": {
-                    "Ref": "Api2RestApi"
-                }
-            }
-        },
-        "Api2MeierGetMethod": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-                "AuthorizationType": "NONE",
-                "Integration": {
-                    "Type": "AWS_PROXY",
-                    "IntegrationHttpMethod": "POST",
-                    "Uri": {
-                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/san/invocations"
-                    }
-                },
-                "HttpMethod": "GET",
-                "ResourceId": {
-                    "Ref": "Api2MeierResource"
-                },
-                "RestApiId": {
-                    "Ref": "Api2RestApi"
-                }
-            }
-        },
-        "Api2MeierOptionsMethod": {
-            "Type": "AWS::ApiGateway::Method",
-            "Properties": {
-                "AuthorizationType": "NONE",
-                "Integration": {
-                    "Type": "AWS_PROXY",
-                    "IntegrationHttpMethod": "POST",
-                    "Uri": {
-                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/paul/invocations"
-                    }
-                },
-                "HttpMethod": "OPTIONS",
-                "ResourceId": {
-                    "Ref": "Api2MeierResource"
-                },
-                "RestApiId": {
-                    "Ref": "Api2RestApi"
-                }
-            }
-        },
         "Api3RestApi": {
             "Type": "AWS::ApiGateway::RestApi",
             "Properties": {
@@ -638,6 +715,37 @@
                 }
             }
         },
+        "ApiPaulMeierGetSanModel": {
+            "Type": "AWS::ApiGateway::Model",
+            "Properties": {
+                "ContentType": "application/json",
+                "Schema": {},
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierGetYonModel": {
+            "Type": "AWS::ApiGateway::Model",
+            "Properties": {
+                "ContentType": "some/thing",
+                "Schema": {},
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierGetRequestValidator": {
+            "Type": "AWS::ApiGateway::RequestValidator",
+            "Properties": {
+                "Name": "peter",
+                "ValidateRequestBody": true,
+                "ValidateRequestParameters": false,
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
         "ApiPaulMeierDeleteNiAuthorizer": {
             "Type": "AWS::ApiGateway::Authorizer",
             "Properties": {
@@ -649,6 +757,31 @@
                 ],
                 "RestApiId": {
                     "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierHeadRequestValidator": {
+            "Type": "AWS::ApiGateway::RequestValidator",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            }
+        },
+        "ApiPaulMeierHeadRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": "*",
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
                 }
             }
         }

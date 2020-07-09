@@ -1,0 +1,5 @@
+[
+    ["AWS::Test::Paul",[
+        "trying to create the same resource under name \"TestPaulTemp2\" and \"SecondSven\""
+    ]]
+]

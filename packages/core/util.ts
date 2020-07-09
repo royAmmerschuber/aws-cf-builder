@@ -3,7 +3,7 @@ import _ from "lodash/fp"
 import { s_path, pathName, prepareQueue, checkValid } from "./symbols"
 import { stackPreparable } from "./stackBackend"
 import { refPlaceholder } from "./refPlaceholder"
-import { pathItem } from "./path"
+import { pathItem,namedPath } from "./path"
 import { Field } from "./field"
 import { Resource } from "./generatables/resource"
 
@@ -12,7 +12,13 @@ export function prepareQueueBase(stack: stackPreparable, path: pathItem, ref: bo
         stack.resources.add(new refPlaceholder(res, path))
     } else {
         if (res[s_path] !== undefined) {
-            throw new PreparableError(res, "multiple attempted creations")
+            const name1=generateUniqueIdentifier(res);
+            const fake:pathItem=pathName in res ? {
+                [s_path]:path,
+                [pathName]:()=>res[pathName]()
+            } as namedPath: path
+            const name2=generateUniqueIdentifier(fake)
+            throw new PreparableError(res, `trying to create the same resource under name "${name1}" and "${name2}"`)
         }
         res[s_path] = path
         stack.resources.add(res)
@@ -20,7 +26,7 @@ export function prepareQueueBase(stack: stackPreparable, path: pathItem, ref: bo
     return !ref
 }
 export function cleanTextForIdentifier(s: string) {
-    return s//TODO convert to valid CloudFormation identifier
+    return s.replace(/[^a-zA-Z0-9]+/g,"")
 }
 export const generateUniqueIdentifier = _.memoize(function _generateUniqueIdentifier(path: pathItem): string {
     if (path instanceof Array) {

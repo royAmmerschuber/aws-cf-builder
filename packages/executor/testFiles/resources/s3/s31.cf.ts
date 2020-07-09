@@ -124,10 +124,10 @@ export const bucket1=new S3.Bucket()
             somethingSlightly:"Different"
         },
     )
-    .notificationConfig("Lambda",{something:["completely","different"]})
-    .notificationConfig("Queue",{something:["completely","different"]})
-    .notificationConfig("Topic",{something:["completely","different"]})
-    .objectLockConfig(true,"GOVERNANCE",72)
+    .notificationConfig("Lambda",{something:["completely","different"]} as any)
+    .notificationConfig("Queue",{something:["completely","different"]} as any)
+    .notificationConfig("Topic",{something:["completely","different"]} as any)
+    .objectLockConfig(true,"GOVERNANCE",72,"days")
     .publicAccessBlockConfig("blockPublicAcls","blockPublicPolicy")
     .publicAccessBlockConfig({
         ignorePublicAcls:false
@@ -168,6 +168,7 @@ export const bucket1=new S3.Bucket()
         hachiJyuuIchi:"hachiJyuuNi",
         hachiJyuuSan:"hachiJyuuYon"
     })
+    .policy({Version:"2012-10-17",Statement:[],Id:"testOfPolicyAttachment"})
 export const bucket2=new S3.Bucket()
     .encryption("aws:kms","372893723-3823824-38294-318938291")
     .loggingConfig("arn:aws:s3:::goJyuuSan")

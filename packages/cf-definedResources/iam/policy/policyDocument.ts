@@ -134,8 +134,8 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
      * @param from the type of resource you want to give these permissions to
      * @param principals the resources you want to give the permissions to
      */
-    principals(from: "AWS" | "Federated" | "Service", ...principals: string[]): this
-    principals(from: "AWS" | "Federated" | "Service" | "*", ...principals: string[]): this {
+    principals(from: PrincipalKeys, ...principals: Field<string>[]): this
+    principals(from: PrincipalKeys | "*", ...principals: Field<string>[]): this {
         if (from == "*") {
             this._.principals = from;
         } else {
@@ -340,6 +340,7 @@ export interface StatementOut {
 
     Condition?: SMap<any>;
 }
+export type PrincipalKeys="AWS" | "Federated" | "Service"
 type PrincipalOut = "*" | {
-    [K in "AWS" | "Federated" | "Service"]: Field<string>[]
+    [K in PrincipalKeys]: Field<string>[]
 };

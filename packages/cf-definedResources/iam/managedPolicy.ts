@@ -22,7 +22,7 @@ import { SMap, ResourceError } from "aws-cf-builder-core/general";
  * 
  * [cloudfront reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-managedpolicy.html)
  */
-export class ManagedPolicy extends Resource{ //TODO
+export class ManagedPolicy extends Resource{
     readonly [resourceIdentifier]="AWS::IAM::ManagedPolicy" 
     //#region parameters
     protected _: {
@@ -112,17 +112,17 @@ export class ManagedPolicy extends Resource{ //TODO
      */
     name(path:Field<string>,name:Field<string>):this;
     name(pathName:Field<string>,name?:Field<string>):this{
-        if(typeof pathName=="string"){
-            const split=pathName.lastIndexOf("/");
-            this._.path=pathName.slice(0,split+1) || undefined;
-            this._.name=pathName.slice(split+1);
-        }else{
-            if(name==undefined){
-                this._.name=pathName
+        if(name==undefined){
+            if(typeof pathName=="string"){
+                const split=pathName.lastIndexOf("/");
+                this._.path=pathName.slice(0,split+1) || undefined;
+                this._.name=pathName.slice(split+1);
             }else{
-                this._.path=pathName
-                this._.name=name
+                this._.name=pathName
             }
+        }else{
+            this._.path=pathName
+            this._.name=name
         }
         return this;
     }
