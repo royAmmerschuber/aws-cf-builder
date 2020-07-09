@@ -16,7 +16,7 @@ import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
  * 
  * [cloudfront reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-managedpolicy.html)
  */
-export class ManagedPolicy extends Policy{
+export class ManagedPolicy extends Policy{ //TODO
     readonly [resourceIdentifier]="AWS::IAM::ManagedPolicy" 
     //#region parameters
     protected _:Policy["_"] & {
@@ -73,7 +73,7 @@ export class ManagedPolicy extends Policy{
      * > that require no or some interruption. If you must replace the 
      * > resource, specify a new name.
      */
-    name(name:Field<string>);
+    name(name:Field<string>):this;
     /**
      * 
      * @param path The path for the IAM policy. By default, the path is 
@@ -99,8 +99,8 @@ export class ManagedPolicy extends Policy{
      * > that require no or some interruption. If you must replace the 
      * > resource, specify a new name.
      */
-    name(path:Field<string>,name:Field<string>);
-    name(pathName:Field<string>,name?:Field<string>){
+    name(path:Field<string>,name:Field<string>):this;
+    name(pathName:Field<string>,name?:Field<string>):this{
         if(typeof pathName=="string"){
             const split=pathName.lastIndexOf("/");
             this._.path=pathName.slice(0,split+1) || undefined;

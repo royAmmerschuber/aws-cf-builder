@@ -64,12 +64,12 @@ export class CronExpression extends Substitution{
     }
     toJSON(){
         return this.generateSubstitutionOutputApi("cron(${m} ${h} ${dom} ${mon} ${dow} ${y})",{
-            m:this._.minutes || "*",
-            h:this._.hours || "*",
-            dom:this._.dayOfMonth || "*",
-            mon:this._.month || "*",
-            dow:this._.dayOfWeek || "?",
-            y:this._.year || "*"
+            m:this._.minutes ?? "*",
+            h:this._.hours ?? "*",
+            dom:this._.dayOfMonth ?? "*",
+            mon:this._.month ?? "*",
+            dow:this._.dayOfWeek ?? "?",
+            y:this._.year ?? "*"
         })
     }
     ;[checkValid]() {

@@ -598,11 +598,11 @@ export class ServerlessFunction extends Resource{
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
         if(prepareQueueBase(stack,path,ref,this)){
             callOnPrepareQueue(this._,stack,this,true)
-            ;[
+            callOnPrepareQueue([
                 this.permissions,
                 this.versions,
                 this.eventMappings
-            ].forEach(v=>v.forEach(v=>v[prepareQueue](stack,this,false)))
+            ],stack,this,false)
         }
     }
     [generateObject]() {

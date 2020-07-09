@@ -1,0 +1,84 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "DeadletterQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+                "FifoQueue": true
+            }
+        },
+        "DeadletterQueuePolicy": {
+            "Type": "AWS::SQS::QueuePolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": []
+                },
+                "Queues": [
+                    {
+                        "Ref": "DeadletterQueue"
+                    },
+                    {
+                        "Ref": "QueueQueue"
+                    }
+                ]
+            }
+        },
+        "QueueQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {
+                "ContentBasedDeduplication": true,
+                "DelaySeconds": 20,
+                "FifoQueue": true,
+                "KmsDataKeyReusePeriodSeconds": 60,
+                "KmsMasterKeyId": "Drei",
+                "MaximumMessageSize": 2048,
+                "MessageRetentionPeriod": 345600,
+                "QueueName": "Vier",
+                "ReceiveMessageWaitTimeSeconds": 5,
+                "RedrivePolicy": {
+                    "deadLetterTargetArn": {
+                        "Fn::GetAtt": [
+                            "DeadletterQueue",
+                            "Arn"
+                        ]
+                    },
+                    "maxReceiveCount": 4
+                },
+                "Tags": [
+                    {
+                        "Key": "paul",
+                        "Value": "peter"
+                    },
+                    {
+                        "Key": "pedro",
+                        "Value": "petra"
+                    }
+                ],
+                "VisibilityTimeout": 30
+            }
+        },
+        "QueueQueuePolicy": {
+            "Type": "AWS::SQS::QueuePolicy",
+            "Properties": {
+                "PolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow"
+                        }
+                    ]
+                },
+                "Queues": [
+                    {
+                        "Ref": "QueueQueue"
+                    }
+                ]
+            }
+        },
+        "QueueemptyQueue": {
+            "Type": "AWS::SQS::Queue",
+            "Properties": {}
+        }
+    }
+}

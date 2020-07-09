@@ -29,7 +29,7 @@ export class Role extends URG {
         maxDuration: Field<number>
         permissionBoundary: Field<string>
     }
-    assumePolicy: Field<PolicyOut>
+    private assumePolicy: Field<PolicyOut>
     /**
      * returns the resource name
      */

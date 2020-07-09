@@ -2,7 +2,7 @@ import _ from "lodash/fp";
 import { InlineAdvField, Field } from "aws-cf-builder-core/field"
 import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
-import { callOn, Attr } from "aws-cf-builder-core/util";
+import { callOn, Attr, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 
@@ -67,11 +67,16 @@ export class PolicyDocument extends InlineAdvField<PolicyOut>{
             };
         }
 
-        return this[checkCache] = callOn([this.id, this.statements], Preparable as any, (o: Preparable) => o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign, out)
+        return this[checkCache] = callOnCheckValid([
+            this.id,
+            this.statements
+        ], out)
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
-        callOn([this.id, this.statements], Preparable as any, (o: Preparable) => o[prepareQueue](stack, path, true))
+        callOnPrepareQueue([
+            this.id,
+            this.statements
+        ], stack, path, true)
     }
     toJSON(): PolicyOut {
         return {
@@ -240,7 +245,7 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
             if (typeof this._.resources == "string") {
                 this._.resources = [];
             }
-            this._.resources.push(...resources.map(r => Attr.get(r,"Arn")))
+            this._.resources.push(...resources.map(r => Attr.get(r, "Arn")))
         }
         return this;
     }
@@ -285,9 +290,9 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         callOn([this._, this.sid], Preparable as any, (o: Preparable) => o[prepareQueue](stack, path, true))
-        if(path instanceof PathDataCarrier && path.data.skipResources){
-            if(this._.resources!="*" && this._.resources!=undefined) throw new PreparableError(this,"do not specify a resource for a Assume Policy")
-            this._.resources=undefined
+        if (path instanceof PathDataCarrier && path.data.skipResources) {
+            if (this._.resources != "*" && this._.resources != undefined) throw new PreparableError(this, "do not specify a resource for a Assume Policy")
+            this._.resources = undefined
         }
     }
     toJSON(): StatementOut {
