@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
         "typeRoots": [
-            "../types"
+            "./types",
+            "./node_modules/@types/node"
         ],
         "target": "es2017",
         "module": "commonjs",
@@ -11,6 +12,5 @@
         "strict": false,
         "esModuleInterop": true
     },
-    "include": ["**/*.cf.ts"],
-    "exclude": ["*"]
+    "include": ["**/*.cf.ts"]
 }

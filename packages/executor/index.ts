@@ -5,6 +5,7 @@ import chalk from "chalk"
 import * as _ from "lodash/fp"
 import * as tsN from "ts-node"
 import { ResourceError, SMap } from "aws-cf-builder-core/general"
+import stringify from "json-stable-stringify"
 let yaml: typeof import("js-yaml")
 
 function printErrors(errs: SMap<ResourceError>):string {
@@ -19,6 +20,8 @@ export interface TransformOptions {
     typescript?: boolean,
     /**enable typescript typechecking*/
     check?: boolean,
+    /** return a js object instead of a string */
+    returnObject?:boolean
     /**indent output */
     indent?: boolean,
     /**enable yaml output */
@@ -32,7 +35,9 @@ export interface TransformOptions {
  * @param file path to file
  * @param options options
  */
-export function transform(file: string, options: TransformOptions): string {
+export function transform(file: string, options: TransformOptions & {returnObject:true}): any
+export function transform(file: string, options: TransformOptions & {returnObject:false}): string
+export function transform(file: string, options: TransformOptions): string|any {
     if (options.typescript) {
         try {
             const opt: tsN.Options = {
@@ -78,7 +83,12 @@ export function transform(file: string, options: TransformOptions): string {
     const outputObject = mainModule.generateObject()
 
     outputObject.Transform = options.transform
-    outputJSON = JSON.stringify(outputObject, null, options.indent ? 4 : 0)
+    outputJSON=stringify(outputObject,{
+        space:options.indent ? 4 : 0
+    })
+    if(options.returnObject){
+        return JSON.parse(outputJSON)
+    }
     if (options.yaml) {
         outputJSON = yaml.safeDump(JSON.parse(outputJSON))
     }
