@@ -6,9 +6,10 @@ import strip from "strip-ansi"
     "core",
     "resources"
 ].forEach(area => handleHead(area, fs.readdirSync(path.join(__dirname, area))))
-const options: TransformOptions = {
+const options = {
     typescript: true,
-    check:true
+    check:true,
+    returnObject:true
 }
 function handleHead(area: string, folders: string[]) {
     describe(area,()=>{
@@ -30,7 +31,7 @@ function handleHead(area: string, folders: string[]) {
 }
 function testFile(name: string, path: string, comparison: any) {
     test(name, () => {
-        const resp = JSON.parse(transform(path, options))
+        const resp = transform(path, options)
         expect(resp).toEqual(comparison)
     })
 }

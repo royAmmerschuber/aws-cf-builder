@@ -36,7 +36,7 @@ export interface TransformOptions {
  * @param options options
  */
 export function transform(file: string, options: TransformOptions & {returnObject:true}): any
-export function transform(file: string, options: TransformOptions & {returnObject:false}): string
+export function transform(file: string, options: TransformOptions): string
 export function transform(file: string, options: TransformOptions): string|any {
     if (options.typescript) {
         try {
