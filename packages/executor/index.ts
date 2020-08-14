@@ -6,6 +6,7 @@ import * as _ from "lodash/fp"
 import * as tsN from "ts-node"
 import { ResourceError, SMap } from "aws-cf-builder-core/general"
 import stringify from "json-stable-stringify"
+import { reorderDeclarations } from "./transform"
 let yaml: typeof import("js-yaml")
 
 function printErrors(errs: SMap<ResourceError>):string {
@@ -45,6 +46,11 @@ export function transform(file: string, options: TransformOptions): string|any {
                     typeRoots: [
                         path.join(__dirname, "./types")
                     ],
+                },
+                transformers:{
+                    before:[
+                        reorderDeclarations
+                    ]
                 },
                 transpileOnly: !options.check
             }
