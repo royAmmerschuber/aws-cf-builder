@@ -11,6 +11,14 @@
             "windows": {
                 "program":"${workspaceFolder}/node_modules/jest/bin/jest"
             }
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name":"testConst",
+            "runtimeArgs":["--no-lazy","-r","ts-node/register"],
+            "args": ["${workspaceRoot}/debugTransforms.ts"],
+            "cwd":"${workspaceFolder}"
         }
     ]
 }
