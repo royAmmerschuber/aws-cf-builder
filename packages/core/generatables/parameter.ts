@@ -117,7 +117,7 @@ type ParmInTypeToTsType<T> = (
     ) ? string
     : T extends (
         "Number"
-    ) ? number
+    ) ? number | string
     : T extends (
         "List<Number>"
     ) ? number[] | string
@@ -231,21 +231,27 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
             AllowedValues: this._.allowedValues,
             ConstraintDescription: this._.constraintDescription,
             Default: (() => {
-                if (typeof this._.default != "string") {
+                if(typeof this._.default=="string" || typeof this._.default=="number"){
+                    return this._.default
+                }
+                else if (this._.default as any instanceof Array) {
                     if (typesListStringInp.includes(this._.type)) {
                         return (this._.default as number[]).join(",")
                     }
-                }else{
-                    return this._.default
                 }
             })(),
             Description: this._.description,
-            MaxLength: this._.max,
-            MaxValue: this._.max,
-            MinLength: this._.min,
-            MinValue: this._.min,
             NoEcho: this._.noEcho,
-            Type: this._.type
+            Type: this._.type,
+            ...this._.type=="Number"
+                ? {
+                    MaxValue: this._.max,
+                    MinValue: this._.min,
+                }
+                : {
+                    MaxLength: this._.max,
+                    MinLength: this._.min,
+                },
         }
     }
     [getName]() {
