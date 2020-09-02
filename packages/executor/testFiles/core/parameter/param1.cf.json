@@ -1,0 +1,49 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Parameters": {
+        "P2": {
+            "Type": "Number"
+        },
+        "P4": {
+            "Default": 43,
+            "MaxValue": 4,
+            "MinValue": 1,
+            "Type": "Number"
+        },
+        "P5": {
+            "Default": "43",
+            "Type": "Number"
+        },
+        "P6": {
+            "Default": "a,b,c",
+            "MaxLength": 4,
+            "MinLength": 1,
+            "Type": "CommaDelimitedList"
+        },
+        "P7": {
+            "Default": "1,2,3,4",
+            "Type": "List<Number>"
+        },
+        "P8": {
+            "Default": "a,b,c,d",
+            "Type": "CommaDelimitedList"
+        },
+        "listTest": {
+            "Default": "1,2,3,4",
+            "MaxLength": 4,
+            "MinLength": 1,
+            "Type": "List<Number>"
+        },
+        "someName": {
+            "ConstraintDescription": "some constraint",
+            "Default": "bjkaldfa",
+            "Description": "fjdoqnvdaxmal",
+            "MaxLength": 4,
+            "MinLength": 1,
+            "NoEcho": true,
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        }
+    },
+    "Resources": {
+    }
+}
