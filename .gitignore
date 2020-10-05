@@ -9,3 +9,5 @@ baseData/
 /types/
 
 /packages/executor/aws-cf-builder-run-*.tgz
+
+coverage/
