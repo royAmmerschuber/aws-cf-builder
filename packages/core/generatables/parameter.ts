@@ -1,5 +1,5 @@
-import { SMap, ResourceError } from "../general";
-import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace } from "../symbols";
+import { SMap, ResourceError, Aliasable } from "../general";
+import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace, s_isAliased } from "../symbols";
 import { stackPreparable } from "../stackBackend";
 import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { GeneratableAdvField } from "../field";
@@ -151,7 +151,7 @@ const typesListStringInp = [
 
     "List<Number>"
 ]
-export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutTypeToTsType<T>>{
+export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutTypeToTsType<T>> implements Aliasable{
     readonly [resourceIdentifier]= "Parameter"
     private _: {
         name: string
@@ -165,6 +165,9 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
         noEcho: boolean,
         type: T,
     } = {} as any
+    get [s_isAliased](){
+        return !!this._.name
+    }
     constructor(name?: string, type?: T) {
         super(2)
         this._.name = name

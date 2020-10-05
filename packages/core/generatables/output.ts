@@ -1,18 +1,21 @@
-import { SMap, ResourceError, Generatable, Preparable } from "../general";
-import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace, checkCache } from "../symbols";
+import { SMap, ResourceError, Generatable, Preparable, Aliasable } from "../general";
+import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace, checkCache, s_isAliased } from "../symbols";
 import { stackPreparable } from "../stackBackend";
-import { prepareQueueBase, generateUniqueIdentifier } from "../util";
+import { prepareQueueBase, generateUniqueIdentifier, callOnCheckValid } from "../util";
 import { Field } from "../field";
 import _ from "lodash/fp";
 
-export class Output<T> extends Generatable{
-    readonly [resourceIdentifier]= "output";
+export class Output<T> extends Generatable implements Aliasable{
+    readonly [resourceIdentifier]= "Output";
     private _:{
         name:string,
         description:string,
         value:Field<T>,
         exportName:Field<string>
     }={} as any
+    get [s_isAliased](){
+        return !!this._.name
+    }
     constructor(name?:string){
         super(1)
         this._.name=name
@@ -34,9 +37,8 @@ export class Output<T> extends Generatable{
         return this
     }
     [checkValid](): SMap<ResourceError> {
-        if(this[checkCache]){
-            return this[checkCache]
-        }
+        if(this[checkCache]) return this[checkCache];
+
         let out:SMap<ResourceError>={}
         const errors:string[]=[];
         if(!this._.value){
@@ -49,16 +51,10 @@ export class Output<T> extends Generatable{
                 errors:errors
             }
         }
-        out=[
+        return this[checkCache] = callOnCheckValid([
             this._.value,
             this._.name
-        ].reduce((o,c)=>{
-            if(c instanceof Preparable){
-               return _.assign(o,c[checkValid]()) 
-            }
-            return o
-        },out)
-        return this[checkCache] = out
+        ],out)
     }
     [prepareQueue](stack: stackPreparable, path: any, ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
