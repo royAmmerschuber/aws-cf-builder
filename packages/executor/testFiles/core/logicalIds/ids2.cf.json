@@ -1,0 +1,19 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+        "Out": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "P1B",
+                    "Arn"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "P1B": {
+            "Properties": {},
+            "Type": "AWS::A::B"
+        }
+    }
+}

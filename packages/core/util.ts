@@ -1,6 +1,6 @@
 import { Generatable, SMap, Preparable, PreparableError, ResourceError } from "./general"
 import _ from "lodash/fp"
-import { s_path, pathName, prepareQueue, checkValid } from "./symbols"
+import { s_path, pathName, prepareQueue, checkValid, s_isAliased } from "./symbols"
 import { stackPreparable } from "./stackBackend"
 import { refPlaceholder } from "./refPlaceholder"
 import { pathItem,namedPath } from "./path"
@@ -12,6 +12,7 @@ export function prepareQueueBase(stack: stackPreparable, path: pathItem, ref: bo
         stack.resources.add(new refPlaceholder(res, path))
     } else {
         if (res[s_path] !== undefined) {
+            if(res[s_isAliased]) return;
             const name1=generateUniqueIdentifier(res);
             const fake:pathItem=pathName in res ? {
                 [s_path]:path,
