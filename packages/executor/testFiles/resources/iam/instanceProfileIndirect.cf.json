@@ -1,0 +1,42 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+        "O1": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "O1InstanceProfile",
+                    "Arn"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "O1InstanceProfile": {
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "O1Role"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "O1Role": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": "*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::Role"
+        }
+    }
+}
