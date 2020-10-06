@@ -1,6 +1,6 @@
 import _ from "lodash/fp";
 import { InlineAdvField, Field } from "aws-cf-builder-core/field"
-import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
 import { callOn, Attr, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
@@ -78,7 +78,7 @@ export class PolicyDocument extends InlineAdvField<PolicyOut>{
             this.statements
         ], stack, path, true)
     }
-    toJSON(): PolicyOut {
+    [toJson](): PolicyOut {
         return {
             Version: "2012-10-17",
             Id: this.id,
@@ -295,7 +295,7 @@ export class PolicyStatement extends InlineAdvField<StatementOut>{
             this._.resources = undefined
         }
     }
-    toJSON(): StatementOut {
+    [toJson](): StatementOut {
         const principals = (typeof this._.principals == "string" || !this._.principals)
             ? this._.principals
             : {

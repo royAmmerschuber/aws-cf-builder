@@ -2,7 +2,7 @@ import { Field, InlineAdvField } from "aws-cf-builder-core/field";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { resourceIdentifier, checkCache, checkValid, prepareQueue, stacktrace } from "aws-cf-builder-core/symbols"
+import { resourceIdentifier, checkCache, checkValid, prepareQueue, stacktrace, toJson } from "aws-cf-builder-core/symbols"
 import { Tag } from "../../util";
 import { notEmpty, Attr, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { Bucket } from ".";
@@ -132,7 +132,7 @@ export class AnalyticsConfig extends InlineAdvField<AnalyticsConfigOut>{
         this._.schema=version
         return this
     }
-    toJSON():AnalyticsConfigOut {
+    [toJson]():AnalyticsConfigOut {
         return {
             Id:this._.id,
             Prefix:this._.prefix,

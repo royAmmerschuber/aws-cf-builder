@@ -1,5 +1,5 @@
 import { InlineAdvField, Field } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError, PreparableError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -213,7 +213,7 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
         this._.noncurrentVersionTransitions.set(to, days)
         return this
     }
-    toJSON(): LifecycleRuleOut {
+    [toJson](): LifecycleRuleOut {
         return {
             Id: this._.id,
             Status: this._.status ?? "Enabled",

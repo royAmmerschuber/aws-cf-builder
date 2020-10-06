@@ -1,7 +1,7 @@
 import { Field, InlineAdvField } from "aws-cf-builder-core/field";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import { pathItem } from "aws-cf-builder-core/path";
 import _ from "lodash/fp";
 import { ContentHandling } from ".";
@@ -156,7 +156,7 @@ export class IntegrationResponse extends InlineAdvField<IntegrationResponseOut>{
         }
         return this
     }
-    toJSON():IntegrationResponseOut{
+    [toJson]():IntegrationResponseOut{
         return {
             ContentHandling:this._.contentHandling,
             ResponseParameters:notEmpty(this._.parameterMapping),

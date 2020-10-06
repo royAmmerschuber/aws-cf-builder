@@ -1,7 +1,7 @@
 import _ from "lodash/fp";
 import { Field, InlineAdvField, isAdvField } from "aws-cf-builder-core/field";
 import { SMap, Preparable, ResourceError } from "aws-cf-builder-core/general";
-import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue, toJson } from "aws-cf-builder-core/symbols";
 import { Attr, callOn } from "aws-cf-builder-core/util";
 import { Role } from "../../iam";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
@@ -283,7 +283,7 @@ export class Target extends InlineAdvField<TargetOut>{
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
         callOn(this._,Preparable,o=> o[prepareQueue](stack,path,true))
     }
-    toJSON():TargetOut{
+    [toJson]():TargetOut{
         return {
             Id:this._.id,
             Arn:this._.arn,

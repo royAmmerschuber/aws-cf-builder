@@ -1,5 +1,5 @@
 import { stackPreparable } from "../stackBackend";
-import { checkValid, prepareQueue, resourceIdentifier } from "../symbols";
+import { checkValid, prepareQueue, resourceIdentifier, toJson } from "../symbols";
 import { pathItem } from "../path";
 import { callOn } from "../util";
 import { Preparable } from "../general";
@@ -9,6 +9,7 @@ import { ReferenceField } from "./referenceField";
 import { Substitution } from "./substitution";
 import { Parameter } from "../generatables/parameter";
 import { localField, s_local_val } from "./local";
+import { isAdvField } from "../field";
 /**
  * converts JS object to Substitution json string with parameters
  */
@@ -23,7 +24,7 @@ export class JSONField extends Substitution{
     [prepareQueue](stack:stackPreparable, path:pathItem, ref: boolean){
         callOn(this.object,Preparable,o=>o[prepareQueue](stack,path,true))
     }
-    toJSON() {
+    [toJson]() {
         const repl=new Map<string,AttributeField|ReferenceField|Substitution|Parameter<any>>()
         const This=this
         let text=JSON.stringify(this.object,function(key,value){
@@ -39,6 +40,8 @@ export class JSONField extends Substitution{
                 const id="repl_"+String(Math.random()*10**10).slice(0,10)
                 repl.set(id,field)
                 return {[id]:id}
+            }else if(isAdvField(field)){
+                return field[toJson]()
             }else{
                 return value
             }
