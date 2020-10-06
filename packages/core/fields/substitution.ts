@@ -1,6 +1,6 @@
 import { SMap, ResourceError, Preparable } from "../general";
 import { Field, InlineAdvField, isAdvField } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, toJson } from "../symbols";
 import { stackPreparable } from "../stackBackend";
 import _ from "lodash/fp"
 import { AttributeField } from "./attributeField";
@@ -90,7 +90,7 @@ export class Substitution extends InlineAdvField<string>{
     private generateTag(val:any):string|void{
         if(isAdvField(val)){
             if(val instanceof Substitution){
-                const subs=val.toJSON()
+                const subs=val[toJson]()
                 if(typeof subs=="string"){
                     return subs
                 }else if(typeof subs["Fn::Sub"]=="string"){
@@ -99,19 +99,19 @@ export class Substitution extends InlineAdvField<string>{
                     return null
                 }
             }else if(val instanceof AttributeField){
-                const getAtt=val.toJSON()["Fn::GetAtt"]
+                const getAtt=val[toJson]()["Fn::GetAtt"]
                 return `\${${getAtt[0]}.${getAtt[1]}}`
             }else if(val instanceof ReferenceField || val instanceof Parameter){
-                const ref=val.toJSON().Ref
+                const ref=val[toJson]().Ref
                 return `\${${ref}}`
             }
         }else if(val instanceof Resource){
-            const ref=val.r.toJSON().Ref
+            const ref=val.r[toJson]().Ref
             return `\${${ref}}`
         }
         return null
     }
-    toJSON(){
+    [toJson](){
         if(typeof this.text=="string") return this.generateSubstitutionOutputApi(this.text,this.args[0])
         else return this.generateSubstitutionOutput(this.text,this.args)
     }

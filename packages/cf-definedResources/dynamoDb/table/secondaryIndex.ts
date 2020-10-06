@@ -1,7 +1,7 @@
 
 import { ProvisionedThroughput } from ".";
 import { Field, InlineAdvField } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, stacktrace, prepareQueue, checkCache, pathName } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, stacktrace, prepareQueue, checkCache, pathName, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, namedPath, PathDataCarrier } from "aws-cf-builder-core/path";
@@ -93,7 +93,7 @@ export abstract class SecondaryIndex extends InlineAdvField<SecondaryIndexOut> i
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
         callOn(this._,Preparable,o=>o[prepareQueue](stack,path,true))
     }
-    toJSON():SecondaryIndexOut{
+    [toJson]():SecondaryIndexOut{
         const projectedAttributes=this._.attributes.filter(v => !v.key);
         return {
             IndexName:this._.name,
@@ -167,8 +167,8 @@ export class GlobalSecondaryIndex extends SecondaryIndex{
             }
         }
     }
-    toJSON(){
-        const out=super.toJSON()
+    [toJson](){
+        const out=super[toJson]()
         out.ProvisionedThroughput=this._.capacity
         return out
     }

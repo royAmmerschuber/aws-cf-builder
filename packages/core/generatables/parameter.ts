@@ -1,5 +1,5 @@
 import { SMap, ResourceError, Aliasable } from "../general";
-import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace, s_isAliased } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, generateObject, getName, s_path, stacktrace, s_isAliased, toJson } from "../symbols";
 import { stackPreparable } from "../stackBackend";
 import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { GeneratableAdvField } from "../field";
@@ -223,7 +223,7 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         prepareQueueBase(stack, path, ref, this)
     }
-    toJSON() {
+    [toJson]() {
         return {
             Ref: this[getName]()
         }

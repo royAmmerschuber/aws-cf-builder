@@ -1,5 +1,5 @@
 import { InlineAdvField } from "../field";
-import { resourceIdentifier, prepareQueue, checkValid, getName } from "../symbols";
+import { resourceIdentifier, prepareQueue, checkValid, getName, toJson } from "../symbols";
 import { Resource } from "../generatables/resource";
 import { stackPreparable } from "../stackBackend";
 import { pathItem } from "../path";
@@ -12,7 +12,7 @@ export class ReferenceField extends InlineAdvField<string>{
     constructor(private resource:Resource|string){
         super(1)
     }
-    toJSON(){
+    [toJson](){
         return {
             Ref:(typeof this.resource =="string") 
                 ? this.resource 

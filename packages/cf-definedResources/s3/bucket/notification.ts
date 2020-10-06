@@ -1,5 +1,5 @@
 import { Field, InlineAdvField } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, prepareQueue, stacktrace, checkCache } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, stacktrace, checkCache, toJson } from "aws-cf-builder-core/symbols";
 import { pathItem } from "aws-cf-builder-core/path";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
@@ -89,7 +89,7 @@ export abstract class Notification extends InlineAdvField<NotificationOut>{
         })
         return this
     }
-    toJSON():NotificationOut {
+    [toJson]():NotificationOut {
         return {
             Event:this._.event,
             Filter:this._.keyFilters.length
@@ -137,8 +137,8 @@ export namespace Notification{
             this._.function=Attr.get(lambda,"Arn")
             return this
         }
-        toJSON():LambdaNotificationOut {
-            const out:any=super.toJSON()
+        [toJson]():LambdaNotificationOut {
+            const out:any=super[toJson]()
             out.Function=this._.function
             return out
         }        
@@ -177,8 +177,8 @@ export namespace Notification{
             this._.queue=Attr.get(queue,"Arn")
             return this
         }
-        toJSON():QueueNotificationOut {
-            const out:any=super.toJSON()
+        [toJson]():QueueNotificationOut {
+            const out:any=super[toJson]()
             out.Queue=this._.queue
             return out
         }        
@@ -217,8 +217,8 @@ export namespace Notification{
             this._.topic=Attr.get(topic,"Arn")
             return this
         }
-        toJSON():QueueNotificationOut {
-            const out:any=super.toJSON()
+        [toJson]():QueueNotificationOut {
+            const out:any=super[toJson]()
             out.Topic=this._.topic
             return out
         }        

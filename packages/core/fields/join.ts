@@ -1,5 +1,5 @@
 import { InlineAdvField, Field } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, toJson } from "../symbols";
 import { SMap, ResourceError } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { pathItem } from "../path";
@@ -17,7 +17,7 @@ export class JoinField extends InlineAdvField<string>{
         super(1)
     }
 
-    toJSON() {
+    [toJson]() {
         if(typeof this.seperator=="string" && this.items instanceof Array && this.items.every(v=>typeof v=="string")){
             return this.items.join(this.seperator)
         }else{

@@ -1,5 +1,5 @@
 import { Field, InlineAdvField } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -103,7 +103,7 @@ export class DeploymentPreference extends InlineAdvField<DeploymentPreferenceOut
         this._.type=type
         return this;
     }
-    toJSON() {
+    [toJson]() {
         return {
             Alarms:notEmpty(this._.alarms),
             Enabled:this._.enabled,
