@@ -2,7 +2,7 @@ import { Api } from "./api";
 import _ from "lodash/fp";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Field } from "aws-cf-builder-core/field";
-import { resourceIdentifier, prepareQueue, checkCache, pathName } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, prepareQueue, checkCache, pathName, toJson } from "aws-cf-builder-core/symbols";
 import { checkValid } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { Preparable, ResourceError, SMap, PreparableError } from "aws-cf-builder-core/general";
@@ -110,7 +110,7 @@ export class Deployment extends Resource implements namedPath{
     public [generateObject](){
         return {
             Type:this[resourceIdentifier],
-            DependsOn:this.fMethod.toJSON().Ref,
+            DependsOn:this.fMethod[toJson]().Ref,
             Properties:{
                 StageDescription : this._.stageDescription,
                 DeploymentCanarySettings :this._.canarySettings,

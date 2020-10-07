@@ -1,0 +1,7 @@
+export const o1=new Output()
+    .name("someName")
+    .description("fjdoqnvdaxmal")
+    .Value("some text")
+    .export("randomName")
+export const o2=new Output()
+    .Value("some text23")

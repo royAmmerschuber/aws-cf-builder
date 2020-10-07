@@ -1,0 +1,9 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources":  {
+        "test":  {
+            "Properties":  {},
+            "Type": "AWS::A::B"
+        }
+    }
+}

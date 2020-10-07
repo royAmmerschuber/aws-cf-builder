@@ -27,14 +27,13 @@ import { Policy } from "./policy";
 export class Role extends URG {
     readonly [resourceIdentifier] = "AWS::IAM::Role";
 
-    //#region parameters
     protected _: URG["_"] & {
         maxDuration: Field<number>
         permissionBoundary: Field<string>
         instanceProfile: boolean
+        assumePolicy:Field<PolicyOut>
     }
-    private assumePolicy: Field<PolicyOut>
-    private instanceProfileR=new InstanceProfile()
+    private instanceProfileR=new InstanceProfile(this)
     /**
      * returns the resource name
      */
@@ -55,13 +54,10 @@ export class Role extends URG {
         instanceProfileArn: Local(() => this._.instanceProfile ? this.instanceProfileR.a.Arn : thrw(new PreparableError(this,"you cannot reference the instanceProfile without activating it"))),
         instanceProfileName: Local(() => this._.instanceProfile ? this.instanceProfileR.r : thrw(new PreparableError(this,"you cannot reference the instanceProfile without activating it")))
     }
-    //#endregion
     constructor() {
         super(1);
     }
-    //#endregion
 
-    //#region simple properties
     /**
      * **required:false**
      * 
@@ -77,9 +73,7 @@ export class Role extends URG {
         return this
     }
 
-    //#endregion
 
-    //#region virtual subresources
     /**
      * **required:true**
      * 
@@ -101,24 +95,22 @@ export class Role extends URG {
     AssumePolicy(df: Field<PolicyOut|PrincipalKeys|"*">,...principals:Field<string>[]) {
         if(typeof df=="string"){
             if(df=="*"){
-                this.assumePolicy=new Policy.Document()
+                this._.assumePolicy=new Policy.Document()
                     .Statement(new Policy.Statement()
                         .Actions("sts:AssumeRole")
                         .principals(df))
             }else{
-                this.assumePolicy=new Policy.Document()
+                this._.assumePolicy=new Policy.Document()
                     .Statement(new Policy.Statement()
                         .Actions("sts:AssumeRole")
                         .principals(df,...principals))
             }
         }else{
-            this.assumePolicy = df
+            this._.assumePolicy = df
         }
         return this
     }
-    //#endregion
 
-    //#region sub resources
     /**
      * **required:false**
      * @param permissionBoundary The ARN of the policy that is used 
@@ -194,30 +186,15 @@ export class Role extends URG {
     instanceProfile(path:Field<string>,name:Field<string>):this;
     instanceProfile(pathName?:Field<string>,name?:Field<string>):this{
         this._.instanceProfile=true
-        if(pathName==undefined) return this
-
-        if(typeof pathName=="string"){
-            const split=pathName.lastIndexOf("/");
-            this.instanceProfileR._.path=pathName.slice(0,split+1) || undefined;
-            this.instanceProfileR._.name=pathName.slice(split+1);
-        }else{
-            if(name==undefined){
-                this.instanceProfileR._.name=pathName
-            }else{
-                this.instanceProfileR._.path=pathName
-                this.instanceProfileR._.name=name
-            }
-        }
+        this.instanceProfileR.name(pathName,name)
         return this;
     }
-    //#endregion
 
-    //#region resource functions
     [checkValid]() {
         if (this[checkCache]) return this[checkCache]
         const out = super[checkValid]();;
         const errors: string[] = []
-        if (!this.assumePolicy) {
+        if (!this._.assumePolicy) {
             errors.push("you must specify the AssumePolicy")
         }
         if (errors.length) {
@@ -237,9 +214,11 @@ export class Role extends URG {
         if (prepareQueueBase(stack, path, ref, this)) {
             callOnPrepareQueue(this._, stack, this, true)
 
-            if (this.assumePolicy instanceof Preparable) this.assumePolicy[prepareQueue](stack, new PathDataCarrier(this, { skipResources: true }), false)
+            if (this._.assumePolicy instanceof Preparable) this._.assumePolicy[prepareQueue](stack, new PathDataCarrier(this, { skipResources: true }), false)
             this.policiesR.forEach(o => o[prepareQueue](stack, new PathDataCarrier(this, { policyAttachment: { type: "role", value: this.r } }), true))
-            if(this._.instanceProfile) this.instanceProfileR[prepareQueue](stack,this,false)
+            if(this._.instanceProfile){
+                this.instanceProfileR[prepareQueue](stack,this,false)
+            } 
         }
     }
     [generateObject]() {
@@ -248,10 +227,9 @@ export class Role extends URG {
             Properties: _.defaults(super[generateObject]().Properties, {
                 RoleName: this._.name,
                 MaxSessionDuration: this._.maxDuration,
-                AssumeRolePolicyDocument: this.assumePolicy,
+                AssumeRolePolicyDocument: this._.assumePolicy,
                 PermissionBoundary: this._.permissionBoundary
             })
         }
     }
-    //#endregion
 }

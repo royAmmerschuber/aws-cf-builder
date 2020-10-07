@@ -1,5 +1,5 @@
 import { InlineAdvField } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue, s_path, pathName } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, s_path, pathName, toJson } from "../symbols";
 import { SMap, ResourceError } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
@@ -13,7 +13,7 @@ export class NamedSubresource extends InlineAdvField<void>{
     ){
         super(1)
     }
-    toJSON(){
+    [toJson](){
         return undefined
     }
     [checkValid](): SMap<ResourceError> {

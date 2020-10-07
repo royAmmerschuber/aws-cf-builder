@@ -1,0 +1,5 @@
+export const o1=new Output()
+    .Value(new Iam.Role()
+        .AssumePolicy("*")
+        .instanceProfile()
+        .a.instanceProfileArn)

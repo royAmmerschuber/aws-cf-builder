@@ -1,5 +1,5 @@
 import { InlineAdvField, isAdvField } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, toJson } from "../symbols";
 import { SMap, ResourceError, Preparable } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { CustomParameters, CustomPropFunction } from "./resource";
@@ -19,10 +19,8 @@ export class customBlock extends InlineAdvField<object>{
                     return v.bind(this);
                 }
                 return v
-            } else if (typeof p == "string") {
-                if (p == "toJSON") {
-                    return this.toJSON.bind(this)
-                }
+            } else if (typeof p == "string" && p!="toJSON") {
+                
                 return CustomPropFunction.create(p, this._, this.proxy)
             }
         }
@@ -53,7 +51,7 @@ export class customBlock extends InlineAdvField<object>{
         _.forEach(rec, this._)
     }
 
-    toJSON() {
+    [toJson]() {
         return this._
     }
 }

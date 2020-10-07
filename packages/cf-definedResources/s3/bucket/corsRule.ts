@@ -2,7 +2,7 @@ import { InlineAdvField, Field } from "aws-cf-builder-core/field";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { resourceIdentifier,checkCache,checkValid,prepareQueue, stacktrace} from "aws-cf-builder-core/symbols"
+import { resourceIdentifier,checkCache,checkValid,prepareQueue, stacktrace, toJson} from "aws-cf-builder-core/symbols"
 import { callOnCheckValid, callOnPrepareQueue, notEmpty } from "aws-cf-builder-core/util";
 
 export interface CorsRuleOut {
@@ -121,7 +121,7 @@ export class CorsRule extends InlineAdvField<CorsRuleOut>{
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         callOnPrepareQueue(this._,stack,path,true)
     }
-    toJSON():CorsRuleOut {
+    [toJson]():CorsRuleOut {
         return {
             AllowedMethods:this._.methods,
             AllowedOrigins:this._.origins,

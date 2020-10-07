@@ -1,5 +1,5 @@
 import { Field, InlineAdvField } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError } from "aws-cf-builder-core/general"
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -106,7 +106,7 @@ export abstract class Gress extends InlineAdvField<IngressOut|EgressOut>{
         this._.protocol=protocol
         return this
     }
-    toJSON() {
+    [toJson]() {
         return {
             CidrIp:this._.cidr,
             CidrIpv6:this._.cidr6,
@@ -221,9 +221,9 @@ export class Ingress extends Gress{
         }
         return this[checkCache]=callOnCheckValid(this._,out)
     }
-    toJSON() {
+    [toJson]() {
         return {
-            ...super.toJSON(),
+            ...super[toJson](),
             ...this._.group && {
                 SourceSecurityGroupId:this._.group.id,
                 SourceSecurityGroupName:this._.group.name,
@@ -284,9 +284,9 @@ export class Egress extends Gress{
         }
         return this[checkCache]=callOnCheckValid(this._,out)
     }
-    toJSON(){
+    [toJson](){
         return {
-            ...super.toJSON(),
+            ...super[toJson](),
             DestinationPrefixListId:this._.prefixListId,
             DestinationSecurityGroupId:this._.groupId
         }
