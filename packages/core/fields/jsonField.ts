@@ -10,6 +10,7 @@ import { Substitution } from "./substitution";
 import { Parameter } from "../generatables/parameter";
 import { localField, s_local_val } from "./local";
 import { isAdvField } from "../field";
+import stringify from "json-stable-stringify";
 /**
  * converts JS object to Substitution json string with parameters
  */
@@ -27,23 +28,25 @@ export class JSONField extends Substitution{
     [toJson]() {
         const repl=new Map<string,AttributeField|ReferenceField|Substitution|Parameter<any>>()
         const This=this
-        let text=JSON.stringify(this.object,function(key,value){
-            let field=this[key]
-            if(field instanceof localField){
-                field=field[s_local_val]
-            }
-            if(field instanceof localField || field instanceof AttributeField || field instanceof ReferenceField || field instanceof Parameter || field instanceof Substitution){
-                if(field instanceof JSONField){
-                    field=Object.create(field) as JSONField
-                    field.nestedness=This.nestedness+1
+        let text=stringify(this.object,{
+            replacer(key,value){
+                let field=this[key]
+                if(field instanceof localField){
+                    field=field[s_local_val]
                 }
-                const id="repl_"+String(Math.random()*10**10).slice(0,10)
-                repl.set(id,field)
-                return {[id]:id}
-            }else if(isAdvField(field)){
-                return field[toJson]()
-            }else{
-                return value
+                if(field instanceof localField || field instanceof AttributeField || field instanceof ReferenceField || field instanceof Parameter || field instanceof Substitution){
+                    if(field instanceof JSONField){
+                        field=Object.create(field) as JSONField
+                        field.nestedness=This.nestedness+1
+                    }
+                    const id="repl_"+String(Math.random()*10**10).slice(0,10)
+                    repl.set(id,field)
+                    return {[id]:id}
+                }else if(isAdvField(field)){
+                    return field[toJson]()
+                }else{
+                    return value
+                }
             }
         })
         let tokenTemplate='{"id":"id"}'

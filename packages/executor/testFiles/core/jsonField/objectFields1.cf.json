@@ -3,7 +3,7 @@
     "Resources": {},
     "Outputs": {
         "Test": {
-            "Value": "{\"test\":{\"paul\":\"meier\",\"sven\":5},\"local\":{\"kevin\":\"nivek\"}}"
+            "Value": "{\"local\":{\"kevin\":\"nivek\"},\"test\":{\"paul\":\"meier\",\"sven\":5}}"
         }
     }
 }

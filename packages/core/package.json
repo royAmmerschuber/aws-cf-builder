@@ -1,17 +1,19 @@
 {
     "name": "aws-cf-builder-core",
-    "version":"1.0.10",
+    "version": "1.0.10",
     "dependencies": {
         "callsite": "^1.0.0",
         "chalk": "^3.0.0",
+        "json-stable-stringify": "^1.0.1",
         "lodash": "^4.17.19"
     },
     "devDependencies": {
+        "@types/json-stable-stringify": "^1.0.32",
         "@types/lodash": "^4.14.149"
     },
     "scripts": {
         "build": "rm -rf dist/* & tsc && cp package.json dist/package.json",
-        "pub":"npm run build && npm publish dist"
+        "pub": "npm run build && npm publish dist"
     },
     "repository": {
         "type": "git",
