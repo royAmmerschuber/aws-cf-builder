@@ -15,6 +15,17 @@ import { Recipe } from "./recipe";
 export type PipelineStartCondition=
     "EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE" |
     "EXPRESSION_MATCH_ONLY"
+/**
+ * An image pipeline is the automation configuration for building secure OS images on AWS. The 
+ * Image Builder image pipeline is associated with an image recipe that defines the build, validation, 
+ * and test phases for an image build lifecycle. An image pipeline can be associated with an infrastructure 
+ * configuration that defines where your image is built. You can define attributes, such as instance type, 
+ * subnets, security groups, logging, and other infrastructure-related configurations. You can also 
+ * associate your image pipeline with a distribution configuration to define how you would like to 
+ * deploy your image.
+ * 
+ * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-imagebuilder-imagepipeline.html)
+ */
 export class ImagePipeline extends Resource{
     readonly [resourceIdentifier]="AWS::ImageBuilder::ImagePipeline";
     private _:{
@@ -24,7 +35,7 @@ export class ImagePipeline extends Resource{
             startCondition:Field<string>
             cron:Field<string>
         }
-
+        name:Field<string>
 
         enhancedMetadata:Field<boolean>
         recipe:Field<string>
@@ -49,6 +60,12 @@ export class ImagePipeline extends Resource{
     constructor(){
         super(1)
     }
+    /**
+     * **required:false**
+     * @param bool The status of the image pipeline.
+     * 
+     * **maps:**`Status`
+     */
     enabled(bool:boolean|Field<"ENABLED"|"DISABLED">=true){
         if(typeof bool=="boolean"){
             this._.status= bool 
@@ -59,33 +76,110 @@ export class ImagePipeline extends Resource{
         }
         return this
     }
+    /**
+     * **required:false**
+     * @param text The description of this image pipeline.
+     * 
+     * **maps:**`Description`
+     */
     description(text:Field<string>){
         this._.description=text
         return this
     }
+    /**
+     * The schedule of the image pipeline. A schedule configures how often and when a pipeline 
+     * will automatically create a new image.
+     * 
+     * **required:false**
+     * @param cron The cron expression determines how often EC2 Image Builder evaluates your 
+     * pipelineExecutionStartCondition.
+     * 
+     * For information on how to format a cron expression in Image Builder, see Use cron 
+     * expressions in EC2 Image Builder.
+     * 
+     * **maps:**`Schedule.ScheduleExpression`
+     * @param startCondition The condition configures when the pipeline should trigger a new 
+     * image build. When the pipelineExecutionStartCondition is set to 
+     * EXPRESSION_MATCH_AND_DEPENDENCY_UPDATES_AVAILABLE, and you use semantic version filters 
+     * on the source image or components in your image recipe, EC2 Image Builder will build a new 
+     * image only when there are new versions of the image or components in your recipe that match 
+     * the semantic version filter. When it is set to EXPRESSION_MATCH_ONLY, it will build a new 
+     * image every time the CRON expression matches the current time. For semantic version syntax, 
+     * see CreateComponent in the EC2 Image Builder API Reference.
+     * 
+     * **maps:**`Schedule.PipelineExecutionStartCondition`
+     */
     schedule(cron:Field<string>|CronExpression,startCondition?:Field<PipelineStartCondition>){
         this._.schedule={ cron, startCondition }
         return this
     }
+    /**
+     * **required:true**
+     * @param name The name of the image pipeline.
+     * 
+     * **maps:**`Name`
+     */
+    Name(name:Field<string>){
+        this._.name=name
+        return this
+    }
 
 
 
+    /**
+     * **required:false**
+     * @param enabled Collects additional information about the image being created, including the 
+     * operating system (OS) version and package list. This information is used to enhance the 
+     * overall experience of using EC2 Image Builder. Enabled by default.
+     * 
+     * **maps:**`EnhancedImageMetadataEnabled`
+     */
     enhandedMetadata(enabled:boolean=true){
         this._.enhancedMetadata=enabled
         return this
     }
+    /**
+     * **required:true**
+     * @param arn The Amazon Resource Name (ARN) of the image recipe.
+     * 
+     * **maps:**`ImageRecipeArn`
+     */
     Recipe(arn:Attr<Recipe>){
         this._.recipe=Attr.get(arn,"Arn")
         return this
     }
+    /**
+     * **required:false**
+     * @param arn The Amazon Resource Name (ARN) of the distribution configuration.
+     * 
+     * **maps:**`DistributionConfigurationArn`
+     */
     distributionConfig(arn:Attr<DistributionConfig>){
         this._.distributionConfig=Attr.get(arn,"Arn")
         return this
     }
+    /**
+     * **required:true**
+     * @param arn The Amazon Resource Name (ARN) of the infrastructure configuration used to create 
+     * this image.
+     * 
+     * **maps:**`InfrastructureConfigurationArn`
+     */
     InfrastructureConfig(arn:Attr<InfrastructureConfig>){
         this._.infrastructureConfig=Attr.get(arn,"Arn")
         return this
     }
+    /**
+     * The configuration of the image tests used when creating this image.
+     * 
+     * **required:false**
+     * @param enabled Defines if tests should be executed when building this image.
+     * 
+     * **maps:**`ImageTestsConfiguration.ImageTestsEnabled`
+     * @param timeoutMin The maximum time in minutes that tests are permitted to run.
+     * 
+     * **maps:**`ImageTestsConfiguration.TimeoutMinutes`
+     */
     testConfig(enabled:Field<boolean>,timeoutMin?:Field<number>){
         this._.testConfig={enabled,timeoutMin}
         return this
@@ -124,6 +218,9 @@ export class ImagePipeline extends Resource{
         if(!this._.recipe){
             errors.push("you must specify a recipe")
         }
+        if(!this._.name){
+            errors.push("you must specify a name")
+        }
         if(!this._.infrastructureConfig){
             errors.push("you must specify an infrastructureConfig")
         }
@@ -145,6 +242,7 @@ export class ImagePipeline extends Resource{
         return {
             Type: this[resourceIdentifier],
             Properties: {
+                Name:this._.name,
                 Description:this._.description,
                 Status:this._.status,
                 Schedule:this._.schedule && {

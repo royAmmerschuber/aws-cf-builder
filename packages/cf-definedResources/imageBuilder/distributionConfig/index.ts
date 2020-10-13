@@ -9,11 +9,18 @@ import { checkCache, checkValid, generateObject, prepareQueue, resourceIdentifie
 import { callOnCheckValid, callOnPrepareQueue, prepareQueueBase } from "aws-cf-builder-core/util";
 import { AwsRegion } from "../../util";
 import { AmiDistribution as _AmiDistribution, AmiDistributionOut } from "./amiDistConfig";
-
+/**
+ * A distribution configuration allows you to specify the name and description of your
+ * output AMI, authorize other AWS accounts to launch the AMI, and replicate the AMI to
+ * other AWS Regions\. It also allows you to export the AMI to Amazon S3\.
+ * 
+ * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-imagebuilder-distributionconfiguration-distribution.html)
+ */
 export class DistributionConfig extends Resource{
     readonly [resourceIdentifier]="AWS::ImageBuilder::DistributionConfiguration";
     private _: {
         description: Field<string>
+        name:Field<string>
         distributions: Map<Field<string>,{
             amiDist:Field<AmiDistributionOut>,
             licenseArns:Field<string>[]
@@ -37,14 +44,50 @@ export class DistributionConfig extends Resource{
     constructor(){
         super(1)
     }
+    /**
+     * **required:true**
+     * @param name The name of this distribution configuration\.  
+     * 
+     * **maps:**`Name`
+     */
+    Name(name:Field<string>){
+        this._.name=name
+        return this
+    }
+    /**
+     * **required:false**
+     * @param text The description of this distribution configuration\.
+     * 
+     * **maps:**`Description`
+     */
     description(text:Field<string>){
         this._.description=text
         return this
     }
+    /**
+     * **required:true**
+     * @param map The distributions of this distribution configuration formatted as map of regions to licenses and AmiDistribution\.  
+     * 
+     * **maps:**`Distributions`
+     */
     Distributions(map:Partial<Record<AwsRegion,{
         dist?:DistributionConfig.AmiDistribution|Field<AmiDistributionOut>
         licenses?:Field<string>[]
     }>>):this
+    /**
+     * **required:true**
+     * @param region The target Region for the Distribution Configuration. For example, eu-west-1.
+     * 
+     * **maps:**`Distributions[].Region`
+     * @param amiDistributionConfig The specific AMI settings, such as launch permissions and AMI
+     * tags. For details, see example schema below.
+     * 
+     * **maps:**`Distributions[].AmiDistributionConfiguration`
+     * @param licenseConfigArns The License Manager Configuration to associate with the AMI in
+     * the specified Region. For more information, see the LicenseConfiguration API.
+     * 
+     * **maps:**`Distributions[].LicenseConfigurationArns`
+     */
     Distributions(region:Field<AwsRegion>,amiDistributionConfig?:DistributionConfig.AmiDistribution|Field<AmiDistributionOut>,licenseConfigArns?:Field<string>[]):this
     Distributions(
         rm:Field<AwsRegion> | SMap<{ dist?:DistributionConfig.AmiDistribution|Field<AmiDistributionOut>, licenses?:Field<string>[] }>,
@@ -98,6 +141,9 @@ export class DistributionConfig extends Resource{
         if(!this._.distributions.size){
             errors.push("you must specify at least one Distribution")
         }
+        if(!this._.name){
+            errors.push("you must specify a name")
+        }
         const out:SMap<ResourceError>={}
         if(errors.length){
             out[this[stacktrace]]={
@@ -116,6 +162,7 @@ export class DistributionConfig extends Resource{
         return {
             Type:this[resourceIdentifier],
             Properties:{
+                Name:this._.name,
                 Description: this._.description,
                 Distributions:this._.distributions.size 
                     ? [...this._.distributions.entries()].map(([k,v])=>({

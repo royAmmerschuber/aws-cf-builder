@@ -30,6 +30,7 @@ export const i1=new ImageBuilder.Image()
         .terminateOnFailure())
     .enhandedMetadata()
     .distributionConfig(new ImageBuilder.DistributionConfig()
+        .Name("dist")
         .description("bla")
         .Distributions(new ReferenceField("someRegion"),
             new ImageBuilder.DistributionConfig.AmiDistribution()
@@ -66,10 +67,12 @@ export const i1=new ImageBuilder.Image()
         }))
     .testConfig(true,60)
     .Recipe(new ImageBuilder.Recipe()
+        .Name("test")
         .Version("1.0.0")
         .ParentImage("someImage")
         .Components(
             new ImageBuilder.Component()
+                .Name("a")
                 .Platform("Linux")
                 .Version("1.0.0")
                 .description("greatStuff")
@@ -100,11 +103,11 @@ export const i1=new ImageBuilder.Image()
                 .phase(new ReferenceField("secondPhase"),[
                     new ImageBuilder.Component.Step.Reboot(5),
                     new ImageBuilder.Component.Step.S3Download("from","to")
-                        .transfer("s3","local"),
+                        .Transfer("s3","local"),
                     new ImageBuilder.Component.Step.S3Upload("from","to",true)
-                        .transfer("local","s3"),
+                        .Transfer("local","s3"),
                     new ImageBuilder.Component.Step.SetRegistry("/some/path","name","DWORD",["some","text"])
-                        .set("path","ident","QWORD",43),
+                        .Set("path","ident","QWORD",43),
                     new ImageBuilder.Component.Step.UpdateOS()
                         .exclude("blender","python3")
                         .include("libGl1"),
@@ -122,19 +125,21 @@ export const i1=new ImageBuilder.Image()
                     paul4:"klee4"
                 }),
             new ImageBuilder.Component()
+                .Name("2")
                 .Platform("Windows")
                 .Version("1.0.1")
                 .data(new JSONField({
                     stuff:"happening"
                 })),
             new ImageBuilder.Component()
+                .Name("3")
                 .Platform("Windows")
                 .Version("1.0.1")
                 .uri("someUri"),
             "someArn")
         .description("cookieRecipe")
         .workingDirectory("/root/stuff")
-        .blockDevicceMapping(
+        .blockDeviceMapping(
             {
                 DeviceName:"/dev/sda",
                 Ebs:{
@@ -172,6 +177,7 @@ export const i2=new ImageBuilder.Image()
         .Name("test")
         .InstanceProfile("profileArn"))
     .Recipe(new ImageBuilder.Recipe()
+        .Name("pual")
         .Version("1.0.0")
         .ParentImage(i1)
         .Components("someComp"))
@@ -182,6 +188,7 @@ export const in1= new ImageBuilder.InfrastructureConfig()
         .AssumePolicy("*")
         .instanceProfile())
 export const ip1=new ImageBuilder.ImagePipeline()
+    .Name("somePipe")
     .InfrastructureConfig("configArn")
     .Recipe("recipeArn")
     .description("someText")
@@ -202,5 +209,6 @@ export const ip1=new ImageBuilder.ImagePipeline()
         paul4:"klee4"
     })
 export const ip2=new ImageBuilder.ImagePipeline()
+    .Name("pipeTsuo")
     .InfrastructureConfig("conf")
     .Recipe("rec")

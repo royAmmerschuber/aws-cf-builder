@@ -43,49 +43,108 @@ export class BlockDeviceMapping extends InlineAdvField<BlockDeviceMappingOut>{
             kmsKey:Field<string>
         }
     }={ebs:{}} as any
+    constructor(){
+        super(1)
+    }
+    /**
+     * **required:false**
+     * @param name The device to which these mappings apply.
+     * 
+     * **maps:**`DeviceName`
+     */
     deviceName(name:Field<string>){
         this._.deviceName=name
         return this
     }
+    /**
+     * **required:false**
+     * @param name Manages the instance ephemeral devices.
+     * 
+     * **maps:**`VirtualName`
+     */
     virtualName(name:Field<string>){
         this._.virtualName=name
         return this
     }
+    /**
+     * **required:false**
+     * @param bool Removes a mapping from the parent image
+     * 
+     * **maps:**`NoDevice`
+     */
     remove(bool=true){
         this._.remove=bool
         return this
     }
-
+    /**
+     * **required:false**
+     * @param bool Configures delete on termination of the associated device.
+     * 
+     * **maps:**`Ebs.DeleteOnTermination`
+     */
     deleteOnTermination(bool:Field<boolean>=true){
         this._.ebs.deleteOnTermination=bool
         return this
     }
+    /**
+     * **required:false**
+     * @param bool Use to configure device encryption.
+     * 
+     * **maps:**`Ebs.Encrypted`
+     */
     encrypted(bool:Field<boolean>=true){
         this._.ebs.encrypted=bool
         return this
     }
+    /**
+     * **required:false**
+     * @param num Use to configure device IOPS.
+     * 
+     * **maps:**`Ebs.Iops`
+     */
     iops(num:Field<number>){
         this._.ebs.iops=num
         return this
     }
+    /**
+     * **required:false**
+     * @param num Overrides the volume size of the device.
+     * 
+     * **maps:**`Ebs.VolumeSize`
+     */
     volumeSize(num:Field<number>){
         this._.ebs.volumeSize=num
         return this
     }
+    /**
+     * **required:false**
+     * @param type Overrides the volume type of the device.
+     * 
+     * **maps:**`Ebs.VolumeType`
+     */
     volumeType(type:Field<VolumeType>){
         this._.ebs.volumeType=type
         return this
     }
+    /**
+     * **required:false**
+     * @param id Use to configure the KMS key to use when encrypting the device.
+     * 
+     * **maps:**`Ebs.KmsKeyId`
+     */
     kmsKey(id:Attr<"KeyId">){//TODO KMS
         this._.ebs.kmsKey=Attr.get(id,"KeyId")
         return this
     }
+    /**
+     * **required:false**
+     * @param id The snapshot that defines the device contents.
+     * 
+     * **maps:**`Ebs.SnapshotId`
+     */
     snapshotId(id:Field<string>){ //TODO EC2
         this._.ebs.snapshot=id
         return this
-    }
-    constructor(){
-        super(1)
     }
     [toJson]():BlockDeviceMappingOut {
         return {

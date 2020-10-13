@@ -12,7 +12,16 @@ import { InstanceProfile } from "../iam/instanceProfile";
 import { InstanceType } from "../ec2/instanceTypes"
 import { s3PathConverter } from "../util";
 import { SecurityGroup } from "../ec2";
-
+/**
+ * The infrastructure configuration allows you to specify the infrastructure within which 
+ * to build and test your image. In the infrastructure configuration, you can specify 
+ * instance types, subnets, and security groups to associate with your instance. You can also
+ * associate an Amazon EC2 key pair with the instance used to build your image. This allows you 
+ * to log on to your instance to troubleshoot if your build fails and you set 
+ * terminateInstanceOnFailure to false.
+ * 
+ * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-imagebuilder-infrastructureconfiguration.html)
+ */
 export class InfrastructureConfig extends Resource{
     readonly [resourceIdentifier]="AWS::ImageBuilder::InfrastructureConfiguration";
     private _:{
@@ -48,11 +57,29 @@ export class InfrastructureConfig extends Resource{
     constructor(){
         super(1)
     }
+    /**
+     * **required:true**
+     * @param name The name of the infrastructure configuration.
+     * 
+     * **maps:**`Name`
+     */
     Name(name:Field<string>){
         this._.name=name
         return this
     }
+    /**
+     * **required:true**
+     * @param role The instance profile of the infrastructure configuration
+     * 
+     * **maps:**`InstanceProfileName`
+     */
     InstanceProfile(role:Attr<Role>):this
+    /**
+     * **required:true**
+     * @param instanceProfile The instance profile of the infrastructure configuration
+     * 
+     * **maps:**`InstanceProfileName`
+     */
     InstanceProfile(instanceProfile:Ref<InstanceProfile>):this
     InstanceProfile(ri:Attr<Role|InstanceProfile>):this{
         if(ri instanceof Resource){
@@ -69,11 +96,37 @@ export class InfrastructureConfig extends Resource{
         this._.instanceTypes.push(...types)
         return this
     }
+    /**
+     * **required:false**
+     * @param name The EC2 key pair of the infrastructure configuration.
+     * 
+     * **maps:**`KeyPair`
+     */
     keyPair(name:Field<string>){
         this._.keyPair=name
         return this
     }
+    /**
+     * The logging configuration of the infrastructure configuration.
+     * 
+     * **required:false**
+     * @param s3Location the location to place the logs as an s3 path formated like 
+     * `s3://bucket/path/key`
+     * 
+     * **maps:**`Logging`
+     */
     s3Log(s3Location:string):this
+    /**
+     * The logging configuration of the infrastructure configuration.
+     * 
+     * **required:false**
+     * @param bucket The Amazon S3 bucket in which to store the logs.
+     * 
+     * **maps:**`Logging.S3Logs.S3BucketName`
+     * @param prefixThe Amazon S3 path in which to store the logs.
+     * 
+     * **maps:**`Logging.S3Logs.S3KeyPrefix`
+     */
     s3Log(bucket:Field<string>,prefix?:Field<string>):this
     s3Log(bp:Field<string>,prefix?:Field<string>){
         if(!prefix && typeof bp=="string" && bp.startsWith("s3://")){
@@ -91,23 +144,66 @@ export class InfrastructureConfig extends Resource{
         }
         return this
     }
+    /**
+     * **required:false**
+     * @param groups The security group IDs of the infrastructure configuration.
+     * 
+     * **maps:**`SecurityGroupIds`
+     */
     securityGroups(...groups:Attr<SecurityGroup>[]){
         this._.securityGroups.push(...groups.map(v=>Attr.get(v,"GroupId")))
         return this
     }
+    /**
+     * **required:false**
+     * @param id The subnet ID of the infrastructure configuration.
+     * 
+     * **maps:**`SubnetId`
+     */
     subnet(id:Attr<"VpcId">){ //TODO AWS::EC2::Subnet
         this._.subnet=Attr.get(id,"VpcId")
         return this
     }
+    /**
+     * **required:false**
+     * @param arn The Amazon Resource Name (ARN) of the SNS topic for the infrastructure 
+     * configuration.
+     * 
+     * **maps:**`SnsTopicArn`
+     */
     snsTopic(arn:Attr<"Arn">){ //TODO AWS::SNS::Topic
         this._.snsTopic=Attr.get(arn,"Arn")
         return this
     }
+    /**
+     * **required:false**
+     * @param bool The terminate instance on failure configuration of the infrastructure
+     * configuration.
+     * 
+     * **maps:**`TerminateInstanceOnFailure`
+     */
     terminateOnFailure(bool=true){
         this._.terminateOnFailure=bool
         return this
     }
+    /**
+     * The tags attached to the resource created by Image Builder.
+     * 
+     * **required:false**
+     * 
+     * **maps:**`ResourceTags`
+     * @param tags a map of tags
+     */
     resourceTag(tags:SMap<Field<string>>):this;
+    /**
+     * The tags attached to the resource created by Image Builder.
+     * 
+     * **required:false**
+     * 
+     * **maps:**`ResourceTags`
+     * @param key the key of a new tag
+     * @param value the value for the tag
+     */
     resourceTag(key:string,value:Field<string>):this;
     resourceTag(tk:string|SMap<Field<string>>,value?:Field<string>):this{
         if(typeof tk=="string"){

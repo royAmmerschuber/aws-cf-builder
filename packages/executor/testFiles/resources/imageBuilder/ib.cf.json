@@ -7,6 +7,7 @@
                 "Data": {
                     "Fn::Sub": "{\"phases\":[{\"name\":\"build\",\"steps\":[{\"action\":\"ExecuteBinary\",\"input\":{\"arguments\":[\"{{ loop.value }}\"],\"path\":\"/bin/ls\"},\"loop\":{\"forEach\":[\"/root\",\"/home/ubuntu\"],\"name\":\"someName\"},\"maxAttempts\":4,\"name\":\"paul\",\"onFailure\":\"Continue\",\"timeoutSeconds\":5},{\"action\":\"ExecutePowerShell\",\"input\":{\"file\":\"C:\\\\test{{ loop.value }}.ps\"},\"loop\":{\"forEach\":{\"delimiter\":\",\",\"list\":\"a,b,c,d,e,f\"}},\"name\":\"ExecutePowerShell1\"},{\"action\":\"ExecuteBinary\",\"input\":{\"arguments\":[\"C:\\\\test{{ loop.index }}.ps\"],\"path\":\"/bin/bash\"},\"loop\":{\"for\":{\"end\":10,\"start\":0,\"updateBy\":3}},\"name\":\"ExecuteBinary2\"},{\"action\":\"Execute${bshOrPs}\",\"input\":{\"commands\":[\"comm1\",\"comm2\",\"comm3\"]},\"name\":\"Execute${bshOrPs}3\"}]},{\"name\":\"${secondPhase}\",\"steps\":[{\"action\":\"Reboot\",\"input\":{\"delaySeconds\":5},\"name\":\"Reboot0\"},{\"action\":\"S3Download\",\"input\":[{\"destination\":\"to\",\"source\":\"from\"},{\"destination\":\"local\",\"source\":\"s3\"}],\"name\":\"S3Download1\"},{\"action\":\"S3Upload\",\"input\":[{\"destination\":\"to\",\"recurse\":true,\"source\":\"from\"},{\"destination\":\"s3\",\"source\":\"local\"}],\"name\":\"S3Upload2\"},{\"action\":\"SetRegistry\",\"input\":[{\"name\":\"name\",\"path\":\"/some/path\",\"type\":\"DWORD\",\"value\":[\"some\",\"text\"]},{\"name\":\"ident\",\"path\":\"path\",\"type\":\"QWORD\",\"value\":43}],\"name\":\"SetRegistry3\"},{\"action\":\"UpdateOS\",\"input\":{\"exclude\":[\"blender\",\"python3\"],\"include\":[\"libGl1\"]},\"name\":\"UpdateOS4\"},{\"action\":\"Reboot\",\"inputs\":{\"delaySeconds\":4},\"name\":\"last\"}]}],\"schemaVersion\":\"1.0\"}"
                 },
+                "Name":"a",
                 "Description": "greatStuff",
                 "KmsKeyId": "keyeyey",
                 "Platform": "Linux",
@@ -26,7 +27,8 @@
             "Properties": {
                 "Data": "{\"stuff\":\"happening\"}",
                 "Platform": "Windows",
-                "Version": "1.0.1"
+                "Version": "1.0.1",
+                "Name":"2"
             },
             "Type": "AWS::ImageBuilder::Component"
         },
@@ -34,12 +36,14 @@
             "Properties": {
                 "Platform": "Windows",
                 "Uri": "someUri",
-                "Version": "1.0.1"
+                "Version": "1.0.1",
+                "Name":"3"
             },
             "Type": "AWS::ImageBuilder::Component"
         },
         "I1DistributionConfiguration": {
             "Properties": {
+                "Name":"dist",
                 "Description": "bla",
                 "Distributions": [
                     {
@@ -199,6 +203,7 @@
                         "ComponentArn": "someArn"
                     }
                 ],
+                "Name":"test",
                 "Description": "cookieRecipe",
                 "ParentImage": "someImage",
                 "Tags": {
@@ -284,6 +289,7 @@
         },
         "I2ImageRecipe": {
             "Properties": {
+                "Name":"pual",
                 "Components": [
                     {
                         "ComponentArn": "someComp"
@@ -352,6 +358,7 @@
         },
         "Ip1ImagePipeline": {
             "Properties": {
+                "Name":"somePipe",
                 "Description": "someText",
                 "DistributionConfigurationArn": "configArn",
                 "EnhancedImageMetadataEnabled":true,
@@ -375,6 +382,7 @@
         },
         "Ip2ImagePipeline": {
             "Properties": {
+                "Name":"pipeTsuo",
                 "ImageRecipeArn": "rec",
                 "InfrastructureConfigurationArn": "conf"
             },

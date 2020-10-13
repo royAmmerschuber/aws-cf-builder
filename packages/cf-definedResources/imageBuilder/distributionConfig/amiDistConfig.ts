@@ -35,26 +35,62 @@ export class AmiDistribution extends InlineAdvField<AmiDistributionOut>{
     constructor(){
         super(1)
     }
+    /**
+     * **required:false**
+     * @param name The name of the distribution configuration.
+     * 
+     * **maps:**`name`
+     */
     name(name:Field<string>){
         this._.name=name
         return this
     }
+    /**
+     * **required:false**
+     * @param text The description of the distribution configuration.
+     * 
+     * **maps:**`description`
+     */
     description(text:Field<string>){
         this._.description=text
         return this
     }
+    /**
+     * **required:false**
+     * @param id The KMS key identifier used to encrypt the distributed image.
+     * 
+     * **maps:**`kmsKeyId`
+     */
     kmsKey(id:Attr<"KeyId">){ //TODO KMS Key
         this._.kmsKey=Attr.get(id,"KeyId")
         return this
     }
+    /**
+     * **required:false**
+     * @param ids The ID of an account to which you want to distribute an image.
+     * 
+     * **maps:**`targetAccountIds`
+     */
     targetAccounts(...ids:Field<string>[]){
         this._.targetAccounts.push(...ids)
         return this
     }
+    /**
+     * **required:false**
+     * @param ids The AWS account IDs which can launch this
+     * 
+     * **maps:**`launchPermission.userIds`
+     */
     accountPermissions(...ids:Field<string>[]){
         this._.accountPermissions.push(...ids)
         return this
     }
+    /**
+     * **required:false**
+     * @param names The name of the groups wich can launch this
+     * 
+     * **maps:**`launchPermission.userGroups`
+     */
     groupPermissions(...names:Field<string>[]){
         this._.groupPermissions.push(...names)
         return this
@@ -64,7 +100,7 @@ export class AmiDistribution extends InlineAdvField<AmiDistributionOut>{
      * 
      * **required:false**
      * 
-     * **maps:** `Tags`
+     * **maps:** `amiTags`
      * @param tags a map of tags
      */
     tag(tags:SMap<Field<string>>):this;

@@ -10,7 +10,13 @@ import { Attr, callOnCheckValid, callOnPrepareQueue, notEmpty, prepareQueueBase 
 import { DistributionConfig } from "./distributionConfig";
 import { InfrastructureConfig } from "./infrastructureConfig";
 import { Recipe } from "./recipe";
-
+/**
+ * An image build version. An image is a customized, secure, and up-to-date “golden” 
+ * server image that is pre-installed and pre-configured with software and settings 
+ * to meet specific IT standards.
+ * 
+ * [cloudformation reference](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-imagebuilder-image.html)
+ */
 export class Image extends Resource{
     [resourceIdentifier]="AWS::ImageBuilder::Image";
     private _:{
@@ -38,22 +44,60 @@ export class Image extends Resource{
     constructor(depth=0){
         super(1)
     }
+    /**
+     * **required:false**
+     * @param enabled Collects additional information about the image being created, including the 
+     * operating system (OS) version and package list. This information is used to enhance the 
+     * overall experience of using EC2 Image Builder. Enabled by default.
+     * 
+     * **maps:**`EnhancedImageMetadataEnabled`
+     */
     enhandedMetadata(enabled:boolean=true){
         this._.enhancedMetadata=enabled
         return this
     }
+    /**
+     * **required:true**
+     * @param arn The Amazon Resource Name (ARN) of the image recipe.
+     * 
+     * **maps:**`ImageRecipeArn`
+     */
     Recipe(arn:Attr<Recipe>){
         this._.recipe=Attr.get(arn,"Arn")
         return this
     }
+    /**
+     * **required:false**
+     * @param arn The Amazon Resource Name (ARN) of the distribution configuration.
+     * 
+     * **maps:**`DistributionConfigurationArn`
+     */
     distributionConfig(arn:Attr<DistributionConfig>){
         this._.distributionConfig=Attr.get(arn,"Arn")
         return this
     }
+    /**
+     * **required:true**
+     * @param arn The Amazon Resource Name (ARN) of the infrastructure configuration used to create 
+     * this image.
+     * 
+     * **maps:**`InfrastructureConfigurationArn`
+     */
     InfrastructureConfig(arn:Attr<InfrastructureConfig>){
         this._.infrastructureConfig=Attr.get(arn,"Arn")
         return this
     }
+    /**
+     * The configuration of the image tests used when creating this image.
+     * 
+     * **required:false**
+     * @param enabled Defines if tests should be executed when building this image.
+     * 
+     * **maps:**`ImageTestsConfiguration.ImageTestsEnabled`
+     * @param timeoutMin The maximum time in minutes that tests are permitted to run.
+     * 
+     * **maps:**`ImageTestsConfiguration.TimeoutMinutes`
+     */
     testConfig(enabled:Field<boolean>,timeoutMin?:Field<number>){
         this._.testConfig={enabled,timeoutMin}
         return this
