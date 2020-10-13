@@ -1,0 +1,55 @@
+[
+    ["AWS::ImageBuilder::Image",[
+        "the testConfig timeout must be between 60 and 1440 Minutes",
+        "you must specify a recipe",
+        "you must specify an infrastructureConfig"
+    ]],
+    ["AWS::ImageBuilder::Image",[
+        "the testConfig timeout must be between 60 and 1440 Minutes"
+    ]],
+    ["AWS::ImageBuilder::InfrastructureConfiguration",[
+        "you must specify a instanceProfile",
+        "you must specify a name"
+    ]],
+    ["AWS::ImageBuilder::DistributionConfiguration",[
+        "you must specify at least one Distribution"
+    ]],
+    ["AWS::ImageBuilder::ImageRecipe",[
+        "you must specify a parentImage",
+        "you must specify a version",
+        "you must specify at least one component"
+    ]],
+    ["AWS::ImageBuilder::ImagePipeline",[
+        "the testConfig timeout must be between 60 and 1440 Minutes",
+        "you must specify a recipe",
+        "you must specify an infrastructureConfig"
+    ]],
+    ["AWS::ImageBuilder::ImagePipeline",[
+        "the testConfig timeout must be between 60 and 1440 Minutes",
+        "you must specify a recipe",
+        "you must specify an infrastructureConfig"
+    ]],
+    ["AWS::ImageBuilder::ImageRecipe",[
+        "you must specify a parentImage",
+        "you must specify a version"
+    ]],
+    ["AWS::ImageBuilder::Component",[
+        "you must specify a Platform",
+        "you must specify a Version",
+        "you must specify one of data, uri or phases"
+    ]],
+    ["AWS::ImageBuilder::Component",[
+        "you must specify a Platform",
+        "you must specify a Version",
+        "you must specify only one of data, uri or phases"
+    ]],
+    ["Step.S3Download",[
+        "you must specify at least one transfer" 
+    ]],
+    ["Step.S3Upload",[
+        "you must specify at least one transfer" 
+    ]],
+    ["Step.SetRegistry",[
+        "you must specify at least one transfer" 
+    ]]
+]
