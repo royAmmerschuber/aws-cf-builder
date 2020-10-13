@@ -1,0 +1,392 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "I10Component": {
+            "Properties": {
+                "ChangeDescription": "peter",
+                "Data": {
+                    "Fn::Sub": "{\"phases\":[{\"name\":\"build\",\"steps\":[{\"action\":\"ExecuteBinary\",\"input\":{\"arguments\":[\"{{ loop.value }}\"],\"path\":\"/bin/ls\"},\"loop\":{\"forEach\":[\"/root\",\"/home/ubuntu\"],\"name\":\"someName\"},\"maxAttempts\":4,\"name\":\"paul\",\"onFailure\":\"Continue\",\"timeoutSeconds\":5},{\"action\":\"ExecutePowerShell\",\"input\":{\"file\":\"C:\\\\test{{ loop.value }}.ps\"},\"loop\":{\"forEach\":{\"delimiter\":\",\",\"list\":\"a,b,c,d,e,f\"}},\"name\":\"ExecutePowerShell1\"},{\"action\":\"ExecuteBinary\",\"input\":{\"arguments\":[\"C:\\\\test{{ loop.index }}.ps\"],\"path\":\"/bin/bash\"},\"loop\":{\"for\":{\"end\":10,\"start\":0,\"updateBy\":3}},\"name\":\"ExecuteBinary2\"},{\"action\":\"Execute${bshOrPs}\",\"input\":{\"commands\":[\"comm1\",\"comm2\",\"comm3\"]},\"name\":\"Execute${bshOrPs}3\"}]},{\"name\":\"${secondPhase}\",\"steps\":[{\"action\":\"Reboot\",\"input\":{\"delaySeconds\":5},\"name\":\"Reboot0\"},{\"action\":\"S3Download\",\"input\":[{\"destination\":\"to\",\"source\":\"from\"},{\"destination\":\"local\",\"source\":\"s3\"}],\"name\":\"S3Download1\"},{\"action\":\"S3Upload\",\"input\":[{\"destination\":\"to\",\"recurse\":true,\"source\":\"from\"},{\"destination\":\"s3\",\"source\":\"local\"}],\"name\":\"S3Upload2\"},{\"action\":\"SetRegistry\",\"input\":[{\"name\":\"name\",\"path\":\"/some/path\",\"type\":\"DWORD\",\"value\":[\"some\",\"text\"]},{\"name\":\"ident\",\"path\":\"path\",\"type\":\"QWORD\",\"value\":43}],\"name\":\"SetRegistry3\"},{\"action\":\"UpdateOS\",\"input\":{\"exclude\":[\"blender\",\"python3\"],\"include\":[\"libGl1\"]},\"name\":\"UpdateOS4\"},{\"action\":\"Reboot\",\"inputs\":{\"delaySeconds\":4},\"name\":\"last\"}]}],\"schemaVersion\":\"1.0\"}"
+                },
+                "Name":"a",
+                "Description": "greatStuff",
+                "KmsKeyId": "keyeyey",
+                "Platform": "Linux",
+                "SupportedOsVersions": [
+                    "4"
+                ],
+                "Tags": {
+                    "pedro":"meier4",
+                    "henry4": "Ford4",
+                    "paul4": "klee4"
+                },
+                "Version": "1.0.0"
+            },
+            "Type": "AWS::ImageBuilder::Component"
+        },
+        "I11Component": {
+            "Properties": {
+                "Data": "{\"stuff\":\"happening\"}",
+                "Platform": "Windows",
+                "Version": "1.0.1",
+                "Name":"2"
+            },
+            "Type": "AWS::ImageBuilder::Component"
+        },
+        "I12Component": {
+            "Properties": {
+                "Platform": "Windows",
+                "Uri": "someUri",
+                "Version": "1.0.1",
+                "Name":"3"
+            },
+            "Type": "AWS::ImageBuilder::Component"
+        },
+        "I1DistributionConfiguration": {
+            "Properties": {
+                "Name":"dist",
+                "Description": "bla",
+                "Distributions": [
+                    {
+                        "AmiDistributionConfiguration": {
+                            "amiTags": {
+                                "pedro":"meier4",
+                                "henry4": "Ford4",
+                                "paul4": "klee4"
+                            },
+                            "description": "someText",
+                            "kmsKeyId": "id",
+                            "launchPermission": {
+                                "userGroups": [
+                                    "groupA",
+                                    "groupB"
+                                ],
+                                "userIds": [
+                                    "account-id",
+                                    "account-id2",
+                                    "account-id3"
+                                ]
+                            },
+                            "name": "yolo",
+                            "targetAccountIds": [
+                                "someAcc",
+                                "otherAcc"
+                            ]
+                        },
+                        "LicenseConfigurationArns": [
+                            "c",
+                            "b",
+                            "a"
+                        ],
+                        "Region": {
+                            "Ref": "someRegion"
+                        }
+                    },
+                    {
+                        "AmiDistributionConfiguration": {
+                        },
+                        "Region": {
+                            "Ref": "otherRegion"
+                        }
+                    },
+                    {
+                        "AmiDistributionConfiguration": {
+                            "description": "greatText",
+                            "name": "stupidName"
+                        },
+                        "LicenseConfigurationArns": [
+                            "a",
+                            "b",
+                            "c"
+                        ],
+                        "Region": "us-east-2"
+                    },
+                    {
+                        "Region": "af-south-1"
+                    }
+                ],
+                "Tags": {
+                    "pedro":"meier5",
+                    "henry5": "Ford5",
+                    "paul5": "klee5"
+                }
+            },
+            "Type": "AWS::ImageBuilder::DistributionConfiguration"
+        },
+        "I1Image": {
+            "Properties": {
+                "DistributionConfigurationArn": {
+                    "Fn::GetAtt": [
+                        "I1DistributionConfiguration",
+                        "Arn"
+                    ]
+                },
+                "ImageRecipeArn": {
+                    "Fn::GetAtt": [
+                        "I1ImageRecipe",
+                        "Arn"
+                    ]
+                },
+                "ImageTestsConfiguration": {
+                    "ImageTestsEnabled": true,
+                    "TimeoutMinutes": 60
+                },
+                "EnhancedImageMetadataEnabled" : true,
+                "InfrastructureConfigurationArn": {
+                    "Fn::GetAtt": [
+                        "I1InfrastructureConfiguration",
+                        "Arn"
+                    ]
+                },
+                "Tags": {
+                    "paul3": "meier3",
+                    "henry3": "Ford3",
+                    "pedro": "klee3"
+                }
+            },
+            "Type": "AWS::ImageBuilder::Image"
+        },
+        "I1ImageRecipe": {
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/sda",
+                        "Ebs": {
+                            "DeleteOnTermination": true
+                        }
+                    },
+                    {
+                        "DeviceName": "/dev/sda",
+                        "NoDevice": ""
+                    },
+                    {
+                        "DeviceName": "/dev/sdb",
+                        "Ebs": {
+                            "DeleteOnTermination": true,
+                            "Encrypted": true,
+                            "Iops": 42,
+                            "KmsKeyId": "someKey",
+                            "SnapshotId": "snap-id",
+                            "VolumeSize": 21,
+                            "VolumeType": "io2"
+                        },
+                        "VirtualName": "some-name"
+                    },
+                    {
+                    }
+                ],
+                "Components": [
+                    {
+                        "ComponentArn": {
+                            "Fn::GetAtt": [
+                                "I10Component",
+                                "Arn"
+                            ]
+                        }
+                    },
+                    {
+                        "ComponentArn": {
+                            "Fn::GetAtt": [
+                                "I11Component",
+                                "Arn"
+                            ]
+                        }
+                    },
+                    {
+                        "ComponentArn": {
+                            "Fn::GetAtt": [
+                                "I12Component",
+                                "Arn"
+                            ]
+                        }
+                    },
+                    {
+                        "ComponentArn": "someArn"
+                    }
+                ],
+                "Name":"test",
+                "Description": "cookieRecipe",
+                "ParentImage": "someImage",
+                "Tags": {
+                    "pedro":"meier6",
+                    "henry6": "Ford6",
+                    "paul6": "klee6"
+                },
+                "Version": "1.0.0",
+                "WorkingDirectory": "/root/stuff"
+            },
+            "Type": "AWS::ImageBuilder::ImageRecipe"
+        },
+        "I1InfrastructureConfiguration": {
+            "Properties": {
+                "InstanceProfileName": {
+                    "Ref": "I1InstanceProfile"
+                },
+                "InstanceTypes": [
+                    "r4.16xlarge",
+                    "x1e.32xlarge"
+                ],
+                "KeyPair": "someKey",
+                "Logging": {
+                    "S3Logs": {
+                        "S3BucketName": "bucket",
+                        "S3KeyPrefix": "path/key/prefix"
+                    }
+                },
+                "Name": "infrastruct",
+                "ResourceTags": {
+                    "henry": "Ford",
+                    "paul": "klee"
+                },
+                "SecurityGroupIds": [
+                    "group",
+                    {
+                        "Fn::GetAtt": [
+                            "I1SecurityGroup",
+                            "GroupId"
+                        ]
+                    }
+                ],
+                "SnsTopicArn": "someTopic",
+                "SubnetId": "subnetId",
+                "Tags": {
+                    "henry2": "Ford2",
+                    "paul2": "klee2"
+                },
+                "TerminateInstanceOnFailure": true
+            },
+            "Type": "AWS::ImageBuilder::InfrastructureConfiguration"
+        },
+        "I1InstanceProfile": {
+            "Properties": {
+                "Roles": [
+                    "role"
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "I1SecurityGroup": {
+            "Properties": {
+                "GroupDescription": "yo"
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "I2Image": {
+            "Properties": {
+                "ImageRecipeArn": {
+                    "Fn::GetAtt": [
+                        "I2ImageRecipe",
+                        "Arn"
+                    ]
+                },
+                "InfrastructureConfigurationArn": {
+                    "Fn::GetAtt": [
+                        "I2InfrastructureConfiguration",
+                        "Arn"
+                    ]
+                }
+            },
+            "Type": "AWS::ImageBuilder::Image"
+        },
+        "I2ImageRecipe": {
+            "Properties": {
+                "Name":"pual",
+                "Components": [
+                    {
+                        "ComponentArn": "someComp"
+                    }
+                ],
+                "ParentImage": {
+                    "Fn::GetAtt": [
+                        "I1Image",
+                        "Arn"
+                    ]
+                },
+                "Version": "1.0.0"
+            },
+            "Type": "AWS::ImageBuilder::ImageRecipe"
+        },
+        "I2InfrastructureConfiguration": {
+            "Properties": {
+                "InstanceProfileName": "profileArn",
+                "Name": "test"
+            },
+            "Type": "AWS::ImageBuilder::InfrastructureConfiguration"
+        },
+        "In1InfrastructureConfiguration": {
+            "Properties": {
+                "InstanceProfileName": {
+                    "Ref": "In1InstanceProfile"
+                },
+                "Logging": {
+                    "S3Logs": {
+                        "S3BucketName": "bucket",
+                        "S3KeyPrefix": {
+                            "Ref": "someRef"
+                        }
+                    }
+                },
+                "Name": "test"
+            },
+            "Type": "AWS::ImageBuilder::InfrastructureConfiguration"
+        },
+        "In1InstanceProfile": {
+            "Properties": {
+                "Roles": [
+                    {
+                        "Ref": "In1Role"
+                    }
+                ]
+            },
+            "Type": "AWS::IAM::InstanceProfile"
+        },
+        "In1Role": {
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Action": [
+                                "sts:AssumeRole"
+                            ],
+                            "Effect": "Allow",
+                            "Principal": "*"
+                        }
+                    ],
+                    "Version": "2012-10-17"
+                }
+            },
+            "Type": "AWS::IAM::Role"
+        },
+        "Ip1ImagePipeline": {
+            "Properties": {
+                "Name":"somePipe",
+                "Description": "someText",
+                "DistributionConfigurationArn": "configArn",
+                "EnhancedImageMetadataEnabled":true,
+                "ImageRecipeArn": "recipeArn",
+                "ImageTestsConfiguration": {
+                    "ImageTestsEnabled": false
+                },
+                "InfrastructureConfigurationArn": "configArn",
+                "Schedule": {
+                    "PipelineExecutionStartCondition": "EXPRESSION_MATCH_ONLY",
+                    "ScheduleExpression": "cron(0 5 * * MON *)"
+                },
+                "Status": "ENABLED",
+                "Tags": {
+                    "henry4": "Ford4",
+                    "paul4": "klee4",
+                    "paul7": "meier4"
+                }
+            },
+            "Type": "AWS::ImageBuilder::ImagePipeline"
+        },
+        "Ip2ImagePipeline": {
+            "Properties": {
+                "Name":"pipeTsuo",
+                "ImageRecipeArn": "rec",
+                "InfrastructureConfigurationArn": "conf"
+            },
+            "Type": "AWS::ImageBuilder::ImagePipeline"
+        }
+    }
+}

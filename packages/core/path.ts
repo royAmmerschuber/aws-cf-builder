@@ -14,3 +14,13 @@ export class PathDataCarrier implements pathable{
         this[s_path]=path
     }
 }
+export class NamedPath implements namedPath{
+    [pathName]() {
+        return this.name
+    }
+    [s_path]: pathItem;
+    
+    constructor(path:pathItem,private name:string){
+        this[s_path]=path
+    }
+}

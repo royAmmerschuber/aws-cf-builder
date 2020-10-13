@@ -17,6 +17,7 @@ import * as serverless from "aws-cf-builder-defined-resources/serverless"
 import * as s3 from "aws-cf-builder-defined-resources/s3"
 import * as sqs from "aws-cf-builder-defined-resources/sqs"
 import * as ec2 from "aws-cf-builder-defined-resources/ec2"
+import * as imageBuilder from "aws-cf-builder-defined-resources/imageBuilder"
 import _ from "lodash"
 //@ts-ignore
 global.Parameter=Parameter
@@ -59,5 +60,8 @@ global.S3=s3
 global.SQS=sqs
 //@ts-ignore
 global.EC2=ec2
+//@ts-ignore
+global.ImageBuilder=imageBuilder
+
 //@ts-ignore
 global._=_
