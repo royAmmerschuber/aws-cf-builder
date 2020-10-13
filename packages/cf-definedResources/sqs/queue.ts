@@ -122,9 +122,9 @@ export class Queue extends Resource {
      * 
      * **maps:**`KmsDataKeyReusePeriodSeconds`
      */
-    kmsMasterKey(id: Field<string>, reusePeriodSec?: Field<number>) {//TODO KMS
+    kmsMasterKey(id: Attr<"KeyId">, reusePeriodSec?: Field<number>) {//TODO KMS
         this._.kms = {
-            key: id,
+            key: Attr.get(id,"KeyId"),
             reusePeriod: reusePeriodSec
         }
         return this
