@@ -1,0 +1,1 @@
+export const o2=new Output()

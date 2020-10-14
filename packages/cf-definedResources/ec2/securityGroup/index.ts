@@ -7,6 +7,8 @@ import { Field } from "aws-cf-builder-core/field";
 import { Tag } from "../../util";
 import { IngressOut, EgressOut, Ingress as _Ingress, Egress as _Egress } from "./gress";
 import { notEmpty, callOnCheckValid, prepareQueueBase, callOnPrepareQueue } from "aws-cf-builder-core/util";
+import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
+import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 
 export class SecurityGroup extends Resource{
     [resourceIdentifier]="AWS::EC2::SecurityGroup"
@@ -22,6 +24,20 @@ export class SecurityGroup extends Resource{
         egress:[],
         tags:[]
     } as any
+    /**
+     * the resource ID. For security groups that were created without specifying a VPC (EC2-Classic or a default VPC), Ref returns the resource name
+     */
+    public r:ReferenceField
+    public a={
+        /**
+         * The group ID of the specified security group, such as `sg-94b3a1f6`.
+         */
+        GroupId:new AttributeField(this,"GroupId"),
+        /**
+         * The physical ID of the VPC. You can obtain the physical ID by using a reference to an AWS::EC2::VPC, such as: { "Ref" : "myVPC" }.
+         */
+        VpcId:new AttributeField(this,"VpcId")
+    }
     constructor(){
         super(2)
     }

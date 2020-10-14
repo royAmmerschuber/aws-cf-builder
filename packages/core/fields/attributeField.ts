@@ -1,5 +1,5 @@
 import { InlineAdvField } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue, getRef, getName } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, getName, toJson } from "../symbols";
 import { SMap, ResourceError } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
@@ -28,7 +28,7 @@ export class AttributeField extends InlineAdvField<any>{
     constructor(pseudoAttribute:string,attr:string)
     constructor(private resource:Resource|string,private attr:string){ super(1) }
 
-    toJSON() {
+    [toJson]() {
         const resourceName=this.resource instanceof Resource ? this.resource[getName]() : this.resource
         return {"Fn::GetAtt":[ resourceName, this.attr ]}
     }    

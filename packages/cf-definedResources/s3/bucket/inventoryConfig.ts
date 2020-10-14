@@ -1,5 +1,5 @@
 import { InlineAdvField, Field } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -137,7 +137,7 @@ export class InventoryConfig extends InlineAdvField<InventoryConfigOut>{
         this._.frequency=frequency
         return this
     }
-    toJSON():InventoryConfigOut {
+    [toJson]():InventoryConfigOut {
         return {
             Destination:{
                 BucketArn:this._.bucket,

@@ -72,7 +72,27 @@
         "Sg2SecurityGroup": {
             "Type": "AWS::EC2::SecurityGroup",
             "Properties": {
-                "GroupDescription": "paul"
+                "GroupDescription": {
+                    "Ref": "Sg1SecurityGroup"
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "Out1": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Sg2SecurityGroup",
+                    "GroupId"
+                ]
+            }
+        },
+        "Out2": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "Sg2SecurityGroup",
+                    "VpcId"
+                ]
             }
         }
     }

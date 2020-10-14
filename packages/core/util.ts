@@ -1,17 +1,35 @@
 import { Generatable, SMap, Preparable, PreparableError, ResourceError } from "./general"
 import _ from "lodash/fp"
-import { s_path, pathName, prepareQueue, checkValid } from "./symbols"
+import { s_path, pathName, prepareQueue, checkValid, s_isAliased, toJson } from "./symbols"
 import { stackPreparable } from "./stackBackend"
 import { refPlaceholder } from "./refPlaceholder"
 import { pathItem,namedPath } from "./path"
 import { Field } from "./field"
 import { Resource } from "./generatables/resource"
 
+export function applyToJson(obj:any){
+    const circular=new WeakSet()
+    function rec(obj:any){
+        if(typeof obj =="object"){
+            if(circular.has(obj)) throw new Error("circular")
+            circular.add(obj)
+            let out:any
+            if(obj[toJson] instanceof Function) out=rec(obj[toJson]())
+            else if(obj instanceof Array) out = obj.map(v => rec(v))
+            else out=_.mapValues((v)=>rec(v),obj)
+            circular.delete(obj)
+            return out
+        }
+        return obj
+    }
+    return rec(obj)
+}
 export function prepareQueueBase(stack: stackPreparable, path: pathItem, ref: boolean, res: Generatable) {
     if (ref) {
         stack.resources.add(new refPlaceholder(res, path))
     } else {
         if (res[s_path] !== undefined) {
+            if(res[s_isAliased]) return;
             const name1=generateUniqueIdentifier(res);
             const fake:pathItem=pathName in res ? {
                 [s_path]:path,

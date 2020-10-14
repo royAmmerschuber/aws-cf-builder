@@ -1,4 +1,4 @@
-import { checkCache, checkValid, prepareQueue, s_path, generateObject, getName } from "./symbols"
+import { checkCache, checkValid, prepareQueue, s_path, generateObject, getName, toJson } from "./symbols"
 import { SMap, ResourceError, Generatable, PreparableError, Preparable } from "./general"
 import _ from "lodash/fp"
 import { Resource } from "./generatables/resource"
@@ -7,6 +7,8 @@ import { Parameter } from "./generatables/parameter"
 import { refPlaceholder } from "./refPlaceholder"
 import chalk from "chalk"
 import { pathItem } from "./path"
+import { Recoverable } from "repl"
+import { applyToJson } from "./util"
 
 export class StackBackend {
     private static readonly moduleCache: Map<any, StackBackend> = new Map()
@@ -147,7 +149,7 @@ export class StackBackend {
         if(errors.length){
             throw errors
         }
-        return out
+        return applyToJson(out)
     }
 }
 

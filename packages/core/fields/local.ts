@@ -1,5 +1,5 @@
 import { InlineAdvField } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue, stacktrace, checkCache } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, stacktrace, checkCache, toJson } from "../symbols";
 import { SMap, ResourceError, Preparable } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { pathItem } from "../path";
@@ -18,11 +18,11 @@ export class localField<T> extends InlineAdvField<T>{
         this[s_local_val] = val
         return this
     }
-    toJSON(...args) {
+    [toJson](...args) {
         //@ts-ignore
-        if (this[s_local_val].toJSON instanceof Function) {
+        if (this[s_local_val][toJson] instanceof Function) {
             //@ts-ignore
-            return this[s_local_val].toJSON(...args)
+            return this[s_local_val][toJson](...args)
         }
         return this[s_local_val]
     }

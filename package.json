@@ -2,6 +2,11 @@
     "devDependencies": {
         "@types/node": "^10.13.0",
         "ts-node": "^8.1.0",
-        "typescript": "^3.4.3"
+        "typescript": "^3.9.6"
+    },
+    "dependencies": {
+        "@types/jest": "^26.0.14",
+        "jest": "^26.5.0",
+        "ts-jest": "^26.4.1"
     }
 }

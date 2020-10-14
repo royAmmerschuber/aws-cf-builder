@@ -1,0 +1,5 @@
+export const a1=Alias("someName",new Custom.A.B())
+export const o1=new Output()
+    .Value(a1.a.Arn)
+export const o2=new Output()
+    .Value(a1.r)

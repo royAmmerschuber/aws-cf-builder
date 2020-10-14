@@ -555,7 +555,10 @@ export class Bucket extends Resource {
             };
         }
 
-        return this[checkCache] = callOnCheckValid(this._, out)
+        return this[checkCache] = callOnCheckValid([
+            this._,
+            this.$policy
+        ], out)
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
         if (prepareQueueBase(stack, path, ref, this)) {

@@ -1,7 +1,7 @@
 import { getShortStack } from "./utilLow";
 import { stackPreparable } from "./stackBackend";
 import _ from "lodash/fp"
-import { checkCache, stacktrace, resourceIdentifier, checkValid, prepareQueue, generateObject, s_path, pathName } from "./symbols";
+import { checkCache, stacktrace, resourceIdentifier, checkValid, prepareQueue, generateObject, s_path, pathName, s_isAliased } from "./symbols";
 import chalk from "chalk";
 import { pathable, pathItem } from "./path";
 // @ts-ignore
@@ -52,4 +52,7 @@ export class PreparableError extends Error {
             ].join("\n"))
         }
     }
+}
+export interface Aliasable{
+    readonly [s_isAliased]:boolean
 }

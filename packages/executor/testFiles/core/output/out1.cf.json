@@ -1,0 +1,17 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+        "O2": {
+            "Value": "some text23"
+        },
+        "someName": {
+            "Description": "fjdoqnvdaxmal",
+            "Export": {
+                "Name": "randomName"
+            },
+            "Value": "some text"
+        }
+    },
+    "Resources": {
+    }
+}

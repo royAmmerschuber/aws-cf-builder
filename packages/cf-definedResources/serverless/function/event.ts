@@ -1,5 +1,5 @@
 import { Field, InlineAdvField } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -262,7 +262,7 @@ export namespace Event {
         [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
             callOnPrepareQueue(this._, stack, path, true)
         }
-        toJSON(): EventOut.Api {
+        [toJson](): EventOut.Api {
             return {
                 Type: "Api",
                 Properties: {

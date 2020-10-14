@@ -1,6 +1,6 @@
 import { SMap, Preparable } from "../general";
 import { InlineAdvField } from "../field";
-import { resourceIdentifier, checkValid, prepareQueue, s_path, getRef } from "../symbols";
+import { resourceIdentifier, checkValid, prepareQueue, s_path, getRef, toJson } from "../symbols";
 import { stackPreparable } from "../stackBackend";
 import { Resource } from "../generatables/resource";
 import { ReferenceField } from "../fields/referenceField";
@@ -38,7 +38,7 @@ class ParentReferenceField extends InlineAdvField<any>{
         private attr = ""
     ) { super(1) }
 
-    toJSON(): string {
+    [toJson](): string {
         const resourceIdentifierName = `AWS::${this.resourceArea}::${this.resourceName}`
         const rec = (path: pathItem) => {
             if (path instanceof Preparable) {
@@ -83,7 +83,7 @@ class ParentAttributeField extends InlineAdvField<any>{
         private resourceName:string,
         private attr:string
     ){ super(1) }
-    toJSON() {
+    [toJson]() {
         const resourceIdentifierName = `AWS::${this.resourceArea}::${this.resourceName}`
         const rec = (path: pathItem) => {
             if (path instanceof Preparable) {

@@ -1,5 +1,5 @@
 import { InlineAdvField, Field } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, prepareQueue, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, prepareQueue, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -44,7 +44,7 @@ export namespace Policy {
             }
             return this
         }
-        toJSON(): ExpirationPolicyOut {
+        [toJson](): ExpirationPolicyOut {
             return {
                 Type: "Expiration",
                 Version: "1.0",
@@ -90,7 +90,7 @@ export namespace Policy {
             this.unit = unit
             return this
         }
-        toJSON(): ExpirationNotificationPolicyOut {
+        [toJson](): ExpirationNotificationPolicyOut {
             return {
                 Type: "ExpirationNotification",
                 Version: "1.0",
@@ -133,7 +133,7 @@ export namespace Policy {
             this.unit = unit
             return this
         }
-        toJSON(): NoChangeNotificationPolicyOut {
+        [toJson](): NoChangeNotificationPolicyOut {
             return {
                 Type: "NoChangeNotification",
                 Version: "1.0",

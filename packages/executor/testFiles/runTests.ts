@@ -6,9 +6,10 @@ import strip from "strip-ansi"
     "core",
     "resources"
 ].forEach(area => handleHead(area, fs.readdirSync(path.join(__dirname, area))))
-const options: TransformOptions = {
+const options = {
     typescript: true,
-    check:true
+    check:true,
+    returnObject:true
 }
 function handleHead(area: string, folders: string[]) {
     describe(area,()=>{
@@ -30,13 +31,14 @@ function handleHead(area: string, folders: string[]) {
 }
 function testFile(name: string, path: string, comparison: any) {
     test(name, () => {
-        const resp = JSON.parse(transform(path, options))
+        const resp = transform(path, options)
         expect(resp).toEqual(comparison)
     })
 }
-function testError(name:string,path:string,comp:any[]){
+type comp=[string,string[]]
+function testError(name:string,path:string,comp:comp[]){
     test(name,()=>{
-        const comps=comp.map(([type,errs]:[string,string[]])=>({type,errs}))
+        const exp:comp[]=comp.map(([type,errs])=>[type,errs.sort()])
         let threw:Error
         try{
             transform(path,options)
@@ -44,15 +46,9 @@ function testError(name:string,path:string,comp:any[]){
             threw=e
         }
         expect(threw).not.toBeUndefined()
-        const errors=threw.message.trimRight().split("\n\n")
-        expect(errors.length).toBe(comp.length)
-        comps.forEach((c,i)=>{
-            const [,type,...errs]=errors[i].split("\n")
-            expect(strip(type)).toBe(c.type)
-            expect(errs.length).toBe(c.errs.length)
-            c.errs.forEach(err=>{
-                expect(errs).toContain(err)
-            })
-        })
+        const recv:comp[]=threw.message.trimRight().split("\n\n")
+            .map(v=>v.split("\n"))
+            .map(([,type,...errs])=>[strip(type),errs.map(strip).sort()])
+        expect(recv).toEqual(exp)
     })
 }

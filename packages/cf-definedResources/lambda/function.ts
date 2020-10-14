@@ -5,7 +5,7 @@ import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { Field } from "aws-cf-builder-core/field";
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { Tag, s3PathConverter } from "../util";
-import { Attr, callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
+import { Attr, callOn, prepareQueueBase, notEmpty, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import { checkValid, prepareQueue, generateObject, stacktrace, checkCache, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -503,7 +503,6 @@ export class LambdaFunction extends Resource{
 
         return this[checkCache]=callOn([
             this._,
-            this.name,
             this.permissions,
             this.versions,
             this.eventMappings
@@ -512,16 +511,12 @@ export class LambdaFunction extends Resource{
     }
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn([
-                this._,
-                this.name
-            ],Preparable,o=>o[prepareQueue](stack,this,true))
-
-            ;[
+            callOnPrepareQueue(this._,stack,this,true)
+            callOnPrepareQueue([
                 this.permissions,
                 this.versions,
                 this.eventMappings
-            ].forEach(v=>v.forEach(v=>v[prepareQueue](stack,this,false)))
+            ],stack,this,false)
         }
     }
     [generateObject]() {

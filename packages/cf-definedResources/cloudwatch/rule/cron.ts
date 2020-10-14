@@ -1,5 +1,5 @@
 import { Field } from "aws-cf-builder-core/field";
-import { resourceIdentifier, checkValid, stacktrace } from "aws-cf-builder-core/symbols";
+import { resourceIdentifier, checkValid, stacktrace, toJson } from "aws-cf-builder-core/symbols";
 import _ from "lodash/fp"
 import { Substitution } from "aws-cf-builder-core/fields/substitution";
 
@@ -62,7 +62,7 @@ export class CronExpression extends Substitution{
         this._.year=year
         return this
     }
-    toJSON(){
+    [toJson](){
         return this.generateSubstitutionOutputApi("cron(${m} ${h} ${dom} ${mon} ${dow} ${y})",{
             m:this._.minutes ?? "*",
             h:this._.hours ?? "*",
