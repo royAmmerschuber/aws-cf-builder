@@ -283,7 +283,7 @@ export namespace Step{
             return {
                 action:this._.action,
                 name:this._.name,
-                input:this.genInput(),
+                inputs:this.genInput(),
                 timeoutSeconds:this._.timeout,
                 onFailure:this._.onFailure,
                 maxAttempts:this._.maxAttempts,
