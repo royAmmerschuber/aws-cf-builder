@@ -1,0 +1,19 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+        "O": {
+            "Value": {
+                "Fn::Sub": "{\"num\":${paul},\"str\":\"${peter}\"}"
+            }
+        }
+    },
+    "Parameters": {
+        "paul": {
+            "Type": "Number"
+        },
+        "peter": {
+            "Type": "List<Number>"
+        }
+    },
+    "Resources": {}
+}

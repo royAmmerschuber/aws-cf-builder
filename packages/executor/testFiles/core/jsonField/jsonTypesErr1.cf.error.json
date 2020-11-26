@@ -1,0 +1,5 @@
+[
+    [ "JSONField", [
+        "cannot insert jsonField as literal into jsonField"
+    ]]
+]

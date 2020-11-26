@@ -4,6 +4,7 @@ import { stackPreparable } from "../stackBackend";
 import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { GeneratableAdvField } from "../field";
 import { pathItem } from "../path";
+import { s_jsonLiteral} from "../fields/jsonField"
 type ParamType = (
     "String" |
     "Number" |
@@ -167,6 +168,11 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
     } = {} as any
     get [s_isAliased](){
         return !!this._.name
+    }
+    get [s_jsonLiteral](){
+        return this._.type=="Number"
+            ? "number"
+            : "string"
     }
     constructor(name?: string, type?: T) {
         super(2)

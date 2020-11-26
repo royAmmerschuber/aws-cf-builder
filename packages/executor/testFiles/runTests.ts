@@ -41,7 +41,8 @@ function testError(name:string,path:string,comp:comp[]){
         const exp:comp[]=comp.map(([type,errs])=>[type,errs.sort()])
         let threw:Error
         try{
-            transform(path,options)
+            const resp=transform(path,options)
+            console.log(resp)
         }catch(e){
             threw=e
         }

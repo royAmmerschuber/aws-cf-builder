@@ -23,7 +23,7 @@ export class Substitution extends InlineAdvField<string>{
         protected readonly args:Field<any>[]
     ){ super(depth) }
     protected generateSubstitutionOutputApi(text:string,subs:SMap<any>){
-        const reg=/((?:[^$]|\$(?!{))*)\${([^}]+)}/g
+        const reg=/((?:[^$]|\$(?!{))*)\${([^!][^}]*)}/g
         
         let outS=""
         const outO={}
@@ -42,25 +42,47 @@ export class Substitution extends InlineAdvField<string>{
                 const tag=this.generateTag(val)
                 if(tag){
                     outS+=tag
+                    simple=false
                 }else{
-                    outS+=`\${${m[2]}}`
-                    outO[m[2]]=val
+                    if(isAdvField(val)){
+                        const out=val[toJson]()
+                        switch(typeof out){
+                            case "number":
+                            case "boolean":
+                            case "string":{
+                                outS+=out
+                                break
+                            }
+                            default:{
+                                outS+=`\${${m[2]}}`
+                                outO[m[2]]=out
+                                simple=false
+                                break;
+                            }
+                        }
+                    }else{
+                        outS+=`\${${m[2]}}`
+                        outO[m[2]]=val
+                        simple=false
+                    }
                 }
-                simple=false
             }
             lastIndex=m.index+m[0].length
         }
         outS+=text.slice(lastIndex)
         if(simple){
-            return outS
+            return outS.replace(/\$\{\!/g,"${")
         }else if(_.isEmpty(outO)){
             return { "Fn::Sub":outS}
         }else{
             return { "Fn::Sub":[outS,outO]}
         }
     }
+    protected cleanText(text:string){
+        return text.replace(/\$\{/g,"${!")
+    }
     protected generateSubstitutionOutput(text:readonly string[],args:Field<any>[]){
-        text=text.map(t=>t.replace(/\$\{/g,"${!"))
+        text=text.map(this.cleanText)
         let templString=text[0]
         const leftovers=[]
         let simple=true
@@ -68,19 +90,38 @@ export class Substitution extends InlineAdvField<string>{
             if(typeof v == "string" || typeof v=="number"){
                 templString+=v
             }else{
-                simple=false
                 const tag=this.generateTag(v)
                 if(tag){
                     templString+=tag
+                    simple=false
                 }else{
-                    leftovers.push(v)
-                    templString+=`\${par_${leftovers.length}}`
+                    if(isAdvField(v)){
+                        const out=v[toJson]()
+                        switch(typeof out){
+                            case "number":
+                            case "boolean":
+                            case "string":{
+                                templString+=out
+                                break
+                            }
+                            default:{
+                                leftovers.push(v)
+                                templString+=`\${par_${leftovers.length}}`
+                                simple=false
+                                break;
+                            }
+                        }
+                    }else{
+                        leftovers.push(v)
+                        templString+=`\${par_${leftovers.length}}`
+                        simple=false
+                    }
                 }
             }
             templString+=text[i+1]
         })
         if(simple){
-            return templString
+            return templString.replace(/\$\{\!/g,"${")
         }else if(leftovers.length){
             return { "Fn::Sub":[templString,_.fromPairs(leftovers.map((v,i)=>["par_"+(i+1),v])) as SMap<any>]}
         }else{
