@@ -1,0 +1,5 @@
+[
+    [ "JSONField", [
+        "you cant specify a literal json type inside of a nested jsonField"
+    ]]
+]

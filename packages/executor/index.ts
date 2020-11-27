@@ -8,6 +8,17 @@ import { ResourceError, SMap } from "aws-cf-builder-core/general"
 import stringify from "json-stable-stringify"
 let yaml: typeof import("js-yaml")
 
+const order=new Map([
+    "AWSTemplateFormatVersion",
+    "Transform",
+    "Description",
+    "Parameters",
+    "Resources",
+    "Outputs",
+    "Type",
+    "Properties"
+].map((k,i)=>[k,i]))
+
 function printErrors(errs: SMap<ResourceError>):string {
     return _.flow(
         _.toPairs,
@@ -84,7 +95,16 @@ export function transform(file: string, options: TransformOptions): string|any {
 
     outputObject.Transform = options.transform
     outputJSON=stringify(outputObject,{
-        space:options.indent ? 4 : 0
+        space:options.indent ? 4 : 0,
+        cmp:(a,b)=>{
+            const preA=order.get(a.key) ?? Infinity
+            const preB=order.get(b.key) ?? Infinity
+            if(preA!=Infinity || preB!=Infinity){
+                return preA-preB
+            }else{
+                return a.key.localeCompare(b.key)
+            }
+        }
     })
     if(options.returnObject){
         return JSON.parse(outputJSON)

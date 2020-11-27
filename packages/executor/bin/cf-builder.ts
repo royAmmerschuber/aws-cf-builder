@@ -11,7 +11,7 @@ import { generateConfig } from "../generateConfig"
 const program:commander.Command & TransformOptions & {
     generateTsconfig?:boolean
 } =new commander.Command()
-    .version("0.0.1")
+    .version("1.1.5")
     .arguments('<file>')
 
     .option('-o, --output <folder>',"the folder to output to")

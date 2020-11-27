@@ -1,0 +1,61 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+        "O0": {
+            "Value": "some random text ${yolo}"
+        },
+        "O1": {
+            "Value": "some text text ${placeholder}"
+        },
+        "O2": {
+            "Value": {
+                "Fn::Sub": "some random text ${!${someRef}}"
+            }
+        },
+        "O3": {
+            "Value": {
+                "Fn::Sub": "some ${someRef} ${someRef} ${!placeholder}"
+            }
+        },
+        "O4": {
+            "Value": {
+                "Fn::Sub": "subception random text"
+            }
+        },
+        "O5": {
+            "Value": {
+                "Fn::Sub": "subception random ${someRef}"
+            }
+        },
+        "O6": {
+            "Value": {
+                "Fn::Sub": "some yo${someRef} yo${someRef} ${!placeholder}"
+            }
+        },
+        "O7": {
+            "Value": "klaus is greate a.b.c"
+        },
+        "O8": {
+            "Value": { "Fn::Sub": [ "klaus is greate ${par_1}", {
+                "par_1": { "Fn::Join": [ ".", [
+                    "a",
+                    { "Ref": "someRef" },
+                    "c"
+                ] ] }
+            } ] }
+        },
+        "O9": {
+            "Value": "klaus is greate a.b.c"
+        },
+        "O10": {
+            "Value": { "Fn::Sub": [ "klaus is greate ${placeholder}", {
+                "placeholder": { "Fn::Join": [ ".", [
+                    "a",
+                    { "Ref": "someRef" },
+                    "c"
+                ] ] }
+            } ] }
+        }
+    },
+    "Resources": {}
+}
