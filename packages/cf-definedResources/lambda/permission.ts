@@ -1,12 +1,12 @@
 import _ from "lodash/fp";
 
-import { checkValid, prepareQueue, resourceIdentifier, stacktrace, generateObject, pathName } from "aws-cf-builder-core/symbols";
+import { checkValid, prepareQueue, resourceIdentifier, stacktrace, generateObject, pathName, checkCache } from "aws-cf-builder-core/symbols";
 import { Field } from "aws-cf-builder-core/field";
-import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
+import { SMap, ResourceError, PreparableError } from "aws-cf-builder-core/general";
 
 import { LambdaFunction } from "./function";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
-import { Attr, prepareQueueBase, callOn, findInPath } from "aws-cf-builder-core/util";
+import { Attr, prepareQueueBase, findInPath, callOnPrepareQueue, callOnCheckValid } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, namedPath } from "aws-cf-builder-core/path";
 import { ServerlessFunction } from "../serverless/function";
@@ -131,6 +131,7 @@ export class Permission extends Resource implements namedPath{
 
     //#region resource functions
     public [checkValid]() {
+        if(this[checkCache]) return this[checkCache]
         const out:SMap<ResourceError>={}
         const errors:string[]=[]
         if(!this._.action){
@@ -145,11 +146,11 @@ export class Permission extends Resource implements namedPath{
                 errors:errors
             }
         }
-        return out;
+        return this[checkCache]=callOnCheckValid(this._,out)
     }
     public [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean) {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable,o=> o[prepareQueue](stack,this,true))
+            callOnPrepareQueue(this._,stack,this,true)
             const found =findInPath(path,{
                 lambda:LambdaFunction,
                 sLambda:ServerlessFunction
