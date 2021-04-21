@@ -5,6 +5,7 @@ import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { GeneratableAdvField } from "../field";
 import { pathItem } from "../path";
 import { s_jsonLiteral} from "../fields/jsonField"
+import { xor } from "lodash";
 type ParamType = (
     "String" |
     "Number" |
@@ -169,7 +170,8 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
     get [s_isAliased](){
         return !!this._.name
     }
-    get [s_jsonLiteral](){
+    get [s_jsonLiteral]():string{
+        //@ts-ignore
         return this._.type=="Number"
             ? "number"
             : "string"

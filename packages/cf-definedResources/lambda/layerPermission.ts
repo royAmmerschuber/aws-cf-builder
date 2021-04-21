@@ -1,8 +1,8 @@
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Field } from "aws-cf-builder-core/field";
 import { resourceIdentifier, checkValid, stacktrace, checkCache, prepareQueue, generateObject, pathName } from "aws-cf-builder-core/symbols";
-import { SMap, ResourceError, Preparable, PreparableError } from "aws-cf-builder-core/general";
-import { callOn, prepareQueueBase, findInPath } from "aws-cf-builder-core/util";
+import { SMap, ResourceError, PreparableError } from "aws-cf-builder-core/general";
+import { prepareQueueBase, findInPath, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import _ from "lodash/fp"
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
@@ -84,12 +84,11 @@ export class LayerPermission extends Resource{
                 errors:errors
             }
         }
-        return this[checkCache]=callOn(this._,Preparable,o=>o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign,out)
+        return this[checkCache]=callOnCheckValid(this._,out)
     }
     [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
+            callOnPrepareQueue(this._,stack,this,true)
 
             const { layer }=findInPath(path,{layer:Layer})
 

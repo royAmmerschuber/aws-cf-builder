@@ -7,6 +7,7 @@ import { pathItem,namedPath } from "./path"
 import { Field } from "./field"
 import { Resource } from "./generatables/resource"
 
+/** returns an object with all [toJson] replacers called */
 export function applyToJson(obj:any){
     const circular=new WeakSet()
     function rec(obj:any){

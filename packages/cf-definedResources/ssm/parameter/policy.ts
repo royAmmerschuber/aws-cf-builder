@@ -3,7 +3,7 @@ import { resourceIdentifier, checkValid, prepareQueue, stacktrace, toJson } from
 import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { callOn } from "aws-cf-builder-core/util";
+import { callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import _ from "lodash/fp"
 
 export type Unit = "Days" | "Hours"
@@ -112,11 +112,10 @@ export namespace Policy {
             } else {
                 out = {}
             }
-            return callOn([this.unit, this.before], Preparable, o => o[checkValid]())
-                .reduce<SMap<ResourceError>>(_.assign, out)
+            return callOnCheckValid([this.unit, this.before],out)
         }
         [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
-            callOn([this.unit, this.before], Preparable, o => o[prepareQueue](stack, path, true))
+            callOnPrepareQueue([this.unit, this.before], stack, path, true)
         }
     }
     export class NoChangeNotification extends InlineAdvField<NoChangeNotificationPolicyOut>{
@@ -155,11 +154,10 @@ export namespace Policy {
             } else {
                 out = {}
             }
-            return callOn([this.unit, this.after], Preparable, o => o[checkValid]())
-                .reduce<SMap<ResourceError>>(_.assign, out)
+            return callOnCheckValid([this.unit, this.after], out)
         }
         [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
-            callOn([this.unit, this.after], Preparable, o => o[prepareQueue](stack, path, true))
+            callOnPrepareQueue([this.unit, this.after],stack, path, true)
         }
     }
 }

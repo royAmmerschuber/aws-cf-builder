@@ -42,11 +42,10 @@ export class localField<T> extends InlineAdvField<T>{
         if (this[s_local_val] instanceof Function) {
             this[s_local_val] = (this[s_local_val] as () => T)()
         }
-        return this[checkCache]=callOn(this[s_local_val], Preparable, o => o[checkValid]())
-            .reduce<SMap<ResourceError>>(_.assign, out)
+        return this[checkCache]=callOnCheckValid(this[s_local_val], out)
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
-        callOn(this[s_local_val], Preparable, o => o[prepareQueue](stack, path, ref))
+        callOnPrepareQueue(this[s_local_val],stack, path, ref)
     }
 }
 export function Local<T>(val?: T | (() => T)) {

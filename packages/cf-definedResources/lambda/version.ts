@@ -1,8 +1,8 @@
 import { resourceIdentifier, pathName, checkValid, checkCache, prepareQueue, generateObject } from "aws-cf-builder-core/symbols";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { Field, isAdvField } from "aws-cf-builder-core/field";
-import { Preparable, PreparableError } from "aws-cf-builder-core/general";
-import { callOn, prepareQueueBase, findInPath } from "aws-cf-builder-core/util";
+import { PreparableError } from "aws-cf-builder-core/general";
+import { prepareQueueBase, findInPath, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import _ from "lodash/fp"
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, namedPath, PathDataCarrier } from "aws-cf-builder-core/path";
@@ -109,15 +109,15 @@ export class Version extends Resource implements namedPath{
     [checkValid]() {
         if(this[checkCache])return this[checkCache]
 
-        return this[checkCache]=callOn([
+        return this[checkCache]=callOnCheckValid([
             this._,
             this.eventMappings,
             this.aliases
-        ],Preparable as any,(o:PreparableError)=>o[checkValid]()).reduce(_.assign,{});
+        ],{});
     }
     [prepareQueue](stack: stackPreparable, path:pathItem,ref:boolean): void {
         if(prepareQueueBase(stack,path,ref,this)){
-            callOn(this._,Preparable,o=>o[prepareQueue](stack,this,true))
+            callOnPrepareQueue(this._,stack,this,true)
             
             this.eventMappings.forEach(v=>v[prepareQueue](stack,this,false))
             this.aliases.forEach(v=>v.alias[prepareQueue](stack,new PathDataCarrier(this,{
