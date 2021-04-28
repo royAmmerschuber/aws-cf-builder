@@ -11,7 +11,7 @@ import { Resource } from "./generatables/resource"
 export function applyToJson(obj:any){
     const circular=new WeakSet()
     function rec(obj:any){
-        if(typeof obj =="object"){
+        if(typeof obj =="object" && obj!=null){
             if(circular.has(obj)) throw new Error("circular")
             circular.add(obj)
             let out:any
