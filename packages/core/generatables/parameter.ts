@@ -5,7 +5,6 @@ import { prepareQueueBase, generateUniqueIdentifier } from "../util";
 import { GeneratableAdvField } from "../field";
 import { pathItem } from "../path";
 import { s_jsonLiteral} from "../fields/jsonField"
-import { xor } from "lodash";
 type ParamType = (
     "String" |
     "Number" |
