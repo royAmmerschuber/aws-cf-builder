@@ -1,9 +1,9 @@
 import { InlineAdvField } from "../field";
 import { resourceIdentifier, checkValid, prepareQueue, stacktrace, checkCache, toJson } from "../symbols";
-import { SMap, ResourceError, Preparable } from "../general";
+import { SMap, ResourceError } from "../general";
 import { stackPreparable } from "../stackBackend";
 import { pathItem } from "../path";
-import { callOn } from "../util";
+import { callOnCheckValid, callOnPrepareQueue } from "../util";
 import _ from "lodash/fp"
 
 export const s_local_val = Symbol("local_val")
@@ -19,10 +19,12 @@ export class localField<T> extends InlineAdvField<T>{
         return this
     }
     [toJson](...args) {
-        //@ts-ignore
         if (this[s_local_val][toJson] instanceof Function) {
-            //@ts-ignore
             return this[s_local_val][toJson](...args)
+        }else if(this[s_local_val] instanceof Function){
+            console.error(`local:${this[stacktrace]}\n didnt properly go throug its lifecycle. this is probably a bug`)
+            //@ts-ignore
+            return this[s_local_val]()
         }
         return this[s_local_val]
     }
