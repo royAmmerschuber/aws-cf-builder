@@ -9,7 +9,7 @@ import { pathItem } from "../path";
 import { Parameter } from "../generatables/parameter"
 import { Resource } from "../generatables/resource";
 import { localField, s_local_val } from "./local";
-import { callOn, callOnPrepareQueue, callOnCheckValid } from "../util";
+import { callOnPrepareQueue, callOnCheckValid } from "../util";
 export function Sub(text:string,subs:SMap<Field<any>>):Substitution
 export function Sub(text:readonly string[],...args:Field<any>[]):Substitution
 export function Sub(text:readonly string[]|string,...args:Field<any>[]){

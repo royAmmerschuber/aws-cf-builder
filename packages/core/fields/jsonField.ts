@@ -1,7 +1,7 @@
 import { stackPreparable } from "../stackBackend";
 import { checkValid, prepareQueue, resourceIdentifier, toJson } from "../symbols";
 import { pathItem } from "../path";
-import { callOn } from "../util";
+import { callOnCheckValid, callOnPrepareQueue } from "../util";
 import { Preparable, PreparableError } from "../general";
 import _ from "lodash/fp"
 import { AttributeField } from "./attributeField";
@@ -9,7 +9,7 @@ import { ReferenceField } from "./referenceField";
 import { Substitution } from "./substitution";
 import { Parameter } from "../generatables/parameter";
 import { localField, s_local_val } from "./local";
-import { Field, isAdvField, AdvField } from "../field";
+import { isAdvField, AdvField } from "../field";
 import stringify from "json-stable-stringify";
 
 export const s_jsonLiteral=Symbol("s_jsonLiteral")
@@ -21,11 +21,10 @@ export class JSONField extends Substitution{
     private nestedness=0
     constructor(private object:any){super(2,[],[])}
     [checkValid](){
-        return callOn(this.object,Preparable,o=>o[checkValid]())
-            .reduce(_.assign,{})
+        return callOnCheckValid(this.object,{})
     }
     [prepareQueue](stack:stackPreparable, path:pathItem, ref: boolean){
-        callOn(this.object,Preparable,o=>o[prepareQueue](stack,path,true))
+        callOnPrepareQueue(this.object,stack,path,true)
     }
     [toJson]() {
         const repl=new Map<string,{

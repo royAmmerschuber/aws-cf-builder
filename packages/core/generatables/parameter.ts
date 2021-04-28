@@ -169,7 +169,8 @@ export class Parameter<T extends ParamType> extends GeneratableAdvField<ParmOutT
     get [s_isAliased](){
         return !!this._.name
     }
-    get [s_jsonLiteral](){
+    get [s_jsonLiteral]():string{
+        //@ts-ignore
         return this._.type=="Number"
             ? "number"
             : "string"

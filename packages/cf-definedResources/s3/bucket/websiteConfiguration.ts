@@ -3,7 +3,7 @@ import { resourceIdentifier, checkValid, prepareQueue, checkCache, stacktrace, t
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { notEmpty, callOnCheckValid, callOnPrepareQueue, callOn } from "aws-cf-builder-core/util";
+import { notEmpty, callOnCheckValid, callOnPrepareQueue } from "aws-cf-builder-core/util";
 import _ from "lodash/fp"
 
 export interface WebsiteConfigurationOut {
