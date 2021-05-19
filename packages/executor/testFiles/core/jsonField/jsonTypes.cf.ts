@@ -24,7 +24,8 @@ export const o=[
             a:JSONField.literal(new ReferenceField("someRef")),
             b:JSONField.literal("129"),
             c:JSONField.literal('{"test":"paul"}'),
-            d:JSONField.literal(192)
+            d:JSONField.literal(192),
+            e:JSONField.literal(new Parameter("paul").Type("String"))
         },
     }))
 ]
