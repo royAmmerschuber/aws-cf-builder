@@ -3,8 +3,13 @@
     "Outputs": {
         "O0": {
             "Value": {
-                "Fn::Sub": "{\"bool\":{\"a\":${someRef},\"b\":true,\"c\":false,\"d\":false},\"literal\":{\"a\":${someRef},\"b\":129,\"c\":{\"test\":\"paul\"},\"d\":192},\"num\":{\"a\":${someRef},\"b\":129,\"c\":184,\"d\":192},\"str\":{\"a\":\"${someRef}\",\"b\":\"129\",\"c\":\"184\",\"d\":\"192\"}}"
+                "Fn::Sub": "{\"bool\":{\"a\":${someRef},\"b\":true,\"c\":false,\"d\":false},\"literal\":{\"a\":${someRef},\"b\":129,\"c\":{\"test\":\"paul\"},\"d\":192,\"e\":${paul}},\"num\":{\"a\":${someRef},\"b\":129,\"c\":184,\"d\":192},\"str\":{\"a\":\"${someRef}\",\"b\":\"129\",\"c\":\"184\",\"d\":\"192\"}}"
             }
+        }
+    },
+    "Parameters":{
+        "paul":{
+            "Type":"String"
         }
     },
     "Resources": {}

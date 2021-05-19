@@ -575,6 +575,7 @@ export type runtimes=
     "nodejs8.10" |
     "nodejs10.x" |
     "nodejs12.x" |
+    "nodejs14.x" |
 
     "provided" |
 

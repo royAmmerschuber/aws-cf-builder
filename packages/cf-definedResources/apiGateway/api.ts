@@ -341,7 +341,7 @@ export class Api extends Resource {
     }
     public [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean) {
         if (prepareQueueBase(stack, path, ref, this)) {
-            let fMethod: ReferenceField;
+            let methods: ReferenceField[]=[];
             const prepareTree = (node: ApiNode, subPath: pathItem) => {
                 let hasMethods = false;
                 for (const k in node) {
@@ -361,7 +361,7 @@ export class Api extends Resource {
                             (e as Method)[prepareQueue](stack, new PathDataCarrier(subPath,{
                                 method:k
                             }), false);
-                            if (!fMethod) fMethod = (e as Method).r;
+                            methods.push((e as Method).r);
                         }
                     }
                 }
@@ -374,11 +374,12 @@ export class Api extends Resource {
                     node.OPTIONS[prepareQueue](stack, new PathDataCarrier(subPath,{
                         method:"OPTIONS"
                     }), false);
+                    methods.push(node.OPTIONS.r)
                 }
             };
             prepareTree(this.$.methodTree,this);
             const deplCarrier = new PathDataCarrier(this, {
-                fMethod: fMethod
+                methods
             })
             this.$.deployments.forEach(d => d[prepareQueue](stack, deplCarrier, false))
             this.$.authorizers.forEach(a => a[prepareQueue](stack, this, false))

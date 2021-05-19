@@ -651,7 +651,17 @@
         },
         "ApiDplDeployment": {
             "Type": "AWS::ApiGateway::Deployment",
-            "DependsOn": "ApiPaulMeierGetMethod",
+            "DependsOn": [
+                "ApiPaulMeierGetMethod",
+                "ApiPaulMeierDeleteMethod",
+                "ApiPaulMeierHeadMethod",
+                "ApiPaulMeierPatchMethod",
+                "ApiPaulMeierPostMethod",
+                "ApiPaulMeierPutMethod",
+                "ApiPaulMeierCustomoptionOptionsMethod",
+                "ApiPaulMeierNooptionsPutMethod",
+                "ApiPaulPutMethod"
+            ],
             "Properties": {
                 "StageDescription": {
                     "AccessLogSetting": {
