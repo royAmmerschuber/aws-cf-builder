@@ -30,7 +30,8 @@ export class Deployment extends Resource implements namedPath{
 
         restApiId:Field<string>
     }={} as any
-    private fMethod:ReferenceField
+    private methods:ReferenceField[]
+    private _autoDeploy: boolean;
     //#endregion
     /**
      * the deployment ID, such as `123abc`
@@ -79,7 +80,16 @@ export class Deployment extends Resource implements namedPath{
         this._.description=desc;
         return this;
     }
-
+    /**
+     * when enabled tries to make sure that it redeploys the api.
+     * 
+     * this only works if you regenerate the cloudformation every time
+     * @returns 
+     */
+    public autoDeploy(bool:boolean=true):this{
+        this._autoDeploy=bool
+        return this
+    }
     //#endregion
 
     //#region resource functions
@@ -95,10 +105,10 @@ export class Deployment extends Resource implements namedPath{
                 o[prepareQueue](stack,this,true)
             })
 
-            if(!(path instanceof PathDataCarrier && path.data.fMethod instanceof ReferenceField)){
+            if(!(path instanceof PathDataCarrier && path.data.methods instanceof Array)){
                 throw new PreparableError(this,"data not found")
             }
-            this.fMethod=path.data.fMethod
+            this.methods=path.data.methods
             const { api }=findInPath(path,{api:Api})
             if(!api){
                 throw( new PreparableError(this,"api not found in path"))
@@ -110,7 +120,7 @@ export class Deployment extends Resource implements namedPath{
     public [generateObject](){
         return {
             Type:this[resourceIdentifier],
-            DependsOn:this.fMethod[toJson]().Ref,
+            DependsOn:this.methods.map(v=>v[toJson]().Ref),
             Properties:{
                 StageDescription : this._.stageDescription,
                 DeploymentCanarySettings :this._.canarySettings,
@@ -122,10 +132,13 @@ export class Deployment extends Resource implements namedPath{
     }
     
     [pathName](){
+        const hash=this._autoDeploy 
+            ? new Date() as any-0
+            : ""
         if(this.name instanceof Preparable){
-            return ""
+            return ""+hash
         }else{
-            return _.capitalize(this.name)
+            return _.capitalize(this.name)+hash
         }
     }
     //#endregion
