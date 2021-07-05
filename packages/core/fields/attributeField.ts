@@ -24,15 +24,16 @@ export class AttributeField extends InlineAdvField<any>{
             }
         })
     }
-    constructor(resource:Resource,attr:string)
-    constructor(pseudoAttribute:string,attr:string)
-    constructor(private resource:Resource|string,private attr:string){ super(1) }
+    constructor(resource:Resource,attr:string, skipDep?:boolean)
+    constructor(pseudoAttribute:string,attr:string, skipDep?:boolean)
+    constructor(private resource:Resource|string,private attr:string,private skipDep=false){ super(1) }
 
     [toJson]() {
         const resourceName=this.resource instanceof Resource ? this.resource[getName]() : this.resource
         return {"Fn::GetAtt":[ resourceName, this.attr ]}
     }    
     [checkValid](): SMap<ResourceError> {
+        if(this.skipDep) return {};
         if(this.resource instanceof Resource){
             return this.resource[checkValid]()
         }else{
@@ -40,6 +41,7 @@ export class AttributeField extends InlineAdvField<any>{
         }
     }
     [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
+        if(this.skipDep) return;
         if(this.resource instanceof Resource){
             this.resource[prepareQueue](stack,path,true);
         }

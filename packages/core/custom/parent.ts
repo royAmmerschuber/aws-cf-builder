@@ -6,6 +6,7 @@ import { Resource } from "../generatables/resource";
 import { ReferenceField } from "../fields/referenceField";
 import { AttributeField } from "../fields/attributeField";
 import { pathItem } from "../path";
+import { ConstructorDeclaration } from "typescript";
 
 export const Parent: SMap<SMap<{ r: ReferenceField, a: SMap<AttributeField> }>> = new Proxy({
     subHandler: {
@@ -33,17 +34,22 @@ class ParentReferenceField extends InlineAdvField<any>{
     readonly [resourceIdentifier] = "parentRef"
         ;[s_path]: pathItem
     constructor(
+        private resourceType: new (...args:any)=>Resource,
         private resourceArea: string,
         private resourceName: string,
         private attr = ""
     ) { super(1) }
 
-    [toJson](): string {
+    [toJson]() {
         const resourceIdentifierName = `AWS::${this.resourceArea}::${this.resourceName}`
-        const rec = (path: pathItem) => {
+        const rec = (path: pathItem):Resource => {
             if (path instanceof Preparable) {
                 if (path instanceof Resource) {
-                    if (path[resourceIdentifier] == resourceIdentifierName) {
+                    if (this.resourceType){
+                        if(path instanceof this.resourceType){
+                            return path
+                        }
+                    }else if (path[resourceIdentifier] == resourceIdentifierName) {
                         return path
                     }
                 }
@@ -52,7 +58,7 @@ class ParentReferenceField extends InlineAdvField<any>{
             throw `parent resource ${resourceIdentifierName} not found`
         }
         const resource = rec(this[s_path])
-        return resource[getRef]()
+        return new ReferenceField(resource,true)[toJson]()
     }
     [checkValid]() {
         return {}
