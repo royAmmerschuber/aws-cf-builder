@@ -1,0 +1,55 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Outputs": {
+        "O0": {
+            "Value": {
+                "Ref": "CName"
+            }
+        },
+        "O1": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "CName",
+                    "hammer"
+                ]
+            }
+        }
+    },
+    "Resources": {
+        "CName": {
+            "Properties": {
+                "Paul": "meier",
+                "SomeBlock": {
+                    "lo": "yo",
+                    "yo": "lo"
+                },
+                "Sven": [
+                    "yo",
+                    "lo"
+                ]
+            },
+            "Type": "AWS::Test::Name"
+        },
+        "Cthismeier": {
+            "Properties": {
+                "P": {
+                    "Ref": "CName"
+                },
+                "Yx": {
+                    "Action": [
+                        {
+                            "Fn::GetAtt": [
+                                "CName",
+                                "peter"
+                            ]
+                        },
+                        "yo"
+                    ],
+                    "Effect": "Allow",
+                    "Resource": "*"
+                }
+            },
+            "Type": "AWS::Paul::meier"
+        }
+    }
+}
