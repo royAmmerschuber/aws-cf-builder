@@ -13,7 +13,7 @@
     },
     "scripts": {
         "build": "rm -rf dist/* & tsc && cp package.json dist/package.json",
-        "pub": "npm run build && npm publish dist"
+        "pub": "npm run build && npm publish ./dist"
     },
     "repository": {
         "type": "git",
