@@ -1,0 +1,100 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Resources": {
+        "ApiRestApi": {
+            "Properties": {
+                "Name": "yolo"
+            },
+            "Type": "AWS::ApiGateway::RestApi"
+        },
+        "ApiSomeGetAuthorizer": {
+            "Properties": {
+                "RestApi":{
+                    "Ref":"ApiRestApi"
+                }
+            },
+            "Type": "AWS::Custom::Authorizer"
+        },
+        "ApiSomeGetMethod": {
+            "Properties": {
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId": {
+                    "Ref": "ApiSomeGetAuthorizer"
+                },
+                "HttpMethod": "GET",
+                "Integration": {
+                    "IntegrationHttpMethod": "POST",
+                    "Type": "AWS_PROXY",
+                    "Uri": {
+                        "Fn::Sub": "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/some/invocations"
+                    }
+                },
+                "ResourceId": {
+                    "Ref": "ApiSomeResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "ApiSomeOptionsMethod": {
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "OPTIONS",
+                "Integration": {
+                    "IntegrationResponses": [
+                        {
+                            "ResponseParameters": {
+                                "method.response.header.Access-Control-Allow-Headers": "'Content-Type,X-Amz-Date,Authorization,auth,X-Api-Key,X-Amz-Security-Token'",
+                                "method.response.header.Access-Control-Allow-Methods": "'GET,OPTIONS'",
+                                "method.response.header.Access-Control-Allow-Origin": "'*'"
+                            },
+                            "StatusCode": "200"
+                        }
+                    ],
+                    "PassthroughBehavior": "WHEN_NO_MATCH",
+                    "RequestTemplates": {
+                        "application/json": "{\"statusCode\":200}"
+                    },
+                    "Type": "MOCK"
+                },
+                "MethodResponses": [
+                    {
+                        "ResponseModels": {
+                            "application/json": "Empty"
+                        },
+                        "ResponseParameters": {
+                            "method.response.header.Access-Control-Allow-Headers": false,
+                            "method.response.header.Access-Control-Allow-Methods": false,
+                            "method.response.header.Access-Control-Allow-Origin": false
+                        },
+                        "StatusCode": "200"
+                    }
+                ],
+                "ResourceId": {
+                    "Ref": "ApiSomeResource"
+                },
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            },
+            "Type": "AWS::ApiGateway::Method"
+        },
+        "ApiSomeResource": {
+            "Properties": {
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "ApiRestApi",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "some",
+                "RestApiId": {
+                    "Ref": "ApiRestApi"
+                }
+            },
+            "Type": "AWS::ApiGateway::Resource"
+        }
+    }
+}

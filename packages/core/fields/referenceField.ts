@@ -7,9 +7,9 @@ import { pathItem } from "../path";
 export class ReferenceField extends InlineAdvField<string>{
     readonly [resourceIdentifier]:string="ref"
     
-    constructor(resource:Resource)
-    constructor(psuedoParam:string)
-    constructor(private resource:Resource|string){
+    constructor(resource:Resource,skipDep?:boolean)
+    constructor(psuedoParam:string,skipDep?:boolean)
+    constructor( protected readonly resource:Resource|string,protected readonly skipDep=false){
         super(1)
     }
     [toJson](){
@@ -20,11 +20,13 @@ export class ReferenceField extends InlineAdvField<string>{
         }
     }
     [prepareQueue](stack: stackPreparable,par: pathItem,ref:boolean){
+        if(this.skipDep)return;
         if(typeof this.resource!="string"){
             this.resource[prepareQueue](stack,par,true);
         }
     }
     [checkValid](){
+        if(this.skipDep)return {};
         if(typeof this.resource=="string") return {}
         return this.resource[checkValid]();
     }
