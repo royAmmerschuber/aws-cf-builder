@@ -9,7 +9,7 @@ export class ReferenceField extends InlineAdvField<string>{
     
     constructor(resource:Resource,skipDep?:boolean)
     constructor(psuedoParam:string,skipDep?:boolean)
-    constructor(private resource:Resource|string,private skipDep=false){
+    constructor( protected readonly resource:Resource|string,protected readonly skipDep=false){
         super(1)
     }
     [toJson](){
