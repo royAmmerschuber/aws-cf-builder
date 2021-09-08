@@ -1,8 +1,11 @@
 import { OptionalKind, MethodDeclarationStructure, WriterFunction } from "ts-morph"
 import { PropertyRef } from "."
 import _ from "lodash/fp"
+type PropDecl=[string,string|WriterFunction]
+
 interface PropertyResponse{
-    prop:[string,string|WriterFunction],
+    prop:PropDecl
+    out:PropDecl
     method:OptionalKind<MethodDeclarationStructure>
 }
 export function generateProperty(identifier:string,def:PropertyRef):PropertyResponse{
@@ -19,6 +22,7 @@ function basicProp(name:string,identifier:string,def:PropertyRef):PropertyRespon
         : "any"
     return {
         prop:[name,type],
+        out:[identifier,`this._.${name}`],
         method:{
             name,
             parameters:[

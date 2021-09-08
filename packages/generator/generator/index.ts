@@ -11,7 +11,7 @@ const filtered=_.fromPairs(_.toPairs(hierarchical)
     .filter(v=>v[0].startsWith("AWS::ApiGateway::"))
 )
 // throw "yo"
-console.log(filtered)
+// console.log(filtered)
 for(const k in filtered){
     const v=filtered[k]
     generateResource(k,v)

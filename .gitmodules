@@ -1,0 +1,3 @@
+[submodule "packages/generator/docs"]
+	path = packages/generator/docs
+	url = https://github.com/awsdocs/aws-cloudformation-user-guide.git
