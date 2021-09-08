@@ -133,3 +133,22 @@ export function generateAdvField(basePath:string,def:PropertyDef){
     })
     src.saveSync()
 }
+import fs from "fs"
+const files=new Set(fs.readdirSync("./docs/doc_source"))
+const fileCache=new Map<string,string>()
+export function resolveDocs(docLink:string):string{
+    const urlPattern=/http:\/\/docs\.aws\.amazon\.com\/AWSCloudFormation\/latest\/UserGuide\/([^.]+)\.html(?:#(.+))?/
+    const match=docLink.match(urlPattern)
+    if(!match || !files.has(match[1]+".md")){
+        console.log(docLink)
+        return ""
+    }
+    const identifier=match[1]
+    const file=fileCache.get(identifier) ?? fs.readFileSync(`./docs/doc_source/${match[1]}.md`,"utf-8")
+    const paragraphPattern=/^(#+)\s*([^<]+)<a name="([^"]+)"><\/a>\n+((?:[^#].*\n+)+)/gm
+    const s=new Set()
+    for(let m=null;m=paragraphPattern.exec(file);){
+        s.add(m[3])
+    }
+    if(![identifier,identifier+"-properties",identifier+"-return-values"].every(v=>s.has(v))) console.log(identifier,s)
+}
