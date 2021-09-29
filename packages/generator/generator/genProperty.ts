@@ -1,6 +1,7 @@
 import { OptionalKind, MethodDeclarationStructure, WriterFunction } from "ts-morph"
 import { PropertyRef } from "."
 import _ from "lodash/fp"
+import { resolveDocs } from "./genResource"
 type PropDecl=[string,string|WriterFunction]
 
 interface PropertyResponse{
@@ -30,6 +31,7 @@ function basicProp(name:string,identifier:string,def:PropertyRef):PropertyRespon
             ],
             docs:[{
                 description:[
+                    resolveDocs(def.doc).properties.get(identifier)?.description ?? "",
                     `**required**:${def.req}`,
                     "",
                     `**maps:**\`${identifier}\``

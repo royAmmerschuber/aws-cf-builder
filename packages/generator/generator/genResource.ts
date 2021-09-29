@@ -1,8 +1,8 @@
 import { project, ResourceDef, PropertyDef } from "."
 import { generateProperty } from "./genProperty"
 import _ from "lodash/fp"
+import util from "util"
 import { Scope, Writers, ImportDeclarationStructure, OptionalKind } from "ts-morph"
-
 const baseImports:OptionalKind<ImportDeclarationStructure>[]=[
     {moduleSpecifier:"aws-cf-builder-core/field",namedImports:["Field"]},
     {moduleSpecifier:"aws-cf-builder-core/symbols",namedImports:["checkValid", "stacktrace", "checkCache", "generateObject", "resourceIdentifier","prepareQueue"]},
@@ -26,7 +26,7 @@ export function generateResource(identifier:string,def:ResourceDef){
     src.addImportDeclarations([
         {moduleSpecifier:"aws-cf-builder-core/generatables/resource",namedImports:["Resource"]}
     ])
-    resolveDocs(def.doc)
+    const docs=resolveDocs(def.doc)
     src.addClass({
         name:type,
         extends:"Resource",
@@ -89,7 +89,10 @@ export function generateResource(identifier:string,def:ResourceDef){
         ],
         docs:[
             {
-                description:`[documentation](${def.doc})`
+                description:[
+                    docs.intro,
+                    `[documentation](${def.doc})`,
+                ].join("\n")
             }
         ],
     })
@@ -135,20 +138,61 @@ export function generateAdvField(basePath:string,def:PropertyDef){
 }
 import fs from "fs"
 const files=new Set(fs.readdirSync("./docs/doc_source"))
-const fileCache=new Map<string,string>()
-export function resolveDocs(docLink:string):string{
-    const urlPattern=/http:\/\/docs\.aws\.amazon\.com\/AWSCloudFormation\/latest\/UserGuide\/([^.]+)\.html(?:#(.+))?/
-    const match=docLink.match(urlPattern)
-    if(!match || !files.has(match[1]+".md")){
+const fileCache=new Map<string,{
+    intro:string
+    properties:Map<string,{description}>
+}>()
+export function resolveDocs(docLink:string){
+    const urlPattern=/http:\/\/docs\.aws\.amazon\.com\/AWSCloudFormation\/latest\/UserGuide\/(?<resource>[^.]+)\.html(?:#(?<fragment>.+))?/
+    const {resource, fragment}=docLink.match(urlPattern).groups
+
+    if(!resource || !files.has(resource+".md")){
         console.log(docLink)
-        return ""
+        return {intro:"",properties:new Map()}
     }
-    const identifier=match[1]
-    const file=fileCache.get(identifier) ?? fs.readFileSync(`./docs/doc_source/${match[1]}.md`,"utf-8")
-    const paragraphPattern=/^(#+)\s*([^<]+)<a name="([^"]+)"><\/a>\n+((?:[^#].*\n+)+)/gm
-    const s=new Set()
-    for(let m=null;m=paragraphPattern.exec(file);){
-        s.add(m[3])
+    const data=prepareFile(resource)
+    return data
+}
+const paragraphPattern=/^(?<depth>#+)\s*(?<title>[^<]+)<a name="(?<fragment>[^"]+)"><\/a>\n+(?<content>(?:[^#].*\n+)+)?/gm
+const propertyPattern=/^`(?<name>[^`]+)`\s+<a name="(?<fragment>[^"]+)"><\/a>\n(?<description>(?:(?!\*).*\n)+)(?<properties>(?:\*.+\n)+)/gm
+const propPropertyPattern=/\*(?<k>[^*]+)\*:\s+(?<v>.+)/gm
+function prepareFile(resource:string){
+    if(fileCache.has(resource)) return fileCache.get(resource)
+    const file=fs.readFileSync(`./docs/doc_source/${resource}.md`,"utf-8").replace(/\r\n/g, "\n")
+    //@ts-ignore
+    const paragraphs:{depth,title,fragment,content}[]=[...file.matchAll(paragraphPattern)]
+        .map(v=>v.groups)
+    const intro=paragraphs.find(v=>v.fragment==resource)?.content
+    const propMatches=paragraphs.find(v=>v.fragment==`${resource}-properties`)?.content.matchAll(propertyPattern)
+    if(!propMatches) console.log(resource)
+    const properties=[...propMatches??[]]
+        .map(v=>v.groups)
+        .map((v)=>{
+            const p:{k:string,v:string}[]=[...v.properties.matchAll(propPropertyPattern)].map(v=>v.groups)
+            if(!p.every(v=>["Required","Type",
+                "Update requires", "Default" ,//TODO do something with these
+                "Minimum","Maximum","Pattern","Allowed values","Valid values"])) console.log(p)
+            const required=p.find(v=>v.k=="Required")?.v?.trim()=="Yes"
+            const type=p.find(v=>v.k=="Type")?.v
+            const updateT=p.find(v=>v.k=="update requires")?.v ?? ""
+            const updateBehavior=updateT.includes("No intteruption")
+                ? "NOINTERRUPT"
+                : updateT.includes("Replacement")
+                ? "REPLACE"
+                : updateT && console.log(p)
+            return {
+                ...v,
+                properties:{
+                    required,
+                    type,
+                    updateBehavior
+                }
+            }
+        })
+    const out={
+        intro,
+        properties:new Map(properties.map(v=>[v.name,v]))
     }
-    if(![identifier,identifier+"-properties",identifier+"-return-values"].every(v=>s.has(v))) console.log(identifier,s)
+    fileCache.set(resource,out)
+    return out
 }

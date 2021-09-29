@@ -1,7 +1,7 @@
 import { SourceFile, PropertyType, Property, PrimitiveType } from "../source/types";
 import { Project } from "ts-morph"
 import _ from "lodash/fp"
-import { generateResource } from "./genResource";
+import { generateResource, resolveDocs } from "./genResource";
 
 const {PropertyTypes,ResourceTypes}:SourceFile=require("../source/CloudFormationResourceSpecification.json")
 
@@ -15,7 +15,6 @@ const filtered=_.fromPairs(_.toPairs(hierarchical)
 for(const k in filtered){
     const v=filtered[k]
     generateResource(k,v)
-
 }
 export interface ResourceDef{
     identifier:string
