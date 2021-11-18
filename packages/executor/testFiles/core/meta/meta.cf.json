@@ -1,0 +1,30 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources":{
+    "M1Policy":{
+      "Type": "AWS::IAM::Policy",
+      "DependsOn":[
+        "XAlpha"
+      ],
+      "Metadata":{
+        "yoldafjhl":"jfdkaj"
+      },
+      "Properties":{
+        "PolicyDocument":{
+          "Statement":[],
+          "Version": "2012-10-17"
+        },
+        "PolicyName":"paul"
+      }
+    },
+    "XAlpha":{
+      "Type":"AWS::Beta::Alpha",
+      "CreationPolicy":{
+        "DontCreateAnything":true
+      },
+      "Properties":{
+        "Paul":"hello"
+      }
+    }
+  }
+}

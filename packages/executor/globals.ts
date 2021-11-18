@@ -5,6 +5,7 @@ import { Sub } from "aws-cf-builder-core/fields/substitution"
 import { Local } from "aws-cf-builder-core/fields/local"
 import { Join } from "aws-cf-builder-core/fields/join"
 import { Alias } from "aws-cf-builder-core/fields/alias"
+import { Meta } from "aws-cf-builder-core/fields/meta"
 import { JSONField } from "aws-cf-builder-core/fields/jsonField"
 import * as aws from "aws-cf-builder-defined-resources/aws"
 import * as apigateway from "aws-cf-builder-defined-resources/apiGateway"
@@ -31,6 +32,8 @@ global.Sub=Sub
 global.Join=Join
 //@ts-ignore
 global.Alias=Alias
+//@ts-ignore
+global.Meta=Meta
 //@ts-ignore
 global.JSONField=JSONField
 
