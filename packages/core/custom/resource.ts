@@ -59,7 +59,7 @@ export class customResource extends Resource{
             if(typeof p=="symbol"){
                 const v=this[p as any]
                 if(v instanceof Function){
-                    return (...args)=>(this[p as any] as Function).call(this,...args);
+                    return (this[p as any] as Function).bind(this)
                 }
                 return this[p as any]
             }else if(typeof p=="string"){

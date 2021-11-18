@@ -12,8 +12,7 @@ export type TimeUnit=
 export class RateExpression extends Substitution{
     [resourceIdentifier]="RateExpression"
     constructor(value:Field<number>,unit:Field<TimeUnit> ){
-        super(2,...(
-            ((...args)=>args)`rate(${value} ${unit})` as [readonly string[],any[]]
-        ))
+        //@ts-ignore
+        super(2,...((text:string,...args:any[])=>[text,args])`rate(${value} ${unit})`)
     }
 }
