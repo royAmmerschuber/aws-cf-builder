@@ -50,6 +50,10 @@
                 }
             },
             "Type": "AWS::Paul::meier"
+        },
+        "YoCustom":{
+            "Properties":"yo mama",
+            "Type": "Custom:paul"
         }
     }
 }
