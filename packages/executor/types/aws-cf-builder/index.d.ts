@@ -4,6 +4,7 @@ import * as output from "aws-cf-builder-core/generatables/output"
 import * as sub from "aws-cf-builder-core/fields/substitution"
 import * as join from "aws-cf-builder-core/fields/join"
 import * as alias from "aws-cf-builder-core/fields/alias"
+import * as meta from "aws-cf-builder-core/fields/meta"
 import * as local from "aws-cf-builder-core/fields/local"
 import * as json from "aws-cf-builder-core/fields/jsonField"
 import * as aws from "aws-cf-builder-defined-resources/aws"
@@ -28,6 +29,7 @@ declare global{
     export const Local:typeof local.Local
     export const Join:typeof join.Join
     export const Alias:typeof alias.Alias
+    export const Meta:typeof meta.Meta
     export const JSONField:typeof json.JSONField
 
     export const Custom:typeof custom.Custom
