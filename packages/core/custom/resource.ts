@@ -3,8 +3,8 @@ import { SMap, Preparable, ResourceError, Generatable } from "../general";
 import { stackPreparable } from "../stackBackend";
 import _ from "lodash/fp";
 import { isAdvField } from "../field";
-import { resourceIdentifier, checkValid, generateObject, prepareQueue, checkCache } from "../symbols";
-import { prepareQueueBase } from "../util";
+import { resourceIdentifier, checkValid, generateObject, prepareQueue, checkCache, getName } from "../symbols";
+import { prepareQueueBase, callOnCheckValid, callOnPrepareQueue, generateUniqueIdentifier } from "../util";
 import { NamedSubresource } from "./namedSubresource";
 import { CustomBlock, customBlock } from "./block";
 import { Parent } from "./parent";
@@ -16,40 +16,46 @@ const pascalCase=_.flow(
     _.camelCase,
     _.upperFirst
 )
-export const Custom:SMap<SMap<new ()=>CustomResource>> & {B:new ()=>CustomBlock,P:typeof Parent}=new Proxy({
-    cache:new Map<string,any>(),
-    subHandler:{
+
+export const Custom:SMap<SMap<new ()=>CustomResource>>
+    & {B:new ()=>CustomBlock,P:typeof Parent}
+    & (new (obj:any)=>CustomBase) =new Proxy(class{
+        static cache=new Map<string,any>()
+        static subHandler={
+            get(target,p,reciever){
+                if(typeof p!="string"){
+                    throw new Error("not supported")
+                }
+                return function(){
+                    return new customResource(target.area,p)
+                }
+            },
+        } as ProxyHandler<{area:string}>
+    },{
+        construct(target,args:[any],newTarget){
+            return new CustomBase(...args)
+        },
         get(target,p,reciever){
             if(typeof p!="string"){
                 throw new Error("not supported")
             }
-            return function(){
-                return new customResource(target.area,p)
+            if(p=="B"){
+                return customBlock
+            }else if(p=="P"){
+                return Parent
+            }
+            const cResult=target.cache.get(p)
+            if(cResult){
+                return cResult
+            }else{
+                const subProx=new Proxy({
+                    area:p
+                },target.subHandler)
+                target.cache.set(p,subProx)
+                return subProx
             }
         }
-    } as ProxyHandler<{area:string}>
-},{
-    get(target,p,reciever){
-        if(typeof p!="string"){
-            throw new Error("not supported")
-        }
-        if(p=="B"){
-            return customBlock
-        }else if(p=="P"){
-            return Parent
-        }
-        const cResult=target.cache.get(p)
-        if(cResult){
-            return cResult
-        }else{
-            const subProx=new Proxy({
-                area:p
-            },target.subHandler)
-            target.cache.set(p,subProx)
-            return subProx
-        }
-    }
-}) as any
+    }) as any
 export class customResource extends Resource{
     readonly [resourceIdentifier]:string
     private _:SMap<any>={};
@@ -116,6 +122,32 @@ export class customResource extends Resource{
             )(this._) as any
         }
     }
+}
+export class CustomBase extends Resource{
+    readonly [resourceIdentifier]: string;
+    r=new ReferenceField(this);
+    a=AttributeField.createMap(this)
+    constructor(private obj:any){
+        super(3)
+        this[resourceIdentifier]=obj.Type ?? "Custom"
+    }
+
+    [generateObject]() {
+        return this.obj
+    }
+    [checkValid](): SMap<ResourceError> {
+        if(this[checkCache]) return this[checkCache]
+        return this[checkCache]=callOnCheckValid(this.obj,{})
+    }
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
+        if(prepareQueueBase(stack,path,ref,this)){
+            callOnPrepareQueue(this.obj,stack,path,true)
+        }
+    }
+    [getName](){
+        return generateUniqueIdentifier(this)+"Custom"
+    }
+
 }
 
 export interface CustomParameters{

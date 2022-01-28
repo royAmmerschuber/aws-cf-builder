@@ -13,3 +13,7 @@ export const o=[
     new Output().Value(c.r),
     new Output().Value(c.a.hammer)
 ]
+export const yo=new Custom({
+    Type:"Custom:paul",
+    Properties:"yo mama"
+})
