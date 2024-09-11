@@ -40,7 +40,7 @@ export class Component extends Resource{
     } as any
     private phases=new Map<Field<string>,Field<StepOut>[]>()
     /** the resource ARN, such as `arn:aws:imagebuilder:us-west-2:123456789012:component/examplecomponent/2019.12.02/1` */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /** the resource ARN, such as `arn:aws:imagebuilder:us-west-2:123456789012:component/examplecomponent/2019.12.02/1` */
         Arn:new AttributeField(this,"Arn"),

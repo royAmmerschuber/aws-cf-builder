@@ -9,7 +9,6 @@ import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import { Preparable } from "aws-cf-builder-core/general";
 import { UTG } from "./utg";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 /**
  * The AWS::IAM::Group resource creates an AWS Identity and Access 
@@ -23,14 +22,14 @@ import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 export class Group extends URG{
     readonly [resourceIdentifier]="AWS::IAM::Group"
     //#region parameters
-    protected _:URG["_"] & {
+    declare protected _:URG["_"] & {
         users: Field<string>[]
     }
     //#endregion
     /**
      * the GroupName. For example: `mystack-mygroup-1DZETITOWEKVO`
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * the Amazon Resource Name (ARN) for the specified 

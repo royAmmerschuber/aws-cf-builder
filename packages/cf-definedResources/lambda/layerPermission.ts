@@ -27,7 +27,7 @@ export class LayerPermission extends Resource{
     /**
      * the layer version ARN and statement ID, such as `arn:aws:lambda:us-west-2:123456789012:layer:my-layer:1#engineering-org`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     /**
      * @param name only used for logical id
      * **default:** `"main"`

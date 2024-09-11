@@ -33,7 +33,7 @@ export class Image extends Resource{
         tags:{}
     } as any
     /** the resource ARN, such as `arn:aws:imagebuilder:us-west-2:123456789012:image/my-example-image`. */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /** the resource ARN, such as `arn:aws:imagebuilder:us-west-2:123456789012:image/my-example-image`. */
         Arn:new AttributeField(this,"Arn"),
@@ -130,7 +130,10 @@ export class Image extends Resource{
     [checkValid](): SMap<ResourceError> {
         if(this[checkCache]) return this[checkCache];
         const errors:string[]=[]
-        if(this._.testConfig?.timeoutMin > 1440 || 60 > this._.testConfig?.timeoutMin ){
+        if(
+            typeof this._.testConfig?.timeoutMin=="number" &&
+            (this._.testConfig?.timeoutMin > 1440 || 60 > this._.testConfig?.timeoutMin)
+        ){
             errors.push("the testConfig timeout must be between 60 and 1440 Minutes")
         }
         if(!this._.recipe){

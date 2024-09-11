@@ -40,7 +40,7 @@ export abstract class Authorizer extends Resource implements namedPath{
     /**
      * the authorizer's ID, such as `abcde1`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     /**
      * @param name The name of the authorizer.
      * 

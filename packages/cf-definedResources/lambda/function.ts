@@ -65,7 +65,7 @@ export class LambdaFunction extends Resource{
     /**
      * the resource name
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * The Amazon Resource Name (ARN) of the function.

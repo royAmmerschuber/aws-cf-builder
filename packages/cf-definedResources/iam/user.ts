@@ -9,14 +9,13 @@ import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem, PathDataCarrier } from "aws-cf-builder-core/path";
 import { Group } from "./group";
 import { AccessKey } from "./accessKey";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { ManagedPolicy } from "./managedPolicy";
 
 export class User extends URG{
     readonly [resourceIdentifier]="AWS::IAM::User";
     //#region parameters
-    protected _: URG["_"] & {
+    declare protected _: URG["_"] & {
         password: Field<string>
         passwordReset: Field<boolean>
         groups:Field<string>[]
@@ -29,7 +28,7 @@ export class User extends URG{
     /**
      * the UserName. For example: `mystack-myuser-1CCXAFG2H2U4D`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * Returns the Amazon Resource Name (ARN) for the specified 

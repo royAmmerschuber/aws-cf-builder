@@ -134,7 +134,7 @@ export abstract class SecondaryIndex extends InlineAdvField<SecondaryIndexOut> i
  */
 export class GlobalSecondaryIndex extends SecondaryIndex{
     readonly [resourceIdentifier]="GlobalSecondaryIndex";
-    protected _:SecondaryIndex["_"] & {
+    declare protected _:SecondaryIndex["_"] & {
         capacity:ProvisionedThroughput
     }
     /**

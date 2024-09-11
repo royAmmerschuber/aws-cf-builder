@@ -32,7 +32,7 @@ export class ServerlessLayer extends Resource {
     /**
      * the resource ARN of the underlying Lambda LayerVersion
      */
-    r: ReferenceField
+    // r:ReferenceField
     a = {
         /**
          * the resource ARN of the underlying Lambda LayerVersion

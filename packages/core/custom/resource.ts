@@ -90,11 +90,12 @@ export class customResource extends Resource{
 
     [checkValid](): SMap<ResourceError> {
         if (this[checkCache]) return this[checkCache]
-        return this[checkCache] = _.flow(
+        const fn=_.flow(
             _.filter(v => v instanceof Preparable),
             _.map((o) => o[checkValid]()),
             _.reduce(_.assign, {})
-        )(this._)
+        )
+        return this[checkCache] = callOnCheckValid(this._,{})
     }
     [prepareQueue](stack:stackPreparable,path:pathItem,ref:boolean){
         if(prepareQueueBase(stack,path,ref,this)){

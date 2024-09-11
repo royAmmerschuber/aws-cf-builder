@@ -25,7 +25,7 @@ export class ApiResource extends Resource implements namedPath{
     /**
      * the resource ID, such as `abc123`
      */
-    r:ReferenceField
+    //r:ReferenceField
     constructor(private pathpart:Field<string>){
         super(2);
     }

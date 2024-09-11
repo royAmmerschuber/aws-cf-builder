@@ -6,11 +6,16 @@ import { pathItem } from "../path";
 
 export class ReferenceField extends InlineAdvField<string>{
     readonly [resourceIdentifier]:string="ref"
-    
+    /**@readonly*/
+    protected accessor resource:Resource|string
     constructor(resource:Resource,skipDep?:boolean)
     constructor(psuedoParam:string,skipDep?:boolean)
-    constructor( protected readonly resource:Resource|string,protected readonly skipDep=false){
+    constructor(
+        resource:Resource|string,
+        protected readonly skipDep=false
+    ){
         super(1)
+        this.resource=resource
     }
     [toJson](){
         return {

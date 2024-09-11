@@ -3,7 +3,6 @@ import { URG } from "./urg";
 import { Field } from "aws-cf-builder-core/field";
 import { Local } from "aws-cf-builder-core/fields/local";
 import { Attr, prepareQueueBase, callOnPrepareQueue, thrw } from "aws-cf-builder-core/util";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { checkValid, stacktrace, checkCache, prepareQueue, generateObject, resourceIdentifier } from "aws-cf-builder-core/symbols";
 import { Preparable, PreparableError } from "aws-cf-builder-core/general";
@@ -27,7 +26,7 @@ import { Policy } from "./policy";
 export class Role extends URG {
     readonly [resourceIdentifier] = "AWS::IAM::Role";
 
-    protected _: URG["_"] & {
+    declare protected _: URG["_"] & {
         maxDuration: Field<number>
         permissionBoundary: Field<string>
         instanceProfile: boolean
@@ -37,7 +36,7 @@ export class Role extends URG {
     /**
      * returns the resource name
      */
-    r: ReferenceField
+    // r:ReferenceField
     a = {
         /**
          * Returns the Amazon Resource Name (ARN) for the role. For example:

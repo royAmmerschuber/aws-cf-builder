@@ -6,7 +6,6 @@ import { SMap, ResourceError, Preparable } from "aws-cf-builder-core/general";
 import { callOn, prepareQueueBase, notEmpty } from "aws-cf-builder-core/util";
 import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { TargetOut, Target as RuleTarget } from "./target";
 import { RateExpression } from "./rate";
@@ -43,7 +42,7 @@ export class Rule extends Resource{
     /**
      * event rule ID, such as `mystack-ScheduledRule-ABCDEFGHIJK`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * The ARN of the rule, such as `arn:aws:events:us-east-2:123456789012:rule/example`.

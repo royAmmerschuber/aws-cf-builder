@@ -61,7 +61,7 @@ export class Api extends Resource {
     /**
      * the `RestApi` ID, such as `a1bcdef2gh`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a = {
         /**
          * The root resource ID for a `RestApi` resource, such as `a0bc123d4e`.

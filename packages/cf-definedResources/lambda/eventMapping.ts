@@ -36,7 +36,7 @@ export class EventMapping extends Resource{
     /**
      * the mapping's ID.
      */
-    r:ReferenceField
+    //r:ReferenceField
     /**
      * @param name only used for logical id
      * 

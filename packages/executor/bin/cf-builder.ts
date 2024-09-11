@@ -8,9 +8,8 @@ import chalk from "chalk"
 import * as _ from "lodash/fp"
 import { transform, TransformOptions } from ".."
 import { generateConfig } from "../generateConfig"
-const program:commander.Command & TransformOptions & {
-    generateTsconfig?:boolean
-} =new commander.Command()
+
+const program:commander.Command =new commander.Command()
     .version("1.1.5")
     .arguments('<file>')
 
@@ -24,32 +23,40 @@ const program:commander.Command & TransformOptions & {
     .option('    --generate-tsconfig', "generates a tsconfig for folder <file>")
     .parse(process.argv) as any
 
-if(program.args.length>1){
+const opts=program.opts<TransformOptions & {
+    generateTsconfig?:boolean,
+    output?:string
+}>()
+const args=program.processedArgs
+
+if(args.length>1){
     console.log(chalk.red("too many arguments"))
     program.outputHelp()
     process.exit(1)
 }
-if(program.generateTsconfig){
-    const inPath=program.args[0] 
-        ? path.resolve(program.args[0])
+const [file]=args
+
+if(opts.generateTsconfig){
+    const inPath=file
+        ? path.resolve(file)
         : process.cwd()
-    
+
     generateConfig(inPath).then(async configContent=>{
         await writeFile(inPath,"tsconfig.json",configContent)
         console.log(chalk.yellowBright("Created:"))
-        console.log(path.join(program.args[0] || ".",chalk.green("tsconfig.json")))
+        console.log(path.join(file || ".",chalk.green("tsconfig.json")))
         process.exit(0)
     })
 }else{
-    if(!program.args[0]){
+    if(!file){
         console.log(chalk.red("please specify the file to compile"))
         program.outputHelp()
         process.exit(1)
     }
-    const inPath=path.resolve(program.args[0]);
+    const inPath=path.resolve(file);
     let outputString:string
     try{
-        outputString=transform(inPath,program)
+        outputString=transform(inPath,opts)
     }catch(e){
         if(e instanceof Error){
             console.log(e.message)
@@ -60,7 +67,7 @@ if(program.generateTsconfig){
     }
     let ending:string
     const moduleName=path.parse(inPath).name
-    if(program.yaml){
+    if(opts.yaml){
         ending=".yaml"
     }else{
         ending=".json"
@@ -68,11 +75,11 @@ if(program.generateTsconfig){
     if(!moduleName.endsWith(".cf")){
         ending=".cf"+ending
     }
-    if(program.output){
-        const outPath=path.resolve(program.output)
+    if(program.opts){
+        const outPath=path.resolve(opts.output)
         writeFile(outPath,moduleName+ending,outputString).then(()=>{
             console.log(chalk.yellowBright("Created:"))
-            console.log(path.join(program.output,chalk.green(moduleName+ending)))
+            console.log(path.join(opts.output,chalk.green(moduleName+ending)))
             process.exit(0)
         })
     }else{

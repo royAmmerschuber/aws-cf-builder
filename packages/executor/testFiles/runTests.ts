@@ -1,4 +1,4 @@
-import { transform, TransformOptions } from "./../index"
+import { transform } from "./../index"
 import fs from "fs"
 import path from "path"
 import strip from "strip-ansi"
@@ -39,7 +39,7 @@ type comp=[string,string[]]
 function testError(name:string,path:string,comp:comp[]){
     test(name,()=>{
         const exp:comp[]=comp.map(([type,errs])=>[type,errs.sort()])
-        let threw:Error
+        let threw:Error|undefined=undefined
         try{
             const resp=transform(path,options)
             console.log(resp)
@@ -47,7 +47,8 @@ function testError(name:string,path:string,comp:comp[]){
             threw=e
         }
         expect(threw).not.toBeUndefined()
-        const recv:comp[]=threw.message.trimRight().split("\n\n")
+        if(!threw) return;
+        const recv:comp[]=threw.message.trimEnd().split("\n\n")
             .map(v=>v.split("\n"))
             .map(([,type,...errs])=>[strip(type),errs.map(strip).sort()])
         expect(recv).toEqual(exp)

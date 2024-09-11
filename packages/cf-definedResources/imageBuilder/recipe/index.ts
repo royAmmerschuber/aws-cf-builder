@@ -27,7 +27,7 @@ export class Recipe extends Resource{
     } as any
     private components:Field<string>[]=[]
     /** the resource ARN, such as `arn:aws:imagebuilder:us-east-1:123456789012:image-recipe/mybasicrecipe/2019.12.03`. */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /** the resource ARN, such as `arn:aws:imagebuilder:us-east-1:123456789012:image-recipe/mybasicrecipe/2019.12.03`. */
         Arn:new AttributeField(this,"Arn"),

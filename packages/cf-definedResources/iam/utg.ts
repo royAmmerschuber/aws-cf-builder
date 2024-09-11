@@ -24,7 +24,7 @@ export class UTG extends Resource{
     /**
      * the resource name
      */
-    r:ReferenceField
+    //r:ReferenceField
     /**
      * 
      * @param users

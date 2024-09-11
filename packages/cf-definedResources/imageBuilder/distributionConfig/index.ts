@@ -31,7 +31,7 @@ export class DistributionConfig extends Resource{
         tags: {}
     } as any
     /** the Amazon Resource Name (ARN) of the resource, such as `arn:aws:imagebuilder:us-west-2:123456789012:distribution-configuration/myexampledistribution` */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /** the Amazon Resource Name (ARN) of the resource, such as `arn:aws:imagebuilder:us-west-2:123456789012:distribution-configuration/myexampledistribution` */
         Arn:new AttributeField(this,"Arn"),

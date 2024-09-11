@@ -69,7 +69,7 @@ export class Table extends Resource{
     /**
      * the resource name
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         Arn:new AttributeField(this,"Arn"),
         StreamArn:new AttributeField(this,"StreamArn")

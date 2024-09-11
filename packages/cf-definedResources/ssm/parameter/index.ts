@@ -31,7 +31,7 @@ export class Parameter extends Resource{
     /**
      * the Name of the SSM parameter. For example, `ssm-myparameter-ABCNPH3XCAO6`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * the type of the parameter. Valid values are String or StringList.

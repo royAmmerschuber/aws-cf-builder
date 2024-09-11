@@ -49,7 +49,7 @@ export class InfrastructureConfig extends Resource{
     } as any
 
     /** the resource ARN, such as `arn:aws:imagebuilder:us-west-2:123456789012:infrastructure-configuration/my-example-infrastructure` */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /** the resource ARN, such as `arn:aws:imagebuilder:us-west-2:123456789012:infrastructure-configuration/my-example-infrastructure` */
         Arn:new AttributeField(this,"Arn")

@@ -33,7 +33,7 @@ export class Model extends Resource implements namedPath{
     /**
      * the model name, such as `myModel`
      */
-    r:ReferenceField
+    //r:ReferenceField
     /**
      * @param name A name for the model. this also gets used to generate the logical Id
      * @param useName If disabled, AWS 

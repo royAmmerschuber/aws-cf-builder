@@ -24,9 +24,18 @@ export class AttributeField extends InlineAdvField<any>{
             }
         })
     }
+    /** @readonly */
+    protected accessor resource:Resource|string
     constructor(resource:Resource,attr:string, skipDep?:boolean)
     constructor(pseudoAttribute:string,attr:string, skipDep?:boolean)
-    constructor(protected resource:Resource|string,protected attr:string,protected skipDep=false){ super(1) }
+    constructor(
+        resource:Resource|string,
+        protected attr:string,
+        protected skipDep=false
+    ){
+        super(1)
+        this.resource=resource
+    }
 
     [toJson]() {
         const resourceName=this.resource instanceof Resource ? this.resource[getName]() : this.resource

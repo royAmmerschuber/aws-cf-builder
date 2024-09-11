@@ -74,7 +74,7 @@ export class ServerlessFunction extends Resource{
     /**
      * the resource name
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         //TODO access Version & Alias
         /**

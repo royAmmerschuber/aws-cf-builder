@@ -5,7 +5,6 @@ import { stackPreparable } from "aws-cf-builder-core/stackBackend";
 import { pathItem } from "aws-cf-builder-core/path";
 import { callOnPrepareQueue, Attr, notEmpty, callOnCheckValid, prepareQueueBase } from "aws-cf-builder-core/util";
 import { Field } from "aws-cf-builder-core/field";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { Tag } from "../util";
 import { QueuePolicy } from "./queuePolicy";
@@ -38,7 +37,7 @@ export class Queue extends Resource {
     /**
      * the queue URL. For example: `https://sqs.us-east-2.amazonaws.com/123456789012/ab1-MyQueue-A2BCDEF3GHI4`
      */
-    r: ReferenceField
+    // r:ReferenceField
     a = {
         /**
          * the Amazon Resource Name (ARN) of the queue. For example: `arn:aws:sqs:us-east-2:123456789012:mystack-myqueue-15PG5C2FC1CW8`.
@@ -263,39 +262,39 @@ export class Queue extends Resource {
         const out: SMap<ResourceError> = {}
         const errors: string[] = []
         if (
-            this._.delay != undefined && !(this._.delay instanceof Generatable) &&
+            typeof this._.delay=="number" &&
             (this._.delay < 0 || this._.delay > 900)
         ) {
             errors.push("the delay must be between 0 and 900 Seconds")
         }
         if (
-            this._.kms?.reusePeriod != undefined && !(this._.kms.reusePeriod instanceof Generatable) &&
+            typeof this._.kms?.reusePeriod=="number" &&
             (this._.kms.reusePeriod < 60 || this._.kms.reusePeriod > 86_400)
         ) {
             errors.push("the kms reusePeriod must be between 60 and 86'400 seconds")
         }
         if (
-            this._.maxMessageSize != undefined && !(this._.maxMessageSize instanceof Generatable) &&
+            typeof this._.maxMessageSize =="number" &&
             (this._.maxMessageSize < 1024 || this._.maxMessageSize > 262_144)
         ) {
             errors.push("the maxMessageSize must be between 1'024 and 262'144 bytes")
         }
         if (
-            this._.messageRetentionPeriod != undefined && !(this._.messageRetentionPeriod instanceof Generatable) &&
+            typeof this._.messageRetentionPeriod=="number" &&
             (this._.messageRetentionPeriod < 60 || this._.messageRetentionPeriod > 1_209_600)
         ) {
             errors.push("the messageRetentionPeriod must be between 60 and 1'209'600 seconds")
         }
 
         if (
-            this._.receiveMessageWaitTime != undefined && !(this._.receiveMessageWaitTime instanceof Generatable) &&
+            typeof this._.receiveMessageWaitTime =="number" &&
             (this._.receiveMessageWaitTime < 0 || this._.receiveMessageWaitTime > 20)
         ) {
             errors.push("the receiveMessageWaitTime must be between 0 and 20 seconds")
         }
 
         if (
-            this._.visibilityTimeout != undefined && !(this._.visibilityTimeout instanceof Generatable) &&
+            typeof this._.visibilityTimeout == "number" &&
             (this._.visibilityTimeout < 0 || this._.visibilityTimeout > 43_200)
         ) {
             errors.push("the visibilityTimeout must be between 0 and 43'200 seconds")

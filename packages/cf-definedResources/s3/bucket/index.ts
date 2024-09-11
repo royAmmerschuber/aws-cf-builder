@@ -76,7 +76,7 @@ export class Bucket extends Resource {
      * returns the resource name.
      * Example: `mystack-mybucket-kdwwxmddtr2g`
      */
-    r: ReferenceField
+    // r:ReferenceField
 
     a = {
         /**

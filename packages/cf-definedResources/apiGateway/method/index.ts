@@ -72,7 +72,7 @@ export abstract class Method extends Resource implements namedPath{
     /**
      * the method ID, such as `mysta-metho-01234b567890example`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     /**
      * 
      * @param OpName A friendly operation name for the method. For example, you can assign the OperationName

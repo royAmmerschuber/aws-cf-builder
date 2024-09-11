@@ -20,7 +20,7 @@ export class RequestValidator extends Resource{
     /**
      * returns the ID of the request validator, such as abc123.
      */
-    r:ReferenceField
+    //r:ReferenceField
     constructor(){
         super(2)
     }

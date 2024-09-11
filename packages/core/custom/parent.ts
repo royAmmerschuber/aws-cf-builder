@@ -1,4 +1,4 @@
-import { SMap, Preparable, PreparableError } from "../general";
+import { SMap, PreparableError } from "../general";
 import { InlineAdvField } from "../field";
 import { resourceIdentifier, s_path, prepareQueue, toJson } from "../symbols";
 import { Resource } from "../generatables/resource";

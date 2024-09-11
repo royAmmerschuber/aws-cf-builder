@@ -22,7 +22,7 @@ import * as AWS from "../../aws"
  */
 export class LambdaMethod extends Method{
     //#region parameters
-    protected _:Method["_"] &{
+    declare protected _:Method["_"] &{
         lambda:Field<string>
     }
     //#endregion

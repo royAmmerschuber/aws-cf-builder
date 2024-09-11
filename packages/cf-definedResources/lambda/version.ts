@@ -37,7 +37,7 @@ export class Version extends Resource implements namedPath{
     /**
      * the ARN of the version, such as `arn:aws:lambda:us-west-2:123456789012:function:helloworld:1`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * The version number.

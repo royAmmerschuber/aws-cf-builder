@@ -38,7 +38,7 @@ export class ManagedPolicy extends Resource{
      * the ARN.
      * such as `arn:aws:iam::123456789012:policy/teststack-CreateTestDBPolicy-16M23YE3CS700`
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * the ARN.

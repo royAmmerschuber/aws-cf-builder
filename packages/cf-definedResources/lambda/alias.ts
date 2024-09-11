@@ -38,7 +38,7 @@ export class Alias extends Resource implements namedPath{
     /**
      * the resource ARN.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         Arn:this.r
     }

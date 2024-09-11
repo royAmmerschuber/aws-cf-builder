@@ -33,7 +33,7 @@ export class InstanceProfile extends Resource {
     /**
      * returns the resource name
      */
-    r: ReferenceField
+    // r:ReferenceField
     a = {
         /**
          * Returns the Amazon Resource Name (ARN) for the role. For example:

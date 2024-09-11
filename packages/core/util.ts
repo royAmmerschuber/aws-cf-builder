@@ -25,7 +25,7 @@ export function applyToJson(obj:any){
     }
     return rec(obj)
 }
-export function prepareQueueBase(stack: stackPreparable, path: pathItem, ref: boolean, res: Generatable) {
+export function prepareQueueBase(stack: stackPreparable, path: pathItem, ref: boolean, res: Generatable|Generatable&namedPath) {
     if (ref) {
         stack.resources.add(new refPlaceholder(res, path))
     } else {

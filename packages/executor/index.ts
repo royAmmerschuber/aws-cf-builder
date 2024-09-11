@@ -3,11 +3,10 @@ import * as path from "path"
 import { StackBackend } from "aws-cf-builder-core/stackBackend"
 import chalk from "chalk"
 import * as _ from "lodash/fp"
-import * as tsN from "ts-node"
+import type { RegisterOptions} from "ts-node"
 import { ResourceError, SMap } from "aws-cf-builder-core/general"
 import stringify from "json-stable-stringify"
 let yaml: typeof import("js-yaml")
-
 const order=new Map([
     "AWSTemplateFormatVersion",
     "Transform",
@@ -51,7 +50,7 @@ export function transform(file: string, options: TransformOptions): string
 export function transform(file: string, options: TransformOptions): string|any {
     if (options.typescript) {
         try {
-            const opt: tsN.Options = {
+            const opt: RegisterOptions = {
                 compilerOptions: {
                     typeRoots: [
                         path.join(__dirname, "./types")
@@ -110,7 +109,7 @@ export function transform(file: string, options: TransformOptions): string|any {
         return JSON.parse(outputJSON)
     }
     if (options.yaml) {
-        outputJSON = yaml.safeDump(JSON.parse(outputJSON))
+        outputJSON = yaml.dump(JSON.parse(outputJSON),{sortKeys:true})
     }
     return outputJSON
 }

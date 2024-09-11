@@ -43,7 +43,7 @@ export class Layer extends Resource{
     /**
      * the ARN of the layer version, such as `arn:aws:lambda:us-west-2:123456789012:layer:my-layer:1`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * the ARN of the layer version, such as `arn:aws:lambda:us-west-2:123456789012:layer:my-layer:1`.

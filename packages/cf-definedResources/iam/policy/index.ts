@@ -33,7 +33,7 @@ export class Policy extends Resource {
     /**
      * the resource name.
      */
-    r: ReferenceField
+    // r:ReferenceField
     constructor() { super(1); }
     /**
      * **required:true**

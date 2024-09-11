@@ -24,7 +24,7 @@ export class AccessKey extends Resource implements namedPath{
     /**
      * the AccessKeyId. For example: `AKIAIOSFODNN7EXAMPLE`.
      */
-    r:ReferenceField
+    //r:ReferenceField
     a={
         /**
          * the secret access key for the specified AWS::IAM::AccessKey resource. 

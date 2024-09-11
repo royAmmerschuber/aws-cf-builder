@@ -27,7 +27,7 @@ export class SecurityGroup extends Resource{
     /**
      * the resource ID. For security groups that were created without specifying a VPC (EC2-Classic or a default VPC), Ref returns the resource name
      */
-    public r:ReferenceField
+    public //r:ReferenceField
     public a={
         /**
          * The group ID of the specified security group, such as `sg-94b3a1f6`.

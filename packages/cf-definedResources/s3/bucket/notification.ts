@@ -123,7 +123,7 @@ export abstract class Notification extends InlineAdvField<NotificationOut>{
 export namespace Notification{
     export class Lambda extends Notification{
         readonly [resourceIdentifier]="LambdaNotification"
-        protected _:Notification["_"] & {
+        declare protected _:Notification["_"] & {
             function:Field<string>
         }
         /**
@@ -163,7 +163,7 @@ export namespace Notification{
     }
     export class Queue extends Notification{
         readonly [resourceIdentifier]="QueueNotification"
-        protected _:Notification["_"] & {
+        declare protected _:Notification["_"] & {
             queue:Field<string>
         }
         /**
@@ -203,7 +203,7 @@ export namespace Notification{
     }
     export class Topic extends Notification{
         readonly [resourceIdentifier]="TopicNotification"
-        protected _:Notification["_"] & {
+        declare protected _:Notification["_"] & {
             topic:Field<string>
         }
         /**
