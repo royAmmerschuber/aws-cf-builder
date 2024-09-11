@@ -1,7 +1,6 @@
 import { AdvField, Field } from "aws-cf-builder-core/field";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 import { JSONField } from "aws-cf-builder-core/fields/jsonField";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { SMap, ResourceError } from "aws-cf-builder-core/general";
 import { Resource } from "aws-cf-builder-core/generatables/resource";
 import { PathDataCarrier, pathItem } from "aws-cf-builder-core/path";

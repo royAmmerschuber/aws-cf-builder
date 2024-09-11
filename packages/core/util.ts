@@ -91,41 +91,25 @@ namespace findInPath {
     }
 }
 
-export function callOn<U>(container: any, instanceOf: typeof Preparable, iter: (obj: Preparable) => U): U[]
-export function callOn<T, U>(container: any, instanceOf: new (...args) => T, iter: (obj: T) => U): U[]
-export function callOn<T, U>(container: any, instanceOf: new (...args) => T | typeof Preparable, iter: (obj: T | Preparable) => U): U[] {
+export function callOn<T, U>(container: any, instanceOf: abstract new (...args) => T, iter: (obj: T) => U): U[] {
     if (container instanceof instanceOf) {
         return [iter(container as T)]
-    } else if (container instanceof Map) {
-        const coll: U[][] = []
-        container.forEach((v, k) => {
-            coll.push(
-                callOn<any, U>(v, instanceOf, iter),
-                callOn<any, U>(k, instanceOf, iter)
-            )
-        })
-        return _.flatten(coll)
-    } else if (container instanceof Set) {
-        const coll: any[][] = []
-        container.forEach(v => {
-            coll.push(callOn<any, any>(v, instanceOf, iter))
-        })
-        return _.flatten(coll)
-    } else if (container instanceof Array || typeof container == "object") {
-        return _.flatMap(
-            v => callOn<any, any>(v, instanceOf, iter),
-            container
-        )
-    } else {
-        return []
     }
+    const arr=container instanceof Map ? [...container.entries()].flat()
+        : container instanceof Set ? [...container.values()]
+        : container instanceof Array ? container
+        : typeof container=="object" ? Object.values(container)
+        : []
+    const x= arr.flatMap(v=>callOn(v,instanceOf,iter))
+
+    return x
 }
 export function callOnPrepareQueue(container: any, stack: stackPreparable, path: pathItem, ref: boolean) {
     return callOn(container, Preparable, o => o[prepareQueue](stack, path, ref))
 }
 export function callOnCheckValid(container: any, out: SMap<ResourceError>): SMap<ResourceError> {
     return callOn(container, Preparable, o => o[checkValid]())
-        .reduce<SMap<ResourceError>>(_.assign, out)
+        .reduce<SMap<ResourceError>>((a,v)=>({...a, ...v}),out)
 }
 export function notEmpty<T extends string | object>(t: T): T | undefined {
     if (_.size(t)) {

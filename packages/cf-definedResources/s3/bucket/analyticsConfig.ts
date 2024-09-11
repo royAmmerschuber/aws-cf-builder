@@ -40,7 +40,7 @@ export class AnalyticsConfig extends InlineAdvField<AnalyticsConfigOut>{
         tagFilters:[]
     } as any
     constructor(){
-        super(1)
+        super(0)
     }
     /**
      * **required:true**

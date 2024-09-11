@@ -39,7 +39,7 @@ export class InventoryConfig extends InlineAdvField<InventoryConfigOut>{
         optionalFields:[]
     } as any
     constructor(){
-        super(1)
+        super(0)
     }
     /**
      * **required:true**

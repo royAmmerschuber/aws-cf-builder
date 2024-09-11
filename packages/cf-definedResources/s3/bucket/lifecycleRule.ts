@@ -59,7 +59,7 @@ export class LifecycleRule extends InlineAdvField<LifecycleRuleOut>{
         tagFilters: []
     } as any
     constructor() {
-        super(1)
+        super(0)
     }
     /**
      * **required:false**

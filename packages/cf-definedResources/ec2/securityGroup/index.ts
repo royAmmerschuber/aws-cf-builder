@@ -7,7 +7,6 @@ import { Field } from "aws-cf-builder-core/field";
 import { Tag } from "../../util";
 import { IngressOut, EgressOut, Ingress as _Ingress, Egress as _Egress } from "./gress";
 import { notEmpty, callOnCheckValid, prepareQueueBase, callOnPrepareQueue } from "aws-cf-builder-core/util";
-import { ReferenceField } from "aws-cf-builder-core/fields/referenceField";
 import { AttributeField } from "aws-cf-builder-core/fields/attributeField";
 
 export class SecurityGroup extends Resource{
@@ -27,7 +26,7 @@ export class SecurityGroup extends Resource{
     /**
      * the resource ID. For security groups that were created without specifying a VPC (EC2-Classic or a default VPC), Ref returns the resource name
      */
-    public //r:ReferenceField
+    //r:ReferenceField
     public a={
         /**
          * The group ID of the specified security group, such as `sg-94b3a1f6`.
@@ -39,7 +38,7 @@ export class SecurityGroup extends Resource{
         VpcId:new AttributeField(this,"VpcId")
     }
     constructor(){
-        super(2)
+        super(1)
     }
     /**
      * **required:false**

@@ -33,7 +33,7 @@ export abstract class Gress extends InlineAdvField<IngressOut|EgressOut>{
         protocol:Field<string>
     }
     constructor(){
-        super(2)
+        super(1)
     }
     /**
      * **required:conditional**

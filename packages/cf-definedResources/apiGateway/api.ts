@@ -76,7 +76,7 @@ export class Api extends Resource {
      * **required: Conditional. Required if you don't specify a OpenAPI definition**
      * @param useName if the api should use the name
      */
-    constructor() { super(2); }
+    constructor() { super(1); }
 
     //#region simple properties
     /**

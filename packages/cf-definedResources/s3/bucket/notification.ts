@@ -58,7 +58,7 @@ export abstract class Notification extends InlineAdvField<NotificationOut>{
         keyFilters:[]
     } as any
     constructor(){
-        super(2)
+        super(1)
     }
     /**
      * **required:true**

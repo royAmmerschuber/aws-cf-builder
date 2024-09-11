@@ -28,7 +28,7 @@ export class WebsiteConfiguration extends InlineAdvField<WebsiteConfigurationOut
     } = {
         rules: []
     } as any
-    constructor() { super(1) }
+    constructor() { super(0) }
     /**
      * **required:false**
      * @param doc The name of the error document for the website.

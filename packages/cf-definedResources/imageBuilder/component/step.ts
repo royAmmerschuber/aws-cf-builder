@@ -319,7 +319,7 @@ export namespace Step{
             }
         }
         constructor(){
-            super(2)
+            super(1)
         }
 
     }

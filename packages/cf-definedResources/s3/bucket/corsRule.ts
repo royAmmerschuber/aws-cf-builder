@@ -29,7 +29,7 @@ export class CorsRule extends InlineAdvField<CorsRuleOut>{
         exposedHeaders:[]
     } as any
     constructor(){
-        super(1)
+        super(0)
     }
     /**
      * **required:false**

@@ -31,7 +31,7 @@ export class IntegrationResponse extends InlineAdvField<IntegrationResponseOut>{
         templateMapping: {},
     } as any
     constructor(){
-        super(1)
+        super(0)
     }
 
     /**

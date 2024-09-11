@@ -49,7 +49,7 @@ export class Model extends Resource implements namedPath{
         private name:Field<string>,
         private useName:boolean=false
     ){
-        super(2);
+        super(1);
     }
 
     //#region simple properties

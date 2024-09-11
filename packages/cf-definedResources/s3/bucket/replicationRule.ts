@@ -47,7 +47,7 @@ export class ReplicationRule extends InlineAdvField<ReplicationRuleOut>{
         prefix:Field<string>
         status:Field<string>
     }={ } as any
-    constructor(){super(1)}
+    constructor(){super(0)}
     /**
      * **required:true**
      * @param id A unique identifier for the rule. The maximum value is 255 characters. If you don't specify a
