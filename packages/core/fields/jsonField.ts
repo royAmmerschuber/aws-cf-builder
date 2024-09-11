@@ -2,17 +2,41 @@ import { stackPreparable } from "../stackBackend";
 import { checkValid, prepareQueue, resourceIdentifier, toJson } from "../symbols";
 import { pathItem } from "../path";
 import { callOnCheckValid, callOnPrepareQueue } from "../util";
-import { Preparable, PreparableError } from "../general";
+import { PreparableError, ResourceError, SMap } from "../general";
 import _ from "lodash/fp"
 import { AttributeField } from "./attributeField";
 import { ReferenceField } from "./referenceField";
 import { Substitution } from "./substitution";
 import { Parameter } from "../generatables/parameter";
 import { localField, s_local_val } from "./local";
-import { isAdvField, AdvField } from "../field";
+import { isAdvField, AdvField, InlineAdvField } from "../field";
 import stringify from "json-stable-stringify";
 
 export const s_jsonLiteral=Symbol("s_jsonLiteral")
+
+export class JSONLiteral<T> extends InlineAdvField<T>{
+    readonly [s_jsonLiteral]:"literal"|"boolean"|"string"|"number"
+    readonly [resourceIdentifier]: string;
+    constructor(
+        public readonly field:AdvField<T>,
+        type:"literal"|"boolean"|"string"|"number"
+    ){
+        super(1)
+        if(field instanceof JSONLiteral) this.field=field=field.field
+        this[s_jsonLiteral]=type
+        this[resourceIdentifier]=field[resourceIdentifier]
+    }
+    [toJson]() {
+        return this.field[toJson]()
+    }
+    [checkValid](): SMap<ResourceError> {
+        return this.field[checkValid]()
+    }
+    [prepareQueue](stack: stackPreparable, path: pathItem, ref: boolean): void {
+        return this.field[prepareQueue](stack,path,ref)
+    }
+}
+
 /**
  * converts JS object to Substitution json string with parameters
  */
@@ -35,8 +59,10 @@ export class JSONField extends Substitution{
         let text=stringify(this.object,{
             replacer(key,value){
                 let field=this[key]
-                let type:"number"|"string"|"literal"|"boolean"|undefined
-                type=field?.[s_jsonLiteral]
+                let type:"number"|"string"|"literal"|"boolean"|undefined=field?.[s_jsonLiteral]
+                if(field instanceof JSONLiteral){
+                    field=field.field
+                }
                 if(field instanceof localField){
                     field=field[s_local_val]
                     if(!type){
@@ -103,8 +129,9 @@ export class JSONField extends Substitution{
     static literal(lit:boolean):boolean;
     static literal(lit:number):number;
     static literal(lit:string):object;
-    static literal<T extends AdvField<any>>(lit:T):T & {[s_jsonLiteral]:"literal"}
-    static literal<T extends AdvField<any>>(lit:T|boolean|number|string):T & {[s_jsonLiteral]:"literal"}|number|boolean|object{
+    /** parses the given string into an object */
+    static literal<T>(lit:AdvField<T>):JSONLiteral<T>
+    static literal<T>(lit:AdvField<T>|boolean|number|string):JSONLiteral<T>|number|boolean|object{
         switch(typeof lit){
             case "boolean":
             case "number":
@@ -113,17 +140,13 @@ export class JSONField extends Substitution{
                 return out
             }
             default:{
-                const out:{[s_jsonLiteral]:"literal"}={
-                    [s_jsonLiteral]:"literal"
-                }
-                Object.setPrototypeOf(out,lit)
-                return out as any
+                return new JSONLiteral(lit,"literal")
             }
         }
     }
     static number(num:number|string):number;
-    static number<T extends AdvField<any>>(num:T):T & {[s_jsonLiteral]:"number"}
-    static number<T extends AdvField<any>>(num:T|number|string):T & {[s_jsonLiteral]:"number"}|number{
+    static number<T>(num:AdvField<T>):JSONLiteral<T>
+    static number<T>(num:AdvField<T>|number|string):JSONLiteral<T>|number{
         switch(typeof num){
             case "number":
             case "string":{
@@ -132,18 +155,14 @@ export class JSONField extends Substitution{
                 return out
             }
             default:{
-                const out={
-                    [s_jsonLiteral]:"number"
-                }
-                Object.setPrototypeOf(out,num)
-                return out as any
+                return new JSONLiteral(num,"number")
             }
         }
     }
 
     static string(str:number|string|boolean):string;
-    static string<T extends AdvField<any>>(str:T):T & {[s_jsonLiteral]:"string"}
-    static string<T extends AdvField<any>>(str:T|boolean|number|string):T & {[s_jsonLiteral]:"string"}|string{
+    static string<T>(str:AdvField<T>):JSONLiteral<T>
+    static string<T>(str:AdvField<T>|boolean|number|string):JSONLiteral<T>|string{
         switch(typeof str){
             case "boolean":
             case "number":
@@ -152,17 +171,13 @@ export class JSONField extends Substitution{
                 return out
             }
             default:{
-                const out={
-                    [s_jsonLiteral]:"string"
-                }
-                Object.setPrototypeOf(out,str)
-                return out as any
+                return new JSONLiteral(str,"string")
             }
         }
     }
     static boolean(bool:number|boolean|string):boolean;
-    static boolean<T extends AdvField<any>>(bool:T):T & {[s_jsonLiteral]:"string"}
-    static boolean<T extends AdvField<any>>(bool:T|number|boolean|string):T & {[s_jsonLiteral]:"string"}|boolean{
+    static boolean<T>(bool:AdvField<T>):JSONLiteral<T>
+    static boolean<T>(bool:AdvField<T>|number|boolean|string):JSONLiteral<T>|boolean{
         switch(typeof bool){
             case "boolean":
             case "number":{
@@ -175,11 +190,7 @@ export class JSONField extends Substitution{
                 return out
             }
             default:{
-                const out={
-                    [s_jsonLiteral]:"boolean"
-                }
-                Object.setPrototypeOf(out,bool)
-                return out as any
+                return new JSONLiteral(bool,"boolean")
             }
         }
     }
